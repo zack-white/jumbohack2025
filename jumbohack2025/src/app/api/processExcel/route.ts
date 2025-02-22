@@ -27,14 +27,14 @@ export async function POST(request: Request) {
       contact: row[2], // contact
       category: row[1],
       description: '', // empty description
-      table_id: null, // empty table ID
+      coordinates: null, // empty table ID
     }));
 
     // Insert data into the database using the query wrapper
     for (const club of clubs) {
       await query(
         'INSERT INTO clubs (name, contact, description, table_id, category) VALUES ($1, $2, $3, $4, $5)',
-        [club.name, club.contact, club.description, club.table_id, club.category]
+        [club.name, club.contact, club.description, club.coordinates, club.category]
       );
     }
 
