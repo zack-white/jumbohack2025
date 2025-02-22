@@ -1,4 +1,8 @@
 import Link from 'next/link';
+import Script from 'next/script';
+import Head from 'next/head';
+import React from 'react';
+import MapboxMap from "./map/map";
 
 export default function Home() {
   return (
@@ -10,6 +14,7 @@ export default function Home() {
       >
         Create Event
       </Link>
+      <MapboxMap></MapboxMap>
     </div>
   );
 }
