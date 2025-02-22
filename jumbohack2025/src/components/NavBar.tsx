@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -12,7 +11,7 @@ const NavBar = () => {
 
   const navItems = [
     { label: 'Home', href: '/' },
-    { label: 'Register', href: '/register' },
+    { label: 'Admin_demo', href: '/admin/send-invitations' },
   ];
 
   // Close mobile menu when clicking outside
