@@ -24,6 +24,10 @@
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7"
+    "@mapbox/mapbox-gl-geocoder": "^5.0.3",
+    "mapbox-gl": "^3.10.0",
+    "xlsx": "^0.18.5",
+    "xslx": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
