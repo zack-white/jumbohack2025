@@ -11,6 +11,7 @@ export default {
   	extend: {
       fontFamily: {
         serif: ['var(--font-ibm-plex-serif)'],
+        inter: ['var(--font-inter)'],
       },
   		colors: {
   			background: 'hsl(var(--background))',
