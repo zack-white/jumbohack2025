@@ -125,6 +125,10 @@ export default function CreateEventPage() {
     setShowMap(false);
   };
 
+  const frontPage = () => {
+    router.push("/");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -351,7 +355,7 @@ export default function CreateEventPage() {
 
           {/* ACTION BUTTONS */}
           <div className="flex justify-end gap-3 pt-6">
-            <Button type="button" variant="outline" className="px-6">
+            <Button type="button" variant="outline" className="px-6" onClick={frontPage}>
               Cancel
             </Button>
             <Button type="submit" className="px-6 bg-[#2E73B5]">
