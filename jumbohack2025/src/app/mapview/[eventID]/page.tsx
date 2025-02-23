@@ -30,6 +30,7 @@ const INITIAL_ZOOM = 17.33;
 
 export default function MapboxMap() {
   const id = useParams().eventID;
+  console.log(id)
 
   // Map container and map instance
   const mapRef = useRef<mapboxgl.Map | null>(null);
