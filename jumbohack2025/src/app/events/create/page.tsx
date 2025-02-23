@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Tooltip from "@/components/tooltip";
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -287,7 +288,10 @@ export default function CreateEventPage() {
 
           {/* SPREADSHEET */}
           <div className="space-y-2">
-            <label className="text-sm">Select Spreadsheet*</label>
+            <div className="flex items-center gap-3">
+              <label className="text-sm">Select Spreadsheet*</label>
+              <Tooltip />
+            </div>
             <div className="flex gap-2">
               <Input
                 type="text"
