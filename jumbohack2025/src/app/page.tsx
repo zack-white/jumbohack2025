@@ -24,18 +24,18 @@ export default function Home() {
 
             {/* Hero Image & Overlay */}
             <div className="relative mb-8 flex justify-center">
-                <div className="relative w-full md:h-[50vh] md:overflow-hidden">
-                  <Image
-                    src="/images/team_photo.jpg"
-                    alt="Team photo"
-                    width={800}
-                    height={400}
-                    className="h-auto max-w-full md:w-full md:object-cover md:object-center" 
-                    priority
-                  />
-                  {/* Dark overlay - only visible on md+ screens */}
-                  <div className="hidden md:block absolute inset-0 bg-black/30" />
-                </div>
+              <div className="relative w-full md:h-[50vh] md:flex">
+                <Image
+                  src="/images/JumboMap_Group.jpeg"
+                  alt="Team photo"
+                  width={800}
+                  height={400}
+                  className="h-auto max-w-full md:w-full md:object-cover md:object-center"
+                  priority
+                />
+                {/* Dark overlay - only visible on md+ screens */}
+                <div className="hidden md:block absolute inset-0 bg-black/30" />
+              </div>
                 
                 {/* Text overlay */}
                 <div className="absolute bottom-8 right-8 bg-white p-2 md:max-w-[30vw] md:bg-transparent md:bottom-1/2 md:left-0 md:p-0 md:transform md:translate-y-3/4">
@@ -85,7 +85,7 @@ export default function Home() {
                 We hope you enjoy!
               </p>
               <p className="text-xs md:text-lg text-gray-500 mt-4">
-                © 2025 Eliza Yu, Hannah Jiang, Helen Kinberger, Shayne Selman,
+                © 2025 Elisa Yu, Hannah Jiang, Holden Kittelberger, Shayne Sidman,
                 William Goldman, Zachary White
               </p>
             </footer>
