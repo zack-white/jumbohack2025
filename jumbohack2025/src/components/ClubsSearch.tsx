@@ -48,8 +48,8 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
   }
 
   return (
-    <div className="max-w-md mx-auto p-4">
-      <h2 className="mb-4 text-lg font-bold">Who’s Attending?</h2>
+    <div className="max-w-md mx-auto">
+      <h2 className="mb-4 text-2xl md:text-3xl font-serif font-bold">Who’s Attending?</h2>
       {/* Search Bar */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
         <input
@@ -60,7 +60,6 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
           style={{
             flex: 1,
             padding: '8px 12px',
-            borderRadius: '4px',
             border: '1px solid #ccc',
           }}
         />
@@ -68,8 +67,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
           type="button"
           style={{
             marginLeft: '8px',
-            padding: '8px',
-            borderRadius: '4px',
+            padding: '12px',
             backgroundColor: '#f3f3f3',
             border: 'none',
             cursor: 'pointer',
@@ -92,7 +90,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
         {filteredClubs.map((club) => (
           <div
             key={club.id}
-            className="bg-gray-200 p-3 rounded cursor-pointer mb-2 shadow"
+            className="bg-gray-200 p-3 cursor-pointer mb-2 shadow"
             onClick={() => handlePopup(club)}
           >
             {club.name}

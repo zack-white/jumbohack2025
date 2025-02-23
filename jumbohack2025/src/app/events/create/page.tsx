@@ -214,7 +214,7 @@ export default function CreateEventPage() {
   };
 
   return (
-    <div className="bg-white min-h-screen overflow-hidden">
+    <div className="bg-white min-h-screen overflow-hidden my-24">
       <div className="bg-[#F7F9FB] max-w-4xl mx-auto pt-8 px-16">
         <div>
           <div className="mb-3">
@@ -408,14 +408,14 @@ export default function CreateEventPage() {
 
       {showMap && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-4xl h-[600px] shadow-lg">
+          <Card className="w-full max-w-2xl h-auto shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Choose a General Location</CardTitle>
-              <Button variant="ghost" onClick={() => setShowMap(false)}>
+              <Button variant="ghost" onClick={() => setShowMap(false)} className="text-2xl px-0 pb-3">
                 ×
               </Button>
             </CardHeader>
-            <CardContent className="h-[500px]">
+            <CardContent className="h-auto">
               <MapboxMap onLocationSelect={handleLocationSelect} />
             </CardContent>
           </Card>

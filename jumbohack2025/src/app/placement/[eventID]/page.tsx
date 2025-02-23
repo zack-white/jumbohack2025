@@ -230,7 +230,7 @@ export default function MapboxMap() {
       const response = await fetch('/api/send-invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({event_id: 1} ),
+        body: JSON.stringify({event_id: id} ),
       });
       
       if (!response.ok) {

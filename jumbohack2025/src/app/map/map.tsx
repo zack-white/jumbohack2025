@@ -84,7 +84,7 @@ export default function MapboxMap({ onLocationSelect }: MapboxMapProps) {
       <div className="bottom-4 right-4">
         <button
           onClick={handleSaveLocation}
-          className="bg-blue-500 text-white px-4 py-2 rounded mt-5"
+          className="h-11 px-6 bg-[#2E73B5] text-white mt-6 font-inter"
         >
           Save Location
         </button>

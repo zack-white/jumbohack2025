@@ -21,13 +21,13 @@ export async function POST(request: Request) {
 
     const clubs = result.rows;
 
+    console.log('clubs:', clubs);
+
     if (clubs.length === 0) {
       return NextResponse.json(
         { message: 'No clubs found for the provided event ID' },
       );
     }
-
-    console.log(clubs);
 
     const emails = clubs.map(club => club.contact);
 
