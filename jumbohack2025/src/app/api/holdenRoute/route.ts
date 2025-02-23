@@ -4,7 +4,6 @@ import { query } from "../query/route";
 export async function POST(request: Request) {
   try {
     const { eventId } = await request.json(); // Extract eventId from request body
-    console.log("AAAAAA", eventId);
     if (!eventId) {
       return NextResponse.json(
         { message: "eventId is required" },
@@ -13,10 +12,10 @@ export async function POST(request: Request) {
     }
 
     const result = await query(
-      "SELECT id, name, category, coordinates FROM clubs WHERE event_id = $1",
+      "SELECT id, name, category, coordinates, description FROM clubs WHERE event_id = $1",
       [eventId]
     );
-
+    
     return NextResponse.json(result.rows);
   } catch (error) {
     console.error("Error fetching clubs:", error);
