@@ -14,8 +14,8 @@ export async function POST(request: Request) {
 
     // Insert event into the Event table
     const eventResult = await query(
-      'INSERT INTO Event (name, date, location, length, width) VALUES ($1, $2, POINT($3, $4), $5, $6) RETURNING id',
-      [eventData.name, eventData.date, eventData.latitude, eventData.longitude, eventData.length, eventData.width]
+      'INSERT INTO Event (name, date, location, scale) VALUES ($1, $2, POINT($3, $4), $5) RETURNING id',
+      [eventData.name, eventData.date, eventData.latitude, eventData.longitude, eventData.scale]
     );
     const eventId = eventResult.rows[0].id;
 
