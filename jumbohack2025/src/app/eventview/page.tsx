@@ -13,11 +13,11 @@ export default function EventPage({ eventId }: { eventId: number }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: 1 }),
         });
-
         const data = await res.json();
-        console.log(data);
+        console.log("JSDANJDNAD", data);
         if (res.ok) setEvent(data);
         else console.error('Error:', data.error);
+        console.log("DATA: ", data.type);
       } catch (error) {
         console.error('Fetch failed:', error);
       } finally {
