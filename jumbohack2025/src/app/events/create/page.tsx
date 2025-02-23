@@ -366,14 +366,14 @@ export default function CreateEventPage() {
   {/* MAP MODAL - kept the same since it's not visible in the screenshot */}
   {showMap && (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl h-[600px] shadow-lg">
+      <Card className="w-full max-w-2xl h-auto shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Choose a General Location</CardTitle>
           <Button variant="ghost" onClick={() => setShowMap(false)}>
             ×
           </Button>
         </CardHeader>
-        <CardContent className="h-[500px]">
+        <CardContent className="h-auto">
           <MapboxMap onLocationSelect={handleLocationSelect} />
         </CardContent>
       </Card>
