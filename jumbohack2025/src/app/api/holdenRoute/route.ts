@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     }
 
     const result = await query(
-      "SELECT id, name, category, coordinates FROM clubs WHERE event_id = $1",
+      "SELECT id, name, category, coordinates, description FROM clubs WHERE event_id = $1",
       [eventId]
     );
     
