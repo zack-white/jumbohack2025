@@ -119,7 +119,7 @@ export default function CreateEventPage() {
     if (e.target.files && e.target.files[0]) {
       setFormData((prev) => ({
         ...prev,
-        spreadsheet: e.target.files[0],
+        spreadsheet: e.target.files ? e.target.files[0] : null,
       }));
       setErrors((prev) => ({ ...prev, spreadsheet: "" }));
     }
@@ -169,7 +169,9 @@ export default function CreateEventPage() {
         loading: "Creating event...",
         success: async (response) => {
           // Call the excel processing API here
-          await processExcel(formData.spreadsheet);
+          if (formData.spreadsheet) {
+            await processExcel(formData.spreadsheet);
+          }
           const result = await response.json();
           const eventId = result.eventId; // Access the `id` from the response
           resetForm();

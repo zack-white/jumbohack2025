@@ -2,8 +2,8 @@
 
 import { useSearchParams } from "next/navigation"; 
 import { useEffect, useState } from "react";
-import ClubsSearch from "../components/ClubsSearch";
-import ShowMapButton from "../components/showMapButton";
+import ClubsSearch from "@/components/ClubsSearch";
+import ShowMapButton from "@/components/showMapButton";
 
 interface Event {
   id: number;
@@ -72,7 +72,7 @@ export default function EventPage() {
       <p className="text-gray-500">
         {dayName}, {month} {day}
       </p>
-      <ShowMapButton />
+      <ShowMapButton eventID={eventId} />
       <ClubsSearch eventId={eventId} />
     </div>
   );
