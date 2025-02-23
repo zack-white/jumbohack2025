@@ -3,10 +3,10 @@
     width: 100vw;
     height: 30vh;
     position: relative;
+    margin-bottom: 10vh;
   }
 
   .saveLocationButton {
-    position: absolute;
     bottom: "20px";
     right: "20px";
     padding: "10px 20px";

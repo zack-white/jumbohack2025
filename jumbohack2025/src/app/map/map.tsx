@@ -84,15 +84,15 @@ const MapboxMap: React.FC = () => {
   return (
     <div className="wrapper">
       <div ref={mapContainerRef} className={style.mapContainer}/>
-    <button
-        onClick={handleSaveLocation}
-        className={style.saveLocationButton}
-      >
-        Save Location
-      </button>
-
-      {/* Conditionally render the CreateEventModal */}
-      {showModal && modalProps && (
+      <div className="button">
+        <button
+          onClick={handleSaveLocation}
+          className={style.saveLocationButton}
+        >
+          Save Location
+        </button>
+        {/* Conditionally render the CreateEventModal */}
+        {showModal && modalProps && (
         <CreateEventModal
           center={modalProps.center}
           zoom={modalProps.zoom}
@@ -100,6 +100,7 @@ const MapboxMap: React.FC = () => {
           onSubmit={handleModalSubmit}
         />
       )}
+      </div>
     </div>
   );
 };
