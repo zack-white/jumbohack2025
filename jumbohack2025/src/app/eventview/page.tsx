@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import ClubsSearch from "../components/ClubsSearch"
+import ShowMapButton from '../components/showMapButton';
 
 interface Event {
   id: number;
@@ -66,6 +67,7 @@ export default function EventPage({ eventId }: { eventId: number }) {
       <p className="text-gray-500">
         {dayName}, {month} {day}
       </p>
+      <ShowMapButton />
       <ClubsSearch/>
     </div>
   );

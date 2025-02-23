@@ -10,14 +10,14 @@ export async function GET(request: Request) {
     if (q.trim()) {
       // Use ILIKE for a case-insensitive search matching anywhere in the club name
       result = await query(
-        `SELECT id, name, category, coordinates FROM clubs WHERE name ILIKE '%' || $1 || '%' AND coordinates IS NULL`,
+        `SELECT id, name, description, category, coordinates FROM clubs WHERE name ILIKE '%' || $1 || '%' AND coordinates IS NULL`,
         [q]
       );
     } else {
       // If no search query, return all clubs for the hardcoded event ID
       const eventId = 1;
       result = await query(
-        `SELECT id, name, category, coordinates FROM clubs WHERE event_id = $1 AND coordinates IS NULL`,
+        `SELECT id, name, category, description, coordinates FROM clubs WHERE event_id = $1 AND coordinates IS NULL`,
         [eventId]
       );
     }
