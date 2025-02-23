@@ -24,21 +24,26 @@ export default function Home() {
 
             {/* Hero Image & Overlay */}
             <div className="relative mb-8 flex justify-center">
-              <Image
-                src="/images/team_photo.jpg"
-                alt="Team photo"
-                width={800}
-                height={400}
-                className="h-auto max-w-full md:max-w-lg" // mobile style remains, smaller on md+
-                priority
-              />
-              {/* Overlay (mobile defaults, bigger spacing on md+) */}
-              <div className="absolute bottom-8 right-8 bg-white p-2 max-w-md md:bottom-12 md:left-16 md:p-4">
-                <h2 className="text-2xl font-medium text-gray-900 pl-2 md:text-3xl">
-                  Making events more accessible for students
-                </h2>
+                <div className="relative w-full md:h-[50vh] md:overflow-hidden">
+                  <Image
+                    src="/images/team_photo.jpg"
+                    alt="Team photo"
+                    width={800}
+                    height={400}
+                    className="h-auto max-w-full md:w-full md:object-cover md:object-center" 
+                    priority
+                  />
+                  {/* Dark overlay - only visible on md+ screens */}
+                  <div className="hidden md:block absolute inset-0 bg-black/30" />
+                </div>
+                
+                {/* Text overlay */}
+                <div className="absolute bottom-8 right-8 bg-white p-2 md:max-w-[30vw] md:bg-transparent md:bottom-1/2 md:left-0 md:p-0 md:transform md:translate-y-3/4">
+                  <h2 className="text-2xl font-medium text-gray-900 pl-2 md:p-10 md:text-4xl md:bg-white md:text-black">
+                    Making events more accessible for students
+                  </h2>
+                </div>
               </div>
-            </div>
 
             {/* Upcoming Events (already has its own mobile vs desktop layout) */}
             <UpcomingEvents />
@@ -51,7 +56,7 @@ export default function Home() {
                 Let&apos;s get your event started
               </h2>
               <Link
-                href="/create-event"
+                href="/events/create"
                 className="bg-white text-[#2E73B5] px-6 py-3 rounded hover:bg-gray-100 transition-colors text-center md:text-2xl"
               >
                 Create New Event
