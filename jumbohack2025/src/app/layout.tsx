@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Serif, Inter } from "next/font/google";
 import "./globals.css";
-import NavBar from "../components/NavBar";
-import { ClerkProvider } from "@clerk/nextjs";
+
+import NavBar from '../components/NavBar';
+import { ClerkProvider } from '@clerk/nextjs';
+
 
 const ibmPlexSerif = IBM_Plex_Serif({
   weight: ["400", "500", "600", "700"],

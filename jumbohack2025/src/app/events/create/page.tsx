@@ -8,9 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+
+import { useAuth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 import Tooltip from "@/components/tooltip";
 
 export default function CreateEventPage() {
+  const { userId } = useAuth();
+  
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   const router = useRouter();
   const [showMap, setShowMap] = useState(false);
   const [formData, setFormData] = useState({
