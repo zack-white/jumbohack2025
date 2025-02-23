@@ -7,16 +7,27 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from 'next/image';
 import { useTheme } from "next-themes";
+import { UserButton, useUser } from "@clerk/nextjs";
 
 const NavBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme } = useTheme();
+  const { isSignedIn } = useUser();
 
-  const navItems = [
+  // Separate public and protected nav items
+  const publicNavItems = [
     { label: 'Home', href: '/' },
-    { label: 'Admin_demo', href: '/admin/send-invitations' },
     { label: 'Map', href: '/mapViewPage' },
   ];
+
+  const protectedNavItems = [
+    { label: 'Admin_demo', href: '/admin/send-invitations' },
+  ];
+
+  // Combine nav items based on auth state
+  const currentNavItems = isSignedIn 
+    ? [...publicNavItems, ...protectedNavItems]
+    : publicNavItems;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -47,7 +58,7 @@ const NavBar = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
+            {currentNavItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
@@ -56,6 +67,16 @@ const NavBar = () => {
                 {item.label}
               </Link>
             ))}
+            
+            {isSignedIn ? (
+              <UserButton afterSignOutUrl="/" />
+            ) : (
+              <Link href="/sign-in">
+                <Button variant="ghost" className="text-white hover:text-gray-200">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
 
           <div className="md:hidden">
@@ -79,7 +100,7 @@ const NavBar = () => {
         isMobileMenuOpen ? "block" : "hidden"
       )}>
         <div className="px-2 pt-2 pb-3 space-y-1">
-          {navItems.map((item) => (
+          {currentNavItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}
@@ -89,6 +110,20 @@ const NavBar = () => {
               {item.label}
             </Link>
           ))}
+          
+          {isSignedIn ? (
+            <div className="px-3 py-2">
+              <UserButton afterSignOutUrl="/" />
+            </div>
+          ) : (
+            <Link
+              href="/sign-in"
+              className="block px-3 py-2 text-white hover:text-gray-200"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </nav>
