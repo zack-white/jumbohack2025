@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import ClubsSearch from "../../components/ClubsSearch"
 import ShowMapButton from '../../components/showMapButton';
+import { useSearchParams } from "next/navigation";
 
 interface Event {
   id: number;
@@ -14,6 +15,8 @@ export default function EventPage({ eventId }: { eventId: number }) {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const id = Number(searchParams.get("id"));
 
   useEffect(() => {
     async function fetchEvent() {
@@ -24,7 +27,7 @@ export default function EventPage({ eventId }: { eventId: number }) {
         const res = await fetch('/api/fetchEvent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: 1 }),
+          body: JSON.stringify({ id: id }),
         });
 
         const data = await res.json();

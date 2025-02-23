@@ -15,8 +15,7 @@ const NavBar = () => {
   const { isSignedIn } = useUser();
 
   const navItems = [
-    { label: 'Create An Event', href: '/events/create' },
-    { label: 'My Events', href: '/events/display'}
+    { label: 'Create An Event', href: '/events/create' }, 
   ];
 
   const protectedNavItems = [
