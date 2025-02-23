@@ -152,9 +152,11 @@ export default function CreateEventPage() {
 
       toast.promise(promise, {
         loading: "Creating event...",
-        success: (response) => {
+        success: async (response) => {
+          const result = await response.json();
+          const eventId = result.id; // Access the `id` from the response
           resetForm();
-          router.push("/placement");
+          router.push("/placement/${eventId}");
           return "Event created successfully!";
         },
         error: "Failed to create event",

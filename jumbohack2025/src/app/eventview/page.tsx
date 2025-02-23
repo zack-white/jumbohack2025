@@ -5,10 +5,10 @@ import ShowMapButton from '../../components/showMapButton';
 import { useSearchParams } from "next/navigation";
 
 interface Event {
-  id: number;
-  name: string;
-  description: string;
-  date: string;
+  id: number,
+  name: string,
+  description: string, 
+  date: string
 }
 
 export default function EventPage({ eventId }: { eventId: number }) {
@@ -70,7 +70,7 @@ export default function EventPage({ eventId }: { eventId: number }) {
       <p className="text-gray-500">
         {dayName}, {month} {day}
       </p>
-      <ShowMapButton />
+      <ShowMapButton eventID={id} />
       <ClubsSearch eventId={id}/>
     </div>
   );

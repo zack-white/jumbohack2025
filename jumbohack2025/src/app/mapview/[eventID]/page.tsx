@@ -1,15 +1,18 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "next/navigation"
 import mapboxgl from "mapbox-gl";
 import InfoPopup from "@/components/ClubInfo"
-import "./placement.css";
+import "./mapview.css";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { unique } from "next/dist/build/utils";
 
 interface Club {
     id: number;
     name: string;
-    description: string;
+    category: string,
+    description: string
   }
 
 mapboxgl.accessToken =
@@ -19,9 +22,9 @@ const INITIAL_LONG = -71.120;
 const INITIAL_LAT = 42.4075;
 const INITIAL_ZOOM = 17.33;
 
-const EVENT_ID = 1;  // CHANGE THIS TO BE IMPORTED FROM CALLING PAGE
-
 export default function MapboxMap() {
+  const id = useParams().eventID;
+
   // Map container and map instance
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -38,7 +41,7 @@ export default function MapboxMap() {
   const [queue, setQueue] = useState<any[]>([]);
 
   // Track club to show popup for
-  const [clubInfo, setClubInfo] = useState<Club>();
+  const [clubInfo, setClubInfo] = useState<any>();
   const [showClubInfo, setShowClubInfo] = useState(false);
 
   // On page render, create map and fetch all old clubs w/ for given event.
@@ -58,8 +61,11 @@ export default function MapboxMap() {
     const getExistingClubs = async () => {
         try {
             const response = await fetch("/api/getExistingClubs", {
-                method: 'GET',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  eventID: id
+                })
             });
 
             if (!response.ok) {
@@ -99,6 +105,9 @@ export default function MapboxMap() {
     // On load, import all existing club pins and add to map
     map.on('load', async () => {
         const existingClubs = await getExistingClubs();
+        setClubs(existingClubs);
+        const uniqueCategories = [...new Set(existingClubs.map((club: Club) => club.category))];
+        setCategories(uniqueCategories);
         existingClubs.map((club: any) => {
             const marker = new mapboxgl.Marker()
                 .setLngLat([club.coordinates.x, club.coordinates.y])
@@ -117,20 +126,6 @@ export default function MapboxMap() {
             });
         });
     });
-  
-  
-
-    async function fetchClubs() {
-      const response = await fetch('/api/getClubs');
-      const data = await response.json();
-      setClubs(data);
-      // Extract unique categories
-      const uniqueCategories = [...new Set(data.map((club: any) => club.category))];
-      setCategories(uniqueCategories);
-    };
-  
-    // Fetch clubs on page load
-    fetchClubs();
 
     mapRef.current.on("move", () => {
       // Get the current center coordinates and zoom level from the map
@@ -140,56 +135,6 @@ export default function MapboxMap() {
       setLong(mapCenter.lng);
       setLat(mapCenter.lat);
       setZoom(mapZoom);
-    });
-
-    // Assign coordinates to the next club in the queue
-    const handlePlaceClub = async (lng: number, lat: number) => {
-      setQueue((prevQueue) => {
-        if (prevQueue.length === 0) return prevQueue; // No clubs left to place; means markers with no associated club could be place but not saved
-    
-        const nextClub = prevQueue[0];
-    
-        // Send update request
-        fetch('/api/updateClub', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id: nextClub.id,
-            x: lng,
-            y: lat,
-          })
-        }).then((response) => {
-          if (response.ok) {
-            // Update the club in the main clubs array
-            setClubs((prevClubs) =>
-              prevClubs.map((club) =>
-                club.id === nextClub.id ? { ...nextClub, x: lng, y: lat } : club
-              )
-            );
-          } else {
-            console.error('Failed to update club coordinates');
-          }
-        }).catch((error) => {
-          console.error('Error updating club:', error);
-        });
-    
-        // Remove the first club from the queue and return the updated state
-        return prevQueue.slice(1);
-      });
-    };
-    
-
-    // Listener for map click to add a marker
-    map.on("click", async (e) => {
-      const { lng, lat } = e.lngLat; // Get the clicked coordinates
-      new mapboxgl.Marker() 
-        .setLngLat([lng, lat])
-        .addTo(map);
-
-      // Pop front element off the queue for given category
-      await handlePlaceClub(lng, lat);
     });
 
     // Cleanup on unmount
@@ -215,7 +160,7 @@ export default function MapboxMap() {
       <div ref={mapContainerRef} className="mapContainer"/>
       {showClubInfo && <InfoPopup club={clubInfo} onClose={() => setShowClubInfo(false)} />}
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold mb-4">Unplaced Clubs</h1>
+        <h1 className="text-2xl font-bold mb-4">Student Org. Club Fair</h1>
 
         {/* Category Dropdown */}
         <div className="mb-4 w-3/5 bg-categoryBg">
