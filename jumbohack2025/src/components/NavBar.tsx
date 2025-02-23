@@ -33,7 +33,7 @@ const NavBar = () => {
   }, []);
 
   return (
-    <nav className="w-full bg-blue-600 dark:bg-blue-800 text-white">
+    <nav className="w-full bg-[#2971AC] dark:[#B2DFFF] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center">

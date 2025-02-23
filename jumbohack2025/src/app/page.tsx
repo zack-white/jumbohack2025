@@ -1,44 +1,91 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { Card, CardContent } from "@/components/ui/card";
-import UpcomingEvents from '@/components/UpcomingEvents';
-import QueryProvider from '@/components/QueryProvider';
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import UpcomingEvents from "@/components/UpcomingEvents";
+import QueryProvider from "@/components/QueryProvider";
+import { useTheme } from "next-themes";
 
 export default function Home() {
+  const { theme } = useTheme();
+
   return (
     <QueryProvider>
-      <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-2xl mx-auto px-4 py-8 md:py-12">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-            Welcome to JumboMap
-          </h1>
+      <main className="min-h-screen bg-white">
+        {/* Outer container (mobile defaults, desktop overrides) */}
+        <div className="mx-auto w-full py-6">
+          <div className="px-4">
+            {/* Top heading (mobile = text-2xl, desktop = text-3xl or 4xl) */}
+            <div>
+              <h1 className="text-2xl font-medium text-gray-900 mb-6 md:text-3xl">
+                Welcome to JumboMap
+              </h1>
+            </div>
 
-          <Card className="overflow-hidden mb-8">
-            <CardContent className="p-0">
-              <div className="relative">
-                <Image
-                  src="/images/dawea.jpg"
-                  alt="Team photo"
-                  width={600}
-                  height={400}
-                  className="w-full"
-                />
-                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
-                  <h2 className="text-2xl font-semibold text-white">
-                    Making events more accessible for students
-                  </h2>
-                </div>
+            {/* Hero Image & Overlay */}
+            <div className="relative mb-8 flex justify-center">
+              <Image
+                src="/images/team_photo.jpg"
+                alt="Team photo"
+                width={800}
+                height={400}
+                className="h-auto max-w-full md:max-w-lg" // mobile style remains, smaller on md+
+                priority
+              />
+              {/* Overlay (mobile defaults, bigger spacing on md+) */}
+              <div className="absolute bottom-8 right-8 bg-white p-2 max-w-md md:bottom-12 md:left-16 md:p-4">
+                <h2 className="text-2xl font-medium text-gray-900 pl-2 md:text-3xl">
+                  Making events more accessible for students
+                </h2>
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          <UpcomingEvents />
-          <Link
-        href="/events/fullMap"
-        className="bg-blue-500 text-white px-4 py-2 rounded">
-          Full Map
-        </Link>
-    </div>
+            {/* Upcoming Events (already has its own mobile vs desktop layout) */}
+            <UpcomingEvents />
+          </div>
+
+          {/* CTA Section */}
+          <div className="bg-[#2E73B5] text-white mt-12 py-12 px-6 w-full">
+            <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-24">
+              <h2 className="text-2xl font-medium text-center md:text-left md:text-3xl">
+                Let&apos;s get your event started
+              </h2>
+              <Link
+                href="/create-event"
+                className="bg-white text-[#2E73B5] px-6 py-3 rounded hover:bg-gray-100 transition-colors text-center md:text-2xl"
+              >
+                Create New Event
+              </Link>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="px-4 md:px-0">
+            <footer className="mt-4 py-8 text-center md:mt-8 md:py-4">
+              <Image
+                src={
+                  theme === "dark"
+                    ? "/logo-footer-light.svg"
+                    : "/logo-footer-dark.svg"
+                }
+                alt="JumboMap Logo"
+                width={80}
+                height={80}
+                className="mx-auto mb-4"
+              />
+              <p className="text-sm md:text-xl text-gray-600 max-w-2xl md:max-w-5xl mx-auto">
+                This project was developed during JumboHack 2025 to create an
+                innovative solution that helps students easily navigate current
+                campus events, explore event layouts, and discover clubs more efficiently.
+                We hope you enjoy!
+              </p>
+              <p className="text-xs md:text-lg text-gray-500 mt-4">
+                © 2025 Eliza Yu, Hannah Jiang, Helen Kinberger, Shayne Selman,
+                William Goldman, Zachary White
+              </p>
+            </footer>
+          </div>
+        </div>
       </main>
     </QueryProvider>
   );
