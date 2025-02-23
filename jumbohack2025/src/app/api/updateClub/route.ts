@@ -3,11 +3,12 @@ import { query } from '../query/route';
 
 export async function POST(request: Request) {
   try {
-    const { id, coordinates } = await request.json();
+    const { id, x, y } = await request.json();
 
+    // Update the club's coordinates
     await query(
-      'UPDATE clubs SET coordinates = $1 WHERE id = $2',
-      [coordinates, id]
+      'UPDATE clubs SET coordinates = POINT($1, $2) WHERE id = $3',
+      [x, y, id]
     );
 
     return NextResponse.json({ message: 'Club updated successfully' });

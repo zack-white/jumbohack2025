@@ -33,8 +33,8 @@ export async function POST(request: Request) {
     // Insert data into the database using the query wrapper
     for (const club of clubs) {
       await query(
-        'INSERT INTO clubs (name, contact, description, table_id, category) VALUES ($1, $2, $3, $4, $5)',
-        [club.name, club.contact, club.description, club.coordinates, club.category]
+        'INSERT INTO clubs (name, contact, description, event_id, category) VALUES ($1, $2, $3, $4, $5, $6)',
+        [club.name, club.contact, club.description, 1, club.category, club.coordinates]
       );
     }
 
