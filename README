@@ -7,17 +7,17 @@ Presented at JumboHack 2025 under the EDUCATION track.
 INSPIRATION
 Navigating crowded spaces like campus events and career fairs can be intimidating and challenging, especially without a clear, accessible map. Many of these events lack a simple way for students to find clubs, opportunities, or areas of interest. To solve this, we digitized event maps, making it easy for students to find what interests them—all from the convenience of their phone.
 
-TEAM
-Elisa Yu: 
-Hannah Jiang: designed the Figma frontend for implementation + css styling
-Holden Kittelberger: 
-Shayne Sidman: 
-Will Goldman:  
-Zack White: 
+OUR TEAM
+Elisa Yu: developed map functionality, implemented frontend features, set up routing, and created the event page.
+Hannah Jiang: designed the Figma frontend and implemented frontend styling.
+Holden Kittelberger: managed project timelines, assigned sprints, guided overall project direction, and developed search and filtering functionality.
+Shayne Sidman: developed map functionality, implemented table placement, and optimized table viewing.
+Will Goldman: designed the email chain structure, admin workflow and create event page (i.e. moving between the create event, select location, and placement pages/components), frontend for the landing page.
+Zack White: designed and set up the backend architecture, spreadsheet parsing, implemented event view functionality, and developed general backend infrastructure.
 
 
 ACKNOWLEDGEMENTS
-ChatGPT: used for fine-tuning
+ChatGPT, Shad, Clerk, MapBox
 
 REFLECTION
 <What motivated your team to choose this project?>
