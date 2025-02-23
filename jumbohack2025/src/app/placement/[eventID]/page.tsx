@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation"
+import { useRouter } from 'next/navigation';
 import mapboxgl from "mapbox-gl";
 import InfoPopup from "@/components/ClubInfo"
 import "./placement.css";
@@ -22,6 +23,7 @@ const INITIAL_LAT = 42.4075;
 const INITIAL_ZOOM = 17.33;
 
 export default function MapboxMap() {
+  const router = useRouter();
   const id = useParams().eventID; // Access the dynamic id from URL
 
   // Map container and map instance
@@ -228,7 +230,7 @@ export default function MapboxMap() {
       const response = await fetch('/api/send-invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({event_id: EVENT_ID}),
+        body: JSON.stringify({event_id: 1} ),
       });
       
       if (!response.ok) {
@@ -245,6 +247,13 @@ export default function MapboxMap() {
     } finally {
       setIsLoading(false);
     }
+
+    handleClose();
+  };
+
+  const handleClose = () => {
+    // Close the modal
+    router.push('/');
   };
 
   // Update queue when category is selected
