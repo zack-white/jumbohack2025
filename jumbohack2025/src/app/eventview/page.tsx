@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
+import ClubsSearch from "../components/ClubsSearch"
 
 export default function EventPage({ eventId }: { eventId: number }) {
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  /* useEffect(() => {
     async function fetchEvent() {
       try {
         const res = await fetch('/api/fetchEvent', {
@@ -26,16 +27,17 @@ export default function EventPage({ eventId }: { eventId: number }) {
     }
 
     fetchEvent();
-  }, [eventId]);
+  }, [eventId]); */
 
-  if (loading) return <p>Loading event...</p>;
-  if (!event) return <p>Event not found</p>;
+  /* if (loading) return <p>Loading event...</p>;
+  if (!event) return <p>Event not found</p>; */
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-bold">{event.name}</h1>
+      {/* <h1 className="text-xl font-bold">{event.name}</h1>
       <p className="text-gray-600">{event.description}</p>
-      <p className="text-gray-500">{event.date}</p>
+      <p className="text-gray-500">{event.date}</p> */}
+        <ClubsSearch/>
     </div>
   );
 }
