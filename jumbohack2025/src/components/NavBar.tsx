@@ -15,6 +15,7 @@ const NavBar = () => {
   const navItems = [
     { label: 'Home', href: '/' },
     { label: 'Admin_demo', href: '/admin/send-invitations' },
+    { label: 'Map', href: '/mapViewPage' },
   ];
 
   useEffect(() => {
