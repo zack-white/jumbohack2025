@@ -2,8 +2,15 @@
 
 import { useState } from 'react';
 
-export default function SendInvitations() {
-  const [eventId, setEventId] = useState('');
+interface Club {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export default function SendInvitations(club: Club) {
+  const eventId = club.id;
+  console.log('eventId:', eventId);
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -16,7 +23,7 @@ export default function SendInvitations() {
       const response = await fetch('/api/send-invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event_id: eventId }),
+        body: JSON.stringify({event_id: eventId}),
       });
       
       if (!response.ok) {
@@ -36,8 +43,11 @@ export default function SendInvitations() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Send Invitations</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {/* <h1 className="text-2xl font-bold mb-4">Send Invitations</h1> */}
+      <button className="submit" onClick={handleSubmit}>
+        Submit
+      </button>
+      {/* <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Enter Event ID:
@@ -58,7 +68,7 @@ export default function SendInvitations() {
         >
           {isLoading ? 'Sending...' : 'Send Invitations'}
         </button>
-      </form>
+      </form> */}
       {status && (
         <p className={`mt-4 text-center ${
           status.includes('Error') ? 'text-red-600' : 'text-green-600'

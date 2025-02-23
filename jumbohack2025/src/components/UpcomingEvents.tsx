@@ -84,8 +84,11 @@ export default function UpcomingEvents() {
           const isToday = daysUntil === 0;
 
           return (
-            <div key={event.name} className="bg-white p-4 shadow-sm"
-            onClick={() => handleEvent(event)}>
+            <div 
+              key={event.name} 
+              className="bg-white p-4 shadow-sm cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
+              onClick={() => handleEvent(event)}
+            >
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-medium text-primary font-inter">{event.name}</h3>
@@ -111,7 +114,7 @@ export default function UpcomingEvents() {
           return (
             <div
               key={event.name}
-              className="bg-white p-6 border border-gray-200 shadow-sm"
+              className="bg-white p-6 border border-gray-200 shadow-sm cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
               onClick={() => handleEvent(event)}
             >
               <div className="flex justify-between items-start mb-2">
