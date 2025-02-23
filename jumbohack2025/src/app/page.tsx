@@ -14,32 +14,33 @@ export default function Home() {
       <main className="min-h-screen bg-white">
         {/* Outer container (mobile defaults, desktop overrides) */}
         <div className="mx-auto w-full py-6">
-          <div className="px-4">
+          <div className="px-[10vw]">
             {/* Top heading (mobile = text-2xl, desktop = text-3xl or 4xl) */}
             <div>
-              <h1 className="text-2xl font-medium text-gray-900 mb-6 md:text-3xl">
+              <h1 className="text-2xl font-medium text-gray-900 mt-2 mb-6 md:mt-6 md:mb-10 md:text-5xl">
                 Welcome to JumboMap
               </h1>
             </div>
 
-            {/* Hero Image & Overlay */}
+            {/* Team Image & Overlay */}
             <div className="relative mb-8 flex justify-center">
-              <div className="relative w-full md:h-[50vh] md:flex">
+              <div className="relative w-full md:h-[50vh]">
                 <Image
                   src="/images/JumboMap_Group.jpeg"
                   alt="Team photo"
                   width={800}
                   height={400}
-                  className="h-auto max-w-full md:w-full md:object-cover md:object-center"
+                  className="w-full h-full object-cover object-center md:object-[45%_25%]"
                   priority
                 />
-                {/* Dark overlay - only visible on md+ screens */}
-                <div className="hidden md:block absolute inset-0 bg-black/30" />
+                <div className="absolute inset-0 bg-black/30" />
               </div>
+            
+
                 
                 {/* Text overlay */}
-                <div className="absolute bottom-8 right-8 bg-white p-2 md:max-w-[30vw] md:bg-transparent md:bottom-1/2 md:left-0 md:p-0 md:transform md:translate-y-3/4">
-                  <h2 className="text-2xl font-medium text-gray-900 pl-2 md:p-10 md:text-4xl md:bg-white md:text-black">
+                <div className="absolute bottom-4 right-8 bg-white p-2 md:max-w-[50vw] lg:max-w-[30vw] md:bg-transparent md:bottom-1/3 md:left-0 md:p-0 md:transform md:translate-y-3/4">
+                  <h2 className="text-1xl font-medium text-gray-900 pl-2 md:p-4 lg:p-10 md:text-2xl lg:text-4xl md:bg-white md:text-black">
                     Making events more accessible for students
                   </h2>
                 </div>
@@ -65,7 +66,7 @@ export default function Home() {
           </div>
 
           {/* Footer */}
-          <div className="px-4 md:px-0">
+          <div className="px-4 md:px-[10vw]">
             <footer className="mt-4 py-8 text-center md:mt-8 md:py-4">
               <Image
                 src={
