@@ -71,7 +71,7 @@ export default function EventPage({ eventId }: { eventId: number }) {
         {dayName}, {month} {day}
       </p>
       <ShowMapButton />
-      <ClubsSearch/>
+      <ClubsSearch eventId={id}/>
     </div>
   );
 }
