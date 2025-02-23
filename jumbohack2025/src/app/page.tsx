@@ -14,7 +14,7 @@ export default function Home() {
       >
         Create Event
       </Link>
-      <MapboxMap></MapboxMap>
+      <MapboxMap />
     </div>
   );
 }

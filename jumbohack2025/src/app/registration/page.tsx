@@ -24,7 +24,7 @@ export default function RegistrationPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           token, 
-          bio: description // Changed to match the backend expectation
+          bio: description
         }),
       });
 

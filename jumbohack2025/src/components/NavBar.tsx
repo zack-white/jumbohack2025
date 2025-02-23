@@ -5,16 +5,18 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import Image from 'next/image';
+import { useTheme } from "next-themes";
 
 const NavBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { theme } = useTheme();
 
   const navItems = [
     { label: 'Home', href: '/' },
     { label: 'Admin_demo', href: '/admin/send-invitations' },
   ];
 
-  // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -30,30 +32,36 @@ const NavBar = () => {
   }, []);
 
   return (
-    <nav className="w-full bg-white border-b border-black">
+    <nav className="w-full bg-blue-600 dark:bg-blue-800 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          {/* Logo Will go here*/}
+          <div className="flex items-center">
+            <Image
+              src={theme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'}
+              alt="JumboMap Logo"
+              width={140}
+              height={40}
+              className="h-8 w-auto"
+            />
+          </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
-                className="text-black hover:text-gray-600"
+                className="text-white hover:text-gray-200"
               >
                 {item.label}
               </Link>
             ))}
           </div>
 
-          {/* Mobile menu button */}
           <div className="md:hidden">
             <Button
               variant="ghost"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-black"
+              className="text-white"
             >
               {isMobileMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -65,17 +73,16 @@ const NavBar = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       <div className={cn(
         "md:hidden",
         isMobileMenuOpen ? "block" : "hidden"
       )}>
-        <div className="px-2 pt-2 pb-3 space-y-1 bg-white">
+        <div className="px-2 pt-2 pb-3 space-y-1">
           {navItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}
-              className="block px-3 py-2 text-black hover:text-gray-600"
+              className="block px-3 py-2 text-white hover:text-gray-200"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {item.label}
