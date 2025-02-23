@@ -1,6 +1,15 @@
 /* MapboxMap.module.css */
 .mapContainer {
     width: 100vw;
-    height: 70vh;
+    height: 30vh;
+    position: relative;
+    margin-bottom: 10vh;
   }
-  
+
+  .saveLocationButton {
+    bottom: "20px";
+    right: "20px";
+    padding: "10px 20px";
+    z-index: 100;
+    cursor: "pointer";
+  }

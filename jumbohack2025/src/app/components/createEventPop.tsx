@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export default function CreateEventModal({ onClose, onSubmit }) {
+export default function CreateEventModal({ onClose, onSubmit, center, zoom }) {
   const [eventName, setEventName] = useState('');
   const [description, setDescription] = useState('');
   const [eventDate, setEventDate] = useState('');
@@ -14,14 +14,17 @@ export default function CreateEventModal({ onClose, onSubmit }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log('longtiude:', center.lng);
+    console.log('latitude:', center.lat);
+    console.log('zoom:', zoom);
+
     const eventData = {
       name: eventName,
       date: eventDate,
       desc: description,
-      latitude: parseFloat(eventLocation.latitude),
-      longitude: parseFloat(eventLocation.longitude),
-      length: parseFloat(eventLength),
-      width: parseFloat(eventWidth),
+      latitude: center.lat,
+      longitude: center.lng,
+      scale: zoom,
     };
 
     const formData = new FormData();
@@ -84,7 +87,7 @@ export default function CreateEventModal({ onClose, onSubmit }) {
               required
             />
           </div>
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Location (Latitude, Longitude)</label>
             <div className="flex gap-2">
               <input
@@ -104,8 +107,8 @@ export default function CreateEventModal({ onClose, onSubmit }) {
                 required
               />
             </div>
-          </div>
-          <div className="mb-4">
+          </div> */}
+          {/* <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Length</label>
             <input
               type="number"
@@ -124,7 +127,7 @@ export default function CreateEventModal({ onClose, onSubmit }) {
               className="w-full p-2 border rounded"
               required
             />
-          </div>
+          </div> */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Upload Clubs Excel</label>
             <input
