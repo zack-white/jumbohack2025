@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 export default function SendInvitations() {
-  const [emails, setEmails] = useState('');
+  const [eventId, setEventId] = useState('');
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -12,24 +12,23 @@ export default function SendInvitations() {
     setIsLoading(true);
     setStatus('');
 
-    const emailList = emails.split('\n').map(email => email.trim()).filter(Boolean);
-    
     try {
       const response = await fetch('/api/send-invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emails: emailList }),
+        body: JSON.stringify({ event_id: eventId }),
       });
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
       setStatus(data.message);
     } catch (error) {
       console.error('Error:', error);
-      setStatus('Error sending invitations. Please check the console for details.');
+      setStatus(error.message || 'Error sending invitations. Please check the console for details.');
     } finally {
       setIsLoading(false);
     }
@@ -41,13 +40,13 @@ export default function SendInvitations() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Enter email addresses (one per line):
+            Enter Event ID:
           </label>
-          <textarea
-            value={emails}
-            onChange={(e) => setEmails(e.target.value)}
+          <input
+            type="number"
+            value={eventId}
+            onChange={(e) => setEventId(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-            rows={10}
           />
         </div>
         <button
