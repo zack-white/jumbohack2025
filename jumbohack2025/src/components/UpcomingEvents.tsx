@@ -64,7 +64,7 @@ export default function UpcomingEvents() {
 
   return (
     <div className="mt-6">
-      <h2 className="text-xl font-medium text-gray-900 mb-4 md:text-2xl">
+      <h2 className="text-xl font-medium text-gray-900 mb-4 md:text-3xl">
         Upcoming Events
       </h2>
 

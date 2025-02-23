@@ -14,10 +14,9 @@ const NavBar = () => {
   const { theme } = useTheme();
   const { isSignedIn } = useUser();
 
-  // Separate public and protected nav items
-  const publicNavItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Map', href: '/mapViewPage' },
+  const navItems = [
+    { label: 'Create An Event', href: '/events/create' },
+    { label: 'My Events', href: '/events/display'}
   ];
 
   const protectedNavItems = [
@@ -26,8 +25,8 @@ const NavBar = () => {
 
   // Combine nav items based on auth state
   const currentNavItems = isSignedIn 
-    ? [...publicNavItems, ...protectedNavItems]
-    : publicNavItems;
+    ? [...navItems, ...protectedNavItems]
+    : navItems;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -46,15 +45,17 @@ const NavBar = () => {
   return (
     <nav className="w-full bg-[#2971AC] dark:[#B2DFFF] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
+        <div className="flex justify-between h-16 md:h-20 items-center">
           <div className="flex items-center">
-            <Image
-              src={theme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'}
-              alt="JumboMap Logo"
-              width={140}
-              height={40}
-              className="h-8 w-auto"
-            />
+            <Link href="/">
+              <Image
+                src={theme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'}
+                alt="JumboMap Logo"
+                width={140}
+                height={40}
+                className="h-8 w-auto md:h-12 md:w-auto"
+              />
+            </Link>
           </div>
 
           <div className="hidden md:flex items-center space-x-8">
@@ -62,7 +63,7 @@ const NavBar = () => {
               <Link
                 key={item.label}
                 href={item.href}
-                className="text-white hover:text-gray-200"
+                className="text-white hover:text-gray-200 md:text-lg"
               >
                 {item.label}
               </Link>
