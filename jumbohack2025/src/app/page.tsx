@@ -51,7 +51,7 @@ export default function Home() {
                 Let&apos;s get your event started
               </h2>
               <Link
-                href="/create-event"
+                href="/events/create"
                 className="bg-white text-[#2E73B5] px-6 py-3 rounded hover:bg-gray-100 transition-colors text-center md:text-2xl"
               >
                 Create New Event

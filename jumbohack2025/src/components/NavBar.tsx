@@ -13,9 +13,8 @@ const NavBar = () => {
   const { theme } = useTheme();
 
   const navItems = [
-    { label: 'Home', href: '/' },
     { label: 'Admin_demo', href: '/admin/send-invitations' },
-    { label: 'Map', href: '/mapViewPage' },
+    { label: 'Create An Event', href: '/events/create' },
   ];
 
   useEffect(() => {
@@ -37,13 +36,15 @@ const NavBar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center">
-            <Image
-              src={theme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'}
-              alt="JumboMap Logo"
-              width={140}
-              height={40}
-              className="h-8 w-auto"
-            />
+            <Link href="/">
+              <Image
+                src={theme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'}
+                alt="JumboMap Logo"
+                width={140}
+                height={40}
+                className="h-8 w-auto"
+              />
+            </Link>
           </div>
 
           <div className="hidden md:flex items-center space-x-8">
