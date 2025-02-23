@@ -30,8 +30,8 @@ export async function POST(request: Request) {
     for (let i = 1; i < jsonData.length; i++) {
       const row = jsonData[i];
       await query(
-        'INSERT INTO clubs (name, contact, description, coordinates, category) VALUES ($1, $2, $3, $4, $5)',
-        [row[0], row[2], '', null, row[1]]
+        'INSERT INTO clubs (name, contact, description, coordinates, category, event_id) VALUES ($1, $2, $3, $4, $5, $6)',
+        [row[0], row[2], '', null, row[1], eventId]
       );
     }
 
