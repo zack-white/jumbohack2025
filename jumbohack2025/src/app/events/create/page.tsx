@@ -168,10 +168,12 @@ export default function CreateEventPage() {
       toast.promise(promise, {
         loading: "Creating event...",
         success: async (response) => {
-          resetForm();
           // Call the excel processing API here
           await processExcel(formData.spreadsheet);
-          router.push("/placement");
+          const result = await response.json();
+          const eventId = result.id; // Access the `id` from the response
+          resetForm();
+          router.push("/placement/${eventId}");
           return "Event created successfully!";
         },
         error: "Failed to create event",

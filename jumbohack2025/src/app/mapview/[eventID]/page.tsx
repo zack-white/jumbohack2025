@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "next/navigation"
 import mapboxgl from "mapbox-gl";
 import InfoPopup from "@/components/ClubInfo";
 import "./mapview.css";
@@ -28,6 +29,8 @@ const INITIAL_LAT = 42.4075;
 const INITIAL_ZOOM = 17.33;
 
 export default function MapboxMap() {
+  const id = useParams().eventID;
+
   // Map container and map instance
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -83,7 +86,78 @@ export default function MapboxMap() {
     });
     mapRef.current = map;
 
-    map.on("move", () => {
+    // Function to fetch all existing clubs to add to map
+    const getExistingClubs = async () => {
+        try {
+            const response = await fetch("/api/getExistingClubs", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  eventID: id
+                })
+            });
+
+            if (!response.ok) {
+                console.log("Error fetching existing clubs.");
+            }
+
+            return await response.json();;
+        } catch(error) {
+            console.error("Error" + error);
+        }
+    }
+
+    // EXECUTED ON LOAD
+
+    // Fetch a club by clicking on their table (specified by coords)
+    const getClubByCoords = async (lng: number, lat: number) => {
+        try {
+            const response = await fetch("/api/getClubByCoords", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    x: lng,
+                    y: lat
+                })
+            });
+
+            if (!response.ok) {
+                console.log("Error fetching existing clubs.");
+            }
+
+            return await response.json();;
+        } catch(error) {
+            console.error("Error" + error);
+        }
+    }
+
+    // On load, import all existing club pins and add to map
+    map.on('load', async () => {
+        const existingClubs = await getExistingClubs();
+        setClubs(existingClubs);
+        const uniqueCategories = [...new Set(existingClubs.map((club: Club) => club.category))];
+        setCategories(uniqueCategories);
+        existingClubs.map((club: any) => {
+            const marker = new mapboxgl.Marker()
+                .setLngLat([club.coordinates.x, club.coordinates.y])
+                .addTo(map);
+    
+            // Add a click event listener to the marker
+            marker.getElement().addEventListener("click", async (event) => {
+                event.stopPropagation();  // Prevents map click from triggering
+                
+                // Get club by long and lat coords
+                const { lng, lat } = marker.getLngLat();
+                const club = await getClubByCoords(lng, lat)
+                console.log(club);
+                setClubInfo({ id: club.id, name: club.name, description: club.description });
+                setShowClubInfo(true);
+            });
+        });
+    });
+
+    mapRef.current.on("move", () => {
+      // Get the current center coordinates and zoom level from the map
       const mapCenter = map.getCenter();
       const mapZoom = map.getZoom();
       setLong(mapCenter.lng);

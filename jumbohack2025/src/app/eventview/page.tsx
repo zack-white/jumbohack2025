@@ -82,8 +82,7 @@ export default function EventPage({ eventId }: { eventId: number }) {
       <p className="text-gray-500">
         {dayName}, {month} {day}
       </p>
-      <ShowMapButton />
-
+      <ShowMapButton eventID={id} />
       {/* Show Edit Button if the logged-in user is the creator */}
       {userEmail === event.creator && (
         <div className="mt-4 flex justify-center">

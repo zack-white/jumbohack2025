@@ -3,13 +3,14 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-export default function ShowMapButton() {
-  const router = useRouter();
 
-  return (
+export default function ShowMapButton(eventID: number) {
+    const router = useRouter();
+
+    return (
         <div className="flex items-center justify-center p-5"> 
         <button
-        onClick={() => router.push("/mapview")}
+        onClick={() => router.push("/mapview/${eventID}")}
         className="relative w-full max-w-xs mx-auto transition-opacity hover:opacity-100"
         >
         {/* Grayed-out Map Image */}
@@ -27,5 +28,5 @@ export default function ShowMapButton() {
         </div>
         </button>
         </div>
-  );
+);
 }
