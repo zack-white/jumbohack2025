@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+
 import { useAuth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
+import Tooltip from "@/components/tooltip";
 
 export default function CreateEventPage() {
   const { userId } = useAuth();
@@ -174,22 +176,22 @@ export default function CreateEventPage() {
 
   return (
     // Light-gray background & full height to mimic the screenshot
-<div className="bg-white min-h-screen">
+<div className="bg-white min-h-scree overflow-hidden">
   {/* Center the form with less max width */}
-  <div className="max-w-xl mx-auto pt-8">
+  <div className="bg-[#F7F9FB] max-w-4xl mx-auto pt-8 px-16">
     {/* Remove Card styling completely since the image doesn't show any card effects */}
     <div>
       {/* Header: Adjusted spacing and text size */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-normal">Create Event</h1>
+      <div className="mb-3">
+        <h1 className="text-2xl font-bold font-serif text-primary">Create Event</h1>
       </div>
 
       {/* Form content with adjusted spacing */}
       <div>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-2">
           {/* EVENT NAME */}
-          <div className="space-y-2">
-            <label className="text-sm">Event Name*</label>
+          <div className="space-y-1">
+            <label className="text-sm text-primary">Event Name*</label>
             <Input
               placeholder="e.g. JumboHack"
               value={formData.eventName}
@@ -210,8 +212,8 @@ export default function CreateEventPage() {
           {/* DATE / TIME / DURATION with adjusted spacing */}
           <div className="grid grid-cols-3 gap-6">
             {/* DATE */}
-            <div className="space-y-2">
-              <label className="text-sm">Date*</label>
+            <div className="space-y-1">
+              <label className="text-sm text-primary">Date*</label>
               <Input
                 type="text"
                 placeholder="00/00/0000"
@@ -231,8 +233,8 @@ export default function CreateEventPage() {
             </div>
 
             {/* TIME */}
-            <div className="space-y-2">
-              <label className="text-sm">Time*</label>
+            <div className="space-y-1">
+              <label className="text-sm text-primary">Time*</label>
               <Input
                 type="text"
                 placeholder="00:00 PM"
@@ -252,8 +254,8 @@ export default function CreateEventPage() {
             </div>
 
             {/* DURATION */}
-            <div className="space-y-2">
-              <label className="text-sm">Duration*</label>
+            <div className="space-y-1">
+              <label className="text-sm text-primary">Duration*</label>
               <Input
                 type="text"
                 placeholder="e.g. 24hr 30m"
@@ -274,10 +276,10 @@ export default function CreateEventPage() {
           </div>
 
           {/* DESCRIPTION */}
-          <div className="space-y-2">
-            <label className="text-sm">Description*</label>
+          <div className="space-y-1">
+            <label className="text-sm text-primary">Description*</label>
             <Textarea
-              placeholder="Additional information about the event"
+              placeholder="Add additional information about the event"
               value={formData.description}
               onChange={(e) => {
                 setFormData((prev) => ({
@@ -294,12 +296,15 @@ export default function CreateEventPage() {
           </div>
 
           {/* SPREADSHEET */}
-          <div className="space-y-2">
-            <label className="text-sm">Select Spreadsheet*</label>
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <label className="text-sm text-primary">Select Spreadsheet*</label>
+              <Tooltip />
+            </div>
             <div className="flex gap-2">
               <Input
                 type="text"
-                placeholder="academicquadclubs.xlsx"
+                placeholder="Choose a spreadsheet file (.xlsx)"
                 value={formData.spreadsheet}
                 readOnly
                 className={`flex-grow h-11 ${errors.spreadsheet ? "border-red-500" : "border-gray-200"}`}
@@ -307,7 +312,7 @@ export default function CreateEventPage() {
               <Button
                 type="button"
                 variant="secondary"
-                className="h-11 px-6"
+                className="h-11 px-6 bg-[#2E73B5] text-[#fff]"
                 onClick={() => document.getElementById("file-upload")?.click()}
               >
                 Upload
@@ -326,8 +331,8 @@ export default function CreateEventPage() {
           </div>
 
           {/* LOCATION */}
-          <div className="space-y-2">
-            <label className="text-sm">Location*</label>
+          <div className="space-y-1">
+            <label className="text-sm text-primary">Location*</label>
             <div className="flex gap-2">
               <Input
                 type="text"
@@ -342,7 +347,7 @@ export default function CreateEventPage() {
               <Button
                 type="button"
                 variant="secondary"
-                className="h-11 px-6"
+                className="h-11 px-6 bg-[#2E73B5] text-[#fff]"
                 onClick={() => setShowMap(true)}
               >
                 Choose Location
@@ -354,11 +359,11 @@ export default function CreateEventPage() {
           </div>
 
           {/* ACTION BUTTONS */}
-          <div className="flex justify-end gap-3 pt-6">
-            <Button type="button" variant="outline" className="px-6">
+          <div className="flex justify-end gap-3 pt-6 pb-10">
+            <Button type="button" variant="outline" className="h-11 px-6">
               Cancel
             </Button>
-            <Button type="submit" className="px-6 bg-[#2E73B5]">
+            <Button type="submit" className="h-11 px-6 bg-[#2E73B5]">
               Create Event
             </Button>
           </div>

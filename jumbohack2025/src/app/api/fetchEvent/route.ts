@@ -5,12 +5,15 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const id = Number(body.id);
+    console.log(id)
     if (!id || isNaN(id)) {
       return NextResponse.json({ error: 'Invalid event ID' }, { status: 400 });
     }
 
     // Run the SQL query and log results
-    const event = await query(`SELECT * FROM event WHERE id = $1`, [1]);
+    const event = await query(`SELECT * FROM event WHERE id = $1`, [id]);
+
+    console.log(event.rows);
 
 
     if (!event || event.length === 0) {
