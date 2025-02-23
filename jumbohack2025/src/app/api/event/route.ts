@@ -13,12 +13,13 @@ export async function POST(request: Request) {
       description,
       scale,
       startTime,
-      duration
+      duration,
+      creator,
     } = data;
 
     const result = await query(
-      `INSERT INTO event (name, description, date, location, scale, start_time, duration) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+      `INSERT INTO event (name, description, date, location, scale, start_time, duration, creator) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
        RETURNING id`,
       [
         eventName,
@@ -27,7 +28,8 @@ export async function POST(request: Request) {
         pointString,
         scale,
         startTime,
-        duration
+        duration,
+        creator
       ]
     );
 

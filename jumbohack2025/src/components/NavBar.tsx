@@ -14,18 +14,10 @@ const NavBar = () => {
   const { theme } = useTheme();
   const { isSignedIn } = useUser();
 
-  const navItems = [
-    { label: 'Create An Event', href: '/events/create' }, 
-  ];
 
   const protectedNavItems = [
-    { label: 'Admin_demo', href: '/admin/send-invitations' },
+    { label: 'Create An Event', href: '/events/create' },
   ];
-
-  // Combine nav items based on auth state
-  const currentNavItems = isSignedIn 
-    ? [...navItems, ...protectedNavItems]
-    : navItems;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -58,7 +50,7 @@ const NavBar = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-8">
-            {currentNavItems.map((item) => (
+            {isSignedIn && protectedNavItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
@@ -67,12 +59,15 @@ const NavBar = () => {
                 {item.label}
               </Link>
             ))}
-            
+
             {isSignedIn ? (
-              <UserButton afterSignOutUrl="/" />
+              <div className="px-3 py-2">
+                <UserButton afterSignOutUrl="/" />
+              </div>
             ) : (
               <Link href="/sign-in">
-                <Button variant="ghost" className="text-white hover:text-gray-200">
+                <Button variant="ghost" className="text-white text-lg hover:underline hover:underline-offset-4 transition-all duration-200">
+
                   Sign In
                 </Button>
               </Link>
@@ -100,7 +95,8 @@ const NavBar = () => {
         isMobileMenuOpen ? "block" : "hidden"
       )}>
         <div className="px-2 pt-2 pb-3 space-y-1">
-          {currentNavItems.map((item) => (
+
+          {isSignedIn && protectedNavItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}
@@ -110,7 +106,7 @@ const NavBar = () => {
               {item.label}
             </Link>
           ))}
-          
+
           {isSignedIn ? (
             <div className="px-3 py-2">
               <UserButton afterSignOutUrl="/" />
@@ -118,7 +114,9 @@ const NavBar = () => {
           ) : (
             <Link
               href="/sign-in"
-              className="block px-3 py-2 text-white hover:text-gray-200"
+
+              className="block px-3 py-2 text-white text-lg hover:underline hover:underline-offset-4 transition-all duration-200"
+
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Sign In
