@@ -171,9 +171,10 @@ export default function CreateEventPage() {
           // Call the excel processing API here
           await processExcel(formData.spreadsheet);
           const result = await response.json();
-          const eventId = result.id; // Access the `id` from the response
+          const eventId = result.eventId; // Access the `id` from the response
           resetForm();
-          router.push("/placement/${eventId}");
+          console.log("AAAAAAAA", eventId);
+          router.push(`/placement/${eventId}`);
           return "Event created successfully!";
         },
         error: "Failed to create event",

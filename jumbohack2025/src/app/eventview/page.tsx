@@ -26,6 +26,7 @@ export default function EventPage({ eventId }: { eventId: number }) {
   const searchParams = useSearchParams();
   const id = Number(searchParams.get("id"));
 
+
   useEffect(() => {
     async function fetchEvent() {
       setLoading(true);
@@ -55,7 +56,8 @@ export default function EventPage({ eventId }: { eventId: number }) {
   }, [eventId]);
 
   async function handleEdit() {
-    router.push('/placement');
+    console.log(id);
+    router.push(`/placement/${id}`);
   }
 
   if (loading) return <p>Loading event...</p>;
