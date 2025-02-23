@@ -19,7 +19,6 @@ export default function MapboxMap() {
   // Map container and map instance
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
 
   // State to control modal visibility and its props
   const [showModal, setShowModal] = useState(false);
