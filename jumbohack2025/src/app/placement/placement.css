@@ -10,4 +10,10 @@
     padding: "10px 20px";
     z-index: 100;
     cursor: "pointer";
+  }
+
+.fullMapContainer {
+  width:100vw;
+  height:100vh;
+  position: absolute;
 }
