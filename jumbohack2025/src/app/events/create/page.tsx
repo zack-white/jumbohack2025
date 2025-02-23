@@ -8,9 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
 
 export default function CreateEventPage() {
   const router = useRouter();
+  const { isSignedIn, user, isLoaded } = useUser();
+  const userEmail = user?.emailAddresses[0];
   const [showMap, setShowMap] = useState(false);
   const [formData, setFormData] = useState({
     eventName: "",
@@ -133,6 +136,7 @@ export default function CreateEventPage() {
     }
 
     try {
+      console.log(userEmail);
       const promise = fetch("/api/event", {
         method: "POST",
         headers: {
@@ -146,6 +150,7 @@ export default function CreateEventPage() {
           description: formData.description,
           location: formData.location,
           scale: formData.scale,
+          creator: userEmail?.emailAddress,
         }),
       });
 
