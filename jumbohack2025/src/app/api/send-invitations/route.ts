@@ -24,9 +24,10 @@ export async function POST(request: Request) {
     if (clubs.length === 0) {
       return NextResponse.json(
         { message: 'No clubs found for the provided event ID' },
-        // { status: 404 }
       );
     }
+
+    console.log(clubs);
 
     const emails = clubs.map(club => club.contact);
 
@@ -41,6 +42,8 @@ export async function POST(request: Request) {
 
       const yesLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invitation-response?token=${token}&response=yes`;
       const noLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invitation-response?token=${token}&response=no`;
+
+      console.log('about to send email');
 
       await sendEmail({
         to: email,

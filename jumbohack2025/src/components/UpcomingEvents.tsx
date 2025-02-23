@@ -3,12 +3,14 @@
 import React from "react";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
+import Router, { useRouter } from "next/navigation";
 
 interface Event {
   name: string;
   date: string;
   time?: string;
   description?: string;
+  id: number
 }
 
 const fetchEvents = async (): Promise<Event[]> => {
@@ -24,6 +26,13 @@ export default function UpcomingEvents() {
     queryKey: ["events"],
     queryFn: fetchEvents,
   });
+
+  const Router = useRouter();
+  
+  const handleEvent = (event: Event) => {
+    Router.push(`/eventview?id=${event.id}`);
+  };
+  
 
   const calculateDays = (date: string) => {
     const eventDate = new Date(date);
@@ -75,7 +84,11 @@ export default function UpcomingEvents() {
           const isToday = daysUntil === 0;
 
           return (
-            <div key={event.name} className="bg-white p-4 shadow-sm">
+            <div 
+              key={event.name} 
+              className="bg-white p-4 shadow-sm cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
+              onClick={() => handleEvent(event)}
+            >
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-medium text-primary font-inter">{event.name}</h3>
@@ -101,7 +114,8 @@ export default function UpcomingEvents() {
           return (
             <div
               key={event.name}
-              className="bg-white p-6 border border-gray-200 shadow-sm"
+              className="bg-white p-6 border border-gray-200 shadow-sm cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
+              onClick={() => handleEvent(event)}
             >
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-lg font-semibold text-primary">
