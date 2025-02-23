@@ -5,6 +5,7 @@ import mapboxgl from "mapbox-gl";
 import InfoPopup from "@/components/ClubInfo"
 import "./placement.css";
 import "mapbox-gl/dist/mapbox-gl.css";
+import SendInvitations from "../admin/send-invitations/page";
 
 interface Club {
     id: number;
@@ -40,6 +41,10 @@ export default function MapboxMap() {
   // Track club to show popup for
   const [clubInfo, setClubInfo] = useState<Club>();
   const [showClubInfo, setShowClubInfo] = useState(false);
+
+  // consts for sending emails
+  const [status, setStatus] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // On page render, create map and fetch all old clubs w/ for given event.
   useEffect(() => {
@@ -180,7 +185,6 @@ export default function MapboxMap() {
       });
     };
     
-
     // Listener for map click to add a marker
     map.on("click", async (e) => {
       const { lng, lat } = e.lngLat; // Get the clicked coordinates
@@ -195,6 +199,33 @@ export default function MapboxMap() {
     // Cleanup on unmount
     return () => map.remove();
   }, []);
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    setStatus('');
+
+    try {
+      const response = await fetch('/api/send-invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({event_id: EVENT_ID}),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log(data);
+      setStatus(data.message);
+    } catch (error) {
+      console.error('Error:', error);
+      setStatus(error.message || 'Error sending invitations. Please check the console for details.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Update queue when category is selected
   useEffect(() => {
@@ -222,7 +253,7 @@ export default function MapboxMap() {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full p-4 border rounded bg-categoryBg"
+            className="w-full p-3 border rounded bg-categoryBg"
           >
             <option>Select a category</option>
             {categories.map((category) => (
@@ -231,6 +262,11 @@ export default function MapboxMap() {
               </option>
             ))}
           </select>
+        </div>
+        <div className="queueAndSubmit">
+          <button type="submit" className="h-11 px-6 bg-[#2E73B5] text-white" onClick={handleSubmit}>
+            Submit
+          </button>
         </div>
         {/* Queue */}
         <div className="mb-4">
@@ -243,6 +279,13 @@ export default function MapboxMap() {
           </ul>
         </div>
       </div>
+      {status && (
+        <p className={`mt-4 text-center ${
+          status.includes('Error') ? 'text-red-600' : 'text-green-600'
+        }`}>
+          {status}
+        </p>
+      )}
     </div>
   );
 };
