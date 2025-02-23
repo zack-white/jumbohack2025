@@ -9,7 +9,7 @@ export default function ShowMapButton() {
   return (
         <div className="flex items-center justify-center p-5"> 
         <button
-        onClick={() => router.push("/map")}
+        onClick={() => router.push("/mapview")}
         className="relative w-full max-w-xs mx-auto transition-opacity hover:opacity-100"
         >
         {/* Grayed-out Map Image */}

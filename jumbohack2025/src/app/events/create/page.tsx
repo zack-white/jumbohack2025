@@ -8,10 +8,25 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+<<<<<<< HEAD
+import { useUser } from "@clerk/nextjs";
+=======
+
+import { useAuth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
+>>>>>>> 38c340c79332974d1b3f6a0a64199b5b3ae41c69
 import Tooltip from "@/components/tooltip";
 
 export default function CreateEventPage() {
+  const { userId } = useAuth();
+  
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   const router = useRouter();
+  const { isSignedIn, user, isLoaded } = useUser();
+  const userEmail = user?.emailAddresses[0];
   const [showMap, setShowMap] = useState(false);
   const [formData, setFormData] = useState({
     eventName: "",
@@ -134,6 +149,7 @@ export default function CreateEventPage() {
     }
 
     try {
+      console.log(userEmail);
       const promise = fetch("/api/event", {
         method: "POST",
         headers: {
@@ -147,6 +163,7 @@ export default function CreateEventPage() {
           description: formData.description,
           location: formData.location,
           scale: formData.scale,
+          creator: userEmail?.emailAddress,
         }),
       });
 
