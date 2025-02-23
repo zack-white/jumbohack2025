@@ -34,7 +34,7 @@ const NavBar = () => {
   return (
     <nav className="w-full bg-[#2971AC] dark:[#B2DFFF] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
+        <div className="flex justify-between h-16 md:h-20 items-center">
           <div className="flex items-center">
             <Link href="/">
               <Image
@@ -42,7 +42,7 @@ const NavBar = () => {
                 alt="JumboMap Logo"
                 width={140}
                 height={40}
-                className="h-8 w-auto"
+                className="h-8 w-auto md:h-12 md:w-auto"
               />
             </Link>
           </div>
@@ -52,7 +52,7 @@ const NavBar = () => {
               <Link
                 key={item.label}
                 href={item.href}
-                className="text-white hover:text-gray-200"
+                className="text-white hover:text-gray-200 md:text-lg"
               >
                 {item.label}
               </Link>
