@@ -184,6 +184,10 @@ export default function CreateEventPage() {
     }
   };
 
+  const handleCancel = () => {
+    router.push("/");
+  };
+  
   const processExcel = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -387,7 +391,7 @@ export default function CreateEventPage() {
 
               {/* ACTION BUTTONS */}
               <div className="flex justify-end gap-3 pt-6 pb-10">
-                <Button type="button" variant="outline" className="h-11 px-6">
+                <Button type="button" variant="outline" className="h-11 px-6" onClick={handleCancel}>
                   Cancel
                 </Button>
                 <Button type="submit" className="h-11 px-6 bg-[#2E73B5]">
