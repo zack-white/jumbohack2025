@@ -1,1 +1,33 @@
-YIPPEE!!!
+================================================================================
+JumboMap
+================================================================================
+Created by: BING CHILLERS. Elisa Yu, Hannah Jiang, Holden Kittelberger, Shayne Sidman, Will Goldman, Zack White
+Presented at JumboHack 2025 under the EDUCATION track.
+
+INSPIRATION
+Navigating crowded spaces like campus events and career fairs can be intimidating and challenging, especially without a clear, accessible map. Many of these events lack a simple way for students to find clubs, opportunities, or areas of interest. To solve this, we digitized event maps, making it easy for students to find what interests them—all from the convenience of their phone.
+
+TEAM
+Elisa Yu: 
+Hannah Jiang: designed the Figma frontend for implementation + css styling
+Holden Kittelberger: 
+Shayne Sidman: 
+Will Goldman:  
+Zack White: 
+
+
+ACKNOWLEDGEMENTS
+ChatGPT: used for fine-tuning
+
+REFLECTION
+<What motivated your team to choose this project?>
+Our team was motivated by the challenges students face when navigating crowded campus events like club fairs and career expos. Many of these events lack accessible, up-to-date maps, making it difficult for students—especially newcomers—to find clubs, opportunities, and areas of interest. We wanted to create a streamlined, digital solution that enhances event accessibility, making it easier for students to explore, connect, and engage with their campus community.
+
+<Potential future work/improvements?>
+We plan to expand JumboMap beyond Tufts, making it accessible for other schools and events. While the frontend is tailored to the Tufts community, the backend is highly adaptable, allowing seamless integration with different campuses and event layouts. By scaling our platform, we aim to help students and administrators effortlessly track, locate, and manage event spaces, improving accessibility and organization across various institutions.
+
+<What is a challenge you encountered while making this?>
+One of the biggest challenges we faced was implementing an email system that confirms attendance while ensuring event descriptions are stored in the database. We implemented a structured backend workflow to ensure that attendance confirmations and event descriptions were accurately stored in the database. Additionally, ensuring that events on the map interacted seamlessly with external logic across different files and pages required careful integration. Another challenge was designing a clear workflow distinction between admin and student users, balancing administrative controls with a streamlined student experience. We designed a clear role-based system with distinct permissions and interfaces, making navigation intuitive for both administrators and students.
+
+<What is a fun or interesting experience you had with another hacker?>
+We had a lot of fun putting on music and watching movies as we worked
