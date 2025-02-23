@@ -89,7 +89,7 @@ export default function EventPage({ eventId }: { eventId: number }) {
         <div className="mt-4 flex justify-center">
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded"
-            onClick={() => {handleEdit()}} // Replace with actual edit functionality
+            onClick={() => {handleEdit()}}
           >
             Edit Event
           </button>
