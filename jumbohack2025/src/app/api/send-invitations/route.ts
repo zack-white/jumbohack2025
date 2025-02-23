@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   try {
     // Get clubs with the provided event_id
     const result = await query(
-      'SELECT contact FROM clubs WHERE event_id = $1',
+      'SELECT contact FROM clubs WHERE event_id = $1 AND confirmed = false AND description IS NULL AND coordinates IS NOT NULL',
       [event_id]
     );
 
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const emails = clubs.map(club => club.contact);
 
     const results = await Promise.all(emails.map(async (email) => {
-      const token = Buffer.from(email + Date.now().toString()).toString('base64');
+      const token = Buffer.from(Date.now().toString() + email).toString('hex');
 
       // Store the token temporarily -- needed for secure email response handling
       await query(
