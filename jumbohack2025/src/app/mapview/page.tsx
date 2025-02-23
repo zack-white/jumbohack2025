@@ -21,8 +21,6 @@ const INITIAL_LONG = -71.120;
 const INITIAL_LAT = 42.4075;
 const INITIAL_ZOOM = 17.33;
 
-const EVENT_ID = 1;  // CHANGE THIS TO BE IMPORTED FROM CALLING PAGE
-
 export default function MapboxMap() {
   // Map container and map instance
   const mapRef = useRef<mapboxgl.Map | null>(null);
