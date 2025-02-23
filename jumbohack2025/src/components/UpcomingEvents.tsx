@@ -107,7 +107,7 @@ export default function UpcomingEvents() {
                 <h3 className="text-lg font-semibold text-primary">
                   {event.name}
                 </h3>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 mt-1">
                   {isToday ? "Today" : `${daysUntil} days`}
                 </span>
               </div>
