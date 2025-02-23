@@ -369,7 +369,7 @@ export default function CreateEventPage() {
       <Card className="w-full max-w-2xl h-auto shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Choose a General Location</CardTitle>
-          <Button variant="ghost" onClick={() => setShowMap(false)}>
+          <Button variant="ghost" onClick={() => setShowMap(false)} className="text-2xl px-0 pb-3">
             ×
           </Button>
         </CardHeader>
