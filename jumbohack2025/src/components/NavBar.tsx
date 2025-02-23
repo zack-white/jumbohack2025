@@ -17,13 +17,7 @@ const NavBar = () => {
 
   const protectedNavItems = [
     { label: 'Create An Event', href: '/events/create' },
-    { label: 'Admin_demo', href: '/admin/send-invitations' },
   ];
-
-  // Combine nav items based on auth state
-  const currentNavItems = isSignedIn 
-    ? [...navItems, ...protectedNavItems]
-    : navItems;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
