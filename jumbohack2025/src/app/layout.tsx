@@ -1,17 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, IBM_Plex_Serif } from "next/font/google";
+import { IBM_Plex_Serif, Inter } from "next/font/google";
 import "./globals.css";
 import NavBar from '../components/NavBar';
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const ibmPlexSerif = IBM_Plex_Serif({
   weight: ['400', '500', '600', '700'],
@@ -19,25 +9,41 @@ const ibmPlexSerif = IBM_Plex_Serif({
   variable: '--font-ibm-plex-serif',
 })
 
+const inter = Inter({
+    weight: ['400', '500', '600', '700'],
+    subsets: ['latin'],
+    variable: '--font-inter',
+  })
+
 export const metadata: Metadata = {
   title: "JumboMap",
   description: "Making events more accessible",
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
+    return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+        <body
+        className={`${ibmPlexSerif.variable} ${inter.variable}`}
+        >
         <NavBar />
         {children}
-      </body>
+        </body>
     </html>
-  );
+    );
 }
 
+module.exports = {
+    theme: {
+        extend: {
+            fontFamily: {
+                serif: "var(--font-ibm-plex-serif)",
+                inter: "var(--font-inter)",
+            },
+        },
+    },
+};

@@ -17,7 +17,7 @@ export default function Home() {
           <div className="px-4">
             {/* Top heading (mobile = text-2xl, desktop = text-3xl or 4xl) */}
             <div>
-              <h1 className="text-2xl font-medium text-gray-900 mb-6 md:text-3xl">
+              <h1 className="text-2xl font-medium text-gray-900 mb-6 md:text-3xl font-serif font-bold pt-2">
                 Welcome to JumboMap
               </h1>
             </div>
@@ -39,7 +39,7 @@ export default function Home() {
                 
                 {/* Text overlay */}
                 <div className="absolute bottom-8 right-8 bg-white p-2 md:max-w-[30vw] md:bg-transparent md:bottom-1/2 md:left-0 md:p-0 md:transform md:translate-y-3/4">
-                  <h2 className="text-2xl font-medium text-gray-900 pl-2 md:p-10 md:text-4xl md:bg-white md:text-black">
+                  <h2 className="text-2xl font-medium text-gray-900 pl-2 md:p-10 md:text-3xl md:bg-white md:text-black font-serif">
                     Making events more accessible for students
                   </h2>
                 </div>
@@ -57,7 +57,7 @@ export default function Home() {
               </h2>
               <Link
                 href="/events/create"
-                className="bg-white text-[#2E73B5] px-6 py-3 rounded hover:bg-gray-100 transition-colors text-center md:text-2xl"
+                className="bg-white text-[#2E73B5] px-6 py-3 hover:bg-gray-100 transition-colors text-center md:text-xl font-inter"
               >
                 Create New Event
               </Link>
@@ -78,13 +78,13 @@ export default function Home() {
                 height={80}
                 className="mx-auto mb-4"
               />
-              <p className="text-sm md:text-xl text-gray-600 max-w-2xl md:max-w-5xl mx-auto">
+              <p className="text-sm md:text-lg text-gray-600 max-w-2xl md:max-w-4xl mx-auto font-inter">
                 This project was developed during JumboHack 2025 to create an
                 innovative solution that helps students easily navigate current
                 campus events, explore event layouts, and discover clubs more efficiently.
                 We hope you enjoy!
               </p>
-              <p className="text-xs md:text-lg text-gray-500 mt-4">
+              <p className="text-xs md:text-base text-gray-500 mt-4 font-inter">
                 © 2025 Elisa Yu, Hannah Jiang, Holden Kittelberger, Shayne Sidman,
                 William Goldman, Zachary White
               </p>

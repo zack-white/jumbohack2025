@@ -5,6 +5,10 @@
 @layer base {
   :root {
 
+    --font-ibm-plex-serif: 'IBM Plex Serif', serif;
+
+    --font-inter: 'Inter', sans-serif;
+
     --background: 0 0% 100%;
 
     --foreground: 222.2 84% 4.9%;
@@ -53,7 +57,7 @@
 
     --chart-5: 27 87% 67%;
 
-    --radius: 0.5rem
+    --radius: 0.5rem;
   }
   .dark {
 
@@ -103,7 +107,7 @@
 
     --chart-4: 280 65% 60%;
 
-    --chart-5: 340 75% 55%
+    --chart-5: 340 75% 55%;
   }
 }
 
