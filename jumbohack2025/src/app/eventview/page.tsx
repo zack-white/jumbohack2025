@@ -55,7 +55,7 @@ export default function EventPage({ eventId }: { eventId: number }) {
   }, [eventId]);
 
   async function handleEdit() {
-    router.push('/mapview');
+    router.push('/placement');
   }
 
   if (loading) return <p>Loading event...</p>;

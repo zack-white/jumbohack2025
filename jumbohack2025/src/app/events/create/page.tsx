@@ -8,11 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-<<<<<<< HEAD
 import { useUser } from "@clerk/nextjs";
-=======
 import Tooltip from "@/components/tooltip";
->>>>>>> main
 
 export default function CreateEventPage() {
   const router = useRouter();
