@@ -36,7 +36,7 @@ export default function UpcomingEvents() {
   if (isLoading) {
     return (
       <div className="mt-6">
-        <h2 className="text-xl font-medium text-gray-900 mb-4 md:text-3xl font-serif">
+        <h2 className="text-xl font-bold text-primary mb-4 md:text-3xl font-serif">
           Upcoming Events
         </h2>
         <div className="animate-pulse space-y-4 md:grid md:grid-cols-3 md:gap-6">
@@ -51,7 +51,7 @@ export default function UpcomingEvents() {
   if (error) {
     return (
       <div className="mt-6">
-        <h2 className="text-xl font-medium text-gray-900 mb-4 md:text-3xl font-serif">
+        <h2 className="text-xl font-bold text-primary mb-4 md:text-3xl font-serif">
           Upcoming Events
         </h2>
         <p className="text-red-500 font-inter">Failed to load events.</p>
@@ -64,7 +64,7 @@ export default function UpcomingEvents() {
 
   return (
     <div className="mt-6">
-      <h2 className="text-xl font-medium text-gray-900 mb-4 md:text-3xl font-serif">
+      <h2 className="text-xl font-bold text-primary mb-4 md:text-3xl font-serif">
         Upcoming Events
       </h2>
 
@@ -78,7 +78,7 @@ export default function UpcomingEvents() {
             <div key={event.name} className="bg-white p-4 shadow-sm">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-medium text-gray-900 font-inter">{event.name}</h3>
+                  <h3 className="font-medium text-primary font-inter">{event.name}</h3>
                   <p className="text-sm text-gray-600 font-inter">
                     {format(new Date(event.date), "MMMM do")}
                   </p>
@@ -104,7 +104,7 @@ export default function UpcomingEvents() {
               className="bg-white p-6 border border-gray-200 shadow-sm"
             >
               <div className="flex justify-between items-start mb-2">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-primary">
                   {event.name}
                 </h3>
                 <span className="text-sm text-gray-600">

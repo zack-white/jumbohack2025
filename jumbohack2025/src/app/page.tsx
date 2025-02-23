@@ -17,7 +17,7 @@ export default function Home() {
           <div className="px-4">
             {/* Top heading (mobile = text-2xl, desktop = text-3xl or 4xl) */}
             <div>
-              <h1 className="text-2xl font-medium text-gray-900 mb-6 md:text-3xl font-serif font-bold pt-2">
+              <h1 className="text-2xl text-gray-900 mb-6 md:text-3xl font-serif font-bold pt-2 text-primary">
                 Welcome to JumboMap
               </h1>
             </div>
@@ -39,7 +39,7 @@ export default function Home() {
                 
                 {/* Text overlay */}
                 <div className="absolute bottom-8 right-8 bg-white p-2 md:max-w-[30vw] md:bg-transparent md:bottom-1/2 md:left-0 md:p-0 md:transform md:translate-y-3/4">
-                  <h2 className="text-2xl font-medium text-gray-900 pl-2 md:p-10 md:text-3xl md:bg-white md:text-black font-serif">
+                  <h2 className="text-2xl font-medium pl-2 md:p-10 md:text-3xl md:bg-white text-primary font-serif">
                     Making events more accessible for students
                   </h2>
                 </div>
@@ -50,14 +50,14 @@ export default function Home() {
           </div>
 
           {/* CTA Section */}
-          <div className="bg-[#2E73B5] text-white mt-12 py-12 px-6 w-full">
+          <div className="bg-[#2E73B5] text-white mt-12 py-24 px-6 w-full">
             <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-24">
-              <h2 className="text-2xl font-medium text-center md:text-left md:text-3xl">
+              <h2 className="text-2xl text-center md:text-left md:text-3xl font-bold">
                 Let&apos;s get your event started
               </h2>
               <Link
                 href="/events/create"
-                className="bg-white text-[#2E73B5] px-6 py-3 hover:bg-gray-100 transition-colors text-center md:text-xl font-inter"
+                className="bg-white text-[#2E73B5] px-12 py-3 hover:bg-gray-100 transition-colors text-center md:text-xl font-inter"
               >
                 Create New Event
               </Link>
@@ -78,7 +78,7 @@ export default function Home() {
                 height={80}
                 className="mx-auto mb-4"
               />
-              <p className="text-sm md:text-lg text-gray-600 max-w-2xl md:max-w-4xl mx-auto font-inter">
+              <p className="text-sm md:text-lg text-gray-600 max-w-2xl md:max-w-4xl mx-auto font-inter py-2">
                 This project was developed during JumboHack 2025 to create an
                 innovative solution that helps students easily navigate current
                 campus events, explore event layouts, and discover clubs more efficiently.
