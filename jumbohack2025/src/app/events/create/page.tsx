@@ -8,13 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-<<<<<<< HEAD
-import { useUser } from "@clerk/nextjs";
-=======
 
+import { useUser } from "@clerk/nextjs";
 import { useAuth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
->>>>>>> 38c340c79332974d1b3f6a0a64199b5b3ae41c69
+
 import Tooltip from "@/components/tooltip";
 
 export default function CreateEventPage() {
