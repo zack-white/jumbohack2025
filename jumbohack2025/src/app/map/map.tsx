@@ -1,19 +1,23 @@
-// "use client" is required at the top for client-side rendering
 "use client";
-
 
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
-import style from "./map.module.css"
+import style from "./map.module.css";
+import "mapbox-gl/dist/mapbox-gl.css";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import CreateEventModal from "../components/createEventPop";
 
-// Set your Mapbox access token
-mapboxgl.accessToken = "pk.eyJ1Ijoic2FsbW9uLXN1c2hpIiwiYSI6ImNtN2dqYWdrZzA4ZnIyam9qNWx1NnAybjcifQ._YD8GYWPtpZ09AwYHzR2Og";
+mapboxgl.accessToken =
+  "pk.eyJ1Ijoic2FsbW9uLXN1c2hpIiwiYSI6ImNtN2dqYWdrZzA4ZnIyam9qNWx1NnAybjcifQ._YD8GYWPtpZ09AwYHzR2Og";
 
-const MapboxMap: React.FC = () => {
-  // Create a ref to hold the map container
+const INITIAL_LONG = -71.120;
+const INITIAL_LAT = 42.4075;
+const INITIAL_ZOOM = 17.33;
+
+export default function MapboxMap() {
+  // Map container and map instance
+  const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
@@ -22,16 +26,18 @@ const MapboxMap: React.FC = () => {
   const [modalProps, setModalProps] = useState<{ center: mapboxgl.LngLat; zoom: number } | null>(null);
 
 
+  const [long, setLong] = useState(INITIAL_LONG);
+  const [lat, setLat] = useState(INITIAL_LAT);
+  const [zoom, setZoom] = useState(INITIAL_ZOOM);
+
   useEffect(() => {
-    // Ensure the container is available
     if (!mapContainerRef.current) return;
 
-    // Initialize the map
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
-      center: [-71.120, 42.4075], // [lng, lat]
-      zoom: 17.33,
+      center: [long, lat],
+      zoom: zoom,
     });
 
     mapRef.current = map;
@@ -41,7 +47,7 @@ const MapboxMap: React.FC = () => {
       accessToken: mapboxgl.accessToken,
       mapboxgl: mapboxgl,
       marker: {
-        color: "orange", // Customize marker color if desired
+        color: "orange",
       },
       placeholder: "Search for places",
     });
@@ -49,8 +55,28 @@ const MapboxMap: React.FC = () => {
     // Add the geocoder to the map
     map.addControl(geocoder, "top-right");
 
+    mapRef.current.on("move", () => {
+      // Get the current center coordinates and zoom level from the map
+      const mapCenter = map.getCenter();
+      const mapZoom = map.getZoom();
+
+      setLong(mapCenter.lng);
+      setLat(mapCenter.lat);
+      setZoom(mapZoom);
+    });
+
+    // Listener for map click to add a marker
+    map.on("click", (e) => {
+      const { lng, lat } = e.lngLat; // Get the clicked coordinates
+      new mapboxgl.Marker() 
+        .setLngLat([lng, lat])
+        .addTo(map);
+    });
+
     // Cleanup on unmount
-    return () => map.remove();
+    return () => {
+      map?.remove();
+    };
   }, []);
 
   // Handler for saving the current map view
@@ -104,5 +130,3 @@ const MapboxMap: React.FC = () => {
     </div>
   );
 };
-
-export default MapboxMap;
