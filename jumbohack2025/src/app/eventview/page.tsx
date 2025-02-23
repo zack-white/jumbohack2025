@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import ClubsSearch from "../components/ClubsSearch"
 
 interface Event {
   id: number;
@@ -45,25 +46,18 @@ export default function EventPage({ eventId }: { eventId: number }) {
   if (error) return <p>Error: {error}</p>;
   if (!event) return <p>No event found</p>;
 
-  // Convert date
   const eventDate = new Date(event.date);
-  
-  // Format Date
+
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
 
-  const dayName = days[eventDate.getDay()]; // Full weekday name
-  const month = months[eventDate.getMonth()]; // Full month name
-  const day = eventDate.getDate(); // Numeric day
+  const dayName = days[eventDate.getDay()];
+  const month = months[eventDate.getMonth()];
+  const day = eventDate.getDate();
 
-  console.log("Raw Date:", event.date);
-  console.log("Parsed Date:", eventDate);
-  console.log("Day of Week:", dayName);
-  console.log("Month:", month);
-  console.log("Day:", day);
 
   return (
     <div className="p-4">
@@ -72,6 +66,7 @@ export default function EventPage({ eventId }: { eventId: number }) {
       <p className="text-gray-500">
         {dayName}, {month} {day}
       </p>
+      <ClubsSearch/>
     </div>
   );
 }
