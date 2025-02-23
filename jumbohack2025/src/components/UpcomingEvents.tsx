@@ -45,7 +45,7 @@ export default function UpcomingEvents() {
   if (isLoading) {
     return (
       <div className="mt-6">
-        <h2 className="text-xl font-medium text-gray-900 mb-4 md:text-2xl">
+        <h2 className="text-xl font-bold text-primary mb-4 md:text-3xl font-serif">
           Upcoming Events
         </h2>
         <div className="animate-pulse space-y-4 md:grid md:grid-cols-3 md:gap-6">
@@ -60,10 +60,10 @@ export default function UpcomingEvents() {
   if (error) {
     return (
       <div className="mt-6">
-        <h2 className="text-xl font-medium text-gray-900 mb-4 md:text-2xl">
+        <h2 className="text-xl font-bold text-primary mb-4 md:text-3xl font-serif">
           Upcoming Events
         </h2>
-        <p className="text-red-500">Failed to load events.</p>
+        <p className="text-red-500 font-inter">Failed to load events.</p>
       </div>
     );
   }
@@ -73,7 +73,7 @@ export default function UpcomingEvents() {
 
   return (
     <div className="mt-6">
-      <h2 className="text-xl font-medium text-gray-900 mb-4 md:text-3xl">
+      <h2 className="text-xl font-bold text-primary mb-4 md:text-3xl font-serif">
         Upcoming Events
       </h2>
 
@@ -88,12 +88,12 @@ export default function UpcomingEvents() {
             onClick={() => handleEvent(event)}>
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-medium text-gray-900">{event.name}</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="font-medium text-primary font-inter">{event.name}</h3>
+                  <p className="text-sm text-gray-600 font-inter">
                     {format(new Date(event.date), "MMMM do")}
                   </p>
                 </div>
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-600 font-inter">
                   {isToday ? "Today" : `${daysUntil} days`}
                 </div>
               </div>
@@ -115,7 +115,7 @@ export default function UpcomingEvents() {
               onClick={() => handleEvent(event)}
             >
               <div className="flex justify-between items-start mb-2">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-primary">
                   {event.name}
                 </h3>
                 <span className="text-sm text-gray-600">

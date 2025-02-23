@@ -24,15 +24,25 @@ export async function GET(request: Request) {
     
     const user = result.rows[0];
 
+    console.log('User:', result);
+
     if (!user) {
       return NextResponse.json({ message: 'Invalid or expired token' }, { status: 400 });
     }
 
+    // Handle confirmed response
     if (response === 'no') {
+      const confirmed = 'false';
       // Update description
       await pool.query(
         'UPDATE clubs SET description = $1 WHERE id = $2',
         ['Declined invitation', user.id]
+      );
+
+      // Update confirmed status
+      await pool.query(
+        'UPDATE clubs SET confirmed = $1 WHERE id = $2',
+        [confirmed, user.id]
       );
 
       // Send email to admin
@@ -91,6 +101,13 @@ export async function GET(request: Request) {
         }
       );
     } else {
+      const confirmed = 'true';
+      // Update confirmed status
+      await pool.query(
+        'UPDATE clubs SET confirmed = $1 WHERE id = $2',
+        [confirmed, user.id]
+      );
+      
       // Redirect to registration form for 'yes' responses
       return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/registration?token=${token}`);
     }

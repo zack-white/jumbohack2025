@@ -4,7 +4,11 @@ import { query } from "../query/route";
 export async function POST(request: Request) {
   try {
     const { eventId } = await request.json(); // Extract eventId from request body
+<<<<<<< HEAD
 
+=======
+    console.log("AAAAAA", eventId);
+>>>>>>> main
     if (!eventId) {
       return NextResponse.json(
         { message: "eventId is required" },
@@ -17,7 +21,10 @@ export async function POST(request: Request) {
       [eventId]
     );
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
     return NextResponse.json(result.rows);
   } catch (error) {
     console.error("Error fetching clubs:", error);
