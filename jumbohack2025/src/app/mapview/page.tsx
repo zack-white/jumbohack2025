@@ -193,17 +193,17 @@ export default function MapboxMap() {
   return (
     <div className="wrapper">
       {/* Search Bar */}
-      <div className="flex items-center mb-4 pt-4 px-10">
+      <div className="flex items-center mb-4 pt-4 px-10 font-inter">
         <input
           type="text"
           placeholder="Search attending clubs..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 p-2 border rounded border-gray-300"
+          className="flex-1 p-3 border bg-categoryBg"
         />
         <button
           type="button"
-          className="ml-2 p-2 rounded bg-gray-200 border-none cursor-pointer"
+          className="ml-2 p-4 bg-gray-200 border-1 cursor-pointer"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -221,14 +221,14 @@ export default function MapboxMap() {
         <InfoPopup club={clubInfo} onClose={() => setShowClubInfo(false)} />
       )}
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold mb-4">Student Org. Club Fair</h1>
+        <h1 className="text-3xl font-bold mb-4 font-serif">Student Org. Club Fair</h1>
 
         {/* Category Dropdown */}
-        <div className="mb-4 w-3/5 bg-categoryBg">
+        <div className="mb-4 w-3/5 bg-categoryBg font-inter">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full p-4 border rounded bg-categoryBg"
+            className="w-full p-4 border bg-categoryBg"
           >
             <option value="">Select a category</option>
             {categories.map((category) => (
@@ -244,7 +244,7 @@ export default function MapboxMap() {
             {queue.map((club) => (
               <li key={club.id} className="mr-2">
                 <button
-                  className="p-4 border-b bg-categoryBg min-w-[8vw] truncate text-center w-full"
+                  className="p-4 border-b bg-categoryBg min-w-[8vw] truncate text-center w-full font-inter"
                   onClick={() => {
                     setClubInfo(club);
                     setShowClubInfo(true);
