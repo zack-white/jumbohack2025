@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Serif, Inter } from "next/font/google";
 import "./globals.css";
 import NavBar from '../components/NavBar';
+import { ClerkProvider } from '@clerk/nextjs';
 
 const ibmPlexSerif = IBM_Plex_Serif({
   weight: ['400', '500', '600', '700'],
@@ -25,25 +26,16 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    return (
-    <html lang="en">
+  return (
+    <ClerkProvider>
+      <html lang="en">
         <body
-        className={`${ibmPlexSerif.variable} ${inter.variable}`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-        <NavBar />
-        {children}
+          <NavBar />
+          {children}
         </body>
-    </html>
-    );
+      </html>
+    </ClerkProvider>
+  );
 }
-
-module.exports = {
-    theme: {
-        extend: {
-            fontFamily: {
-                serif: "var(--font-ibm-plex-serif)",
-                inter: "var(--font-inter)",
-            },
-        },
-    },
-};
