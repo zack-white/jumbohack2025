@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import FullScreenMap from '../../map/fullScreenMap';
+import FullScreenMap from '../../map/map';
 
 interface MapData {
   long: number;

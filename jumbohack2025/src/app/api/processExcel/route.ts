@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
-import { query } from '../query/route';
+import { query } from '../../../lib/query';
 
 export async function POST(request: Request) {
   try {

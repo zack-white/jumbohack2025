@@ -3,13 +3,17 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-export default function ShowMapButton() {
+// export default function ShowMapButton( {eventID} : {eventID : number}) {
+//     const router = useRouter();
+
+    export default function ShowMapButton({ eventID }: { eventID: number }) {
     const router = useRouter();
+    console.log("Navigating to map with event ID:", eventID);
   
     return (
       <div className="w-full flex items-center py-5"> 
         <button
-          onClick={() => router.push("/mapview")}
+          onClick={() => router.push(`/mapview/${eventID}`)}
           className="relative w-full max-w-[600px] aspect-[3/2] transition-opacity hover:opacity-100"
         >
           <Image
@@ -27,4 +31,5 @@ export default function ShowMapButton() {
       </div>
     );
   }
+
   

@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "next/navigation"
+import { useRouter } from 'next/navigation';
 import mapboxgl from "mapbox-gl";
 import InfoPopup from "@/components/ClubInfo"
 import "./placement.css";
@@ -20,9 +22,10 @@ const INITIAL_LONG = -71.120;
 const INITIAL_LAT = 42.4075;
 const INITIAL_ZOOM = 17.33;
 
-const EVENT_ID = 1;  // CHANGE THIS TO BE IMPORTED FROM CALLING PAGE
-
 export default function MapboxMap() {
+  const router = useRouter();
+  const id = useParams().eventID; // Access the dynamic id from URL
+
   // Map container and map instance
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -39,7 +42,7 @@ export default function MapboxMap() {
   const [queue, setQueue] = useState<any[]>([]);
 
   // Track club to show popup for
-  const [clubInfo, setClubInfo] = useState<Club>();
+  const [clubInfo, setClubInfo] = useState<any>();
   const [showClubInfo, setShowClubInfo] = useState(false);
 
   // consts for sending emails
@@ -63,8 +66,11 @@ export default function MapboxMap() {
     const getExistingClubs = async () => {
         try {
             const response = await fetch("/api/getExistingClubs", {
-                method: 'GET',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  eventID: id
+                })
             });
 
             if (!response.ok) {
@@ -126,12 +132,28 @@ export default function MapboxMap() {
   
 
     async function fetchClubs() {
-      const response = await fetch('/api/getClubs');
-      const data = await response.json();
-      setClubs(data);
-      // Extract unique categories
-      const uniqueCategories = [...new Set(data.map((club: any) => club.category))];
-      setCategories(uniqueCategories);
+      try {
+        const response = await fetch("/api/getClubs", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              eventID: id
+            })
+        });
+
+        if (!response.ok) {
+            console.log("Error fetching existing clubs.");
+        }
+
+        const data = await response.json();
+        setClubs(data);
+        console.log(data)
+        // Extract unique categories
+        const uniqueCategories = [...new Set(data.map((club: any) => club.category))];
+        setCategories(uniqueCategories);
+      } catch(error) {
+        console.error("Error" + error);
+      }
     };
   
     // Fetch clubs on page load
@@ -208,7 +230,7 @@ export default function MapboxMap() {
       const response = await fetch('/api/send-invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({event_id: EVENT_ID}),
+        body: JSON.stringify({event_id: 1} ),
       });
       
       if (!response.ok) {
@@ -225,6 +247,13 @@ export default function MapboxMap() {
     } finally {
       setIsLoading(false);
     }
+
+    handleClose();
+  };
+
+  const handleClose = () => {
+    // Close the modal
+    router.push('/');
   };
 
   // Update queue when category is selected

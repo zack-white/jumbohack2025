@@ -119,7 +119,7 @@ export default function CreateEventPage() {
     if (e.target.files && e.target.files[0]) {
       setFormData((prev) => ({
         ...prev,
-        spreadsheet: e.target.files[0],
+        spreadsheet: e.target.files ? e.target.files[0] : null,
       }));
       setErrors((prev) => ({ ...prev, spreadsheet: "" }));
     }
@@ -168,10 +168,15 @@ export default function CreateEventPage() {
       toast.promise(promise, {
         loading: "Creating event...",
         success: async (response) => {
-          resetForm();
           // Call the excel processing API here
-          await processExcel(formData.spreadsheet);
-          router.push("/placement");
+          if (formData.spreadsheet) {
+            await processExcel(formData.spreadsheet);
+          }
+          const result = await response.json();
+          const eventId = result.eventId; // Access the `id` from the response
+          resetForm();
+          console.log("AAAAAAAA", eventId);
+          router.push(`/placement/${eventId}`);
           return "Event created successfully!";
         },
         error: "Failed to create event",
@@ -182,6 +187,10 @@ export default function CreateEventPage() {
     }
   };
 
+  const handleCancel = () => {
+    router.push("/");
+  };
+  
   const processExcel = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -385,7 +394,7 @@ export default function CreateEventPage() {
 
               {/* ACTION BUTTONS */}
               <div className="flex justify-end gap-3 pt-6 pb-10">
-                <Button type="button" variant="outline" className="h-11 px-6">
+                <Button type="button" variant="outline" className="h-11 px-6" onClick={handleCancel}>
                   Cancel
                 </Button>
                 <Button type="submit" className="h-11 px-6 bg-[#2E73B5]">
