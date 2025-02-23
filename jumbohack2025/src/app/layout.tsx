@@ -3,6 +3,8 @@ import { IBM_Plex_Serif, Inter } from "next/font/google";
 import "./globals.css";
 import NavBar from '../components/NavBar';
 import { ClerkProvider } from '@clerk/nextjs';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 
 const ibmPlexSerif = IBM_Plex_Serif({
   weight: ['400', '500', '600', '700'],
@@ -30,7 +32,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
         >
           <NavBar />
           {children}
