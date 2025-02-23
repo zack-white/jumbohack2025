@@ -122,7 +122,7 @@ export default function MapboxMap() {
     fetchClubs();
   }, [eventId]);
 
-  // Update queue when category is selected
+  // Update queue when category is selected (used in the UI list below)
   useEffect(() => {
     if (selectedCategory) {
       // Filter clubs by category (and optionally by coordinate existence)
@@ -136,11 +136,12 @@ export default function MapboxMap() {
     }
   }, [selectedCategory, clubs]);
 
-  // Compute filtered clubs based on the search input.
-  // When search is empty, all clubs are shown.
-  const filteredClubs = clubs.filter((club) =>
-    club.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Compute filtered clubs based on search and category.
+  const filteredClubs = clubs.filter((club) => {
+    const matchesSearch = club.name.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = selectedCategory ? club.category === selectedCategory : true;
+    return matchesSearch && matchesCategory;
+  });
 
   // Update map markers whenever the filtered clubs change.
   useEffect(() => {
@@ -229,7 +230,7 @@ export default function MapboxMap() {
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="w-full p-4 border rounded bg-categoryBg"
           >
-            <option>Select a category</option>
+            <option value="">Select a category</option>
             {categories.map((category) => (
               <option key={category} value={category}>
                 {category}
@@ -241,11 +242,16 @@ export default function MapboxMap() {
         <div className="mb-4">
           <ul className="flex flex-row overflow-auto">
             {queue.map((club) => (
-              <li
-                key={club.id}
-                className="p-4 mr-2 border-b bg-categoryBg min-w-[8vw] truncate text-center"
-              >
-                {club.name}
+              <li key={club.id} className="mr-2">
+                <button
+                  className="p-4 border-b bg-categoryBg min-w-[8vw] truncate text-center w-full"
+                  onClick={() => {
+                    setClubInfo(club);
+                    setShowClubInfo(true);
+                  }}
+                >
+                  {club.name}
+                </button>
               </li>
             ))}
           </ul>
