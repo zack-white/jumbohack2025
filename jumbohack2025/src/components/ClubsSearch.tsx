@@ -48,64 +48,52 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
   }
 
   return (
-    <div className="max-w-md mx-auto p-4">
-      <h2 className="mb-4 text-lg font-bold">Who’s Attending?</h2>
-      {/* Search Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-        <input
-          type="text"
-          placeholder="Search attending clubs..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{
-            flex: 1,
-            padding: '8px 12px',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
-          }}
-        />
-        <button
-          type="button"
-          style={{
-            marginLeft: '8px',
-            padding: '8px',
-            borderRadius: '4px',
-            backgroundColor: '#f3f3f3',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          {/* Simple magnifying glass icon (inline SVG) */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            viewBox="0 0 16 16"
-          >
-            <path d="M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.867-3.867zM12.5 6.5a6 6 0 11-12 0 6 6 0 0112 0z" />
-          </svg>
-        </button>
-      </div>
-      {/* Clubs List */}
-      <div>
-        {filteredClubs.map((club) => (
-          <div
-            key={club.id}
-            className="bg-gray-200 p-3 rounded cursor-pointer mb-2 shadow"
-            onClick={() => handlePopup(club)}
-          >
-            {club.name}
-          </div>
-        ))}
-      </div>
+    <div className="max-w-md mx-auto p-4 bg-white">
+    {/* Fixed Header */}
+        <div className="max-w-md bg-white sticky top-4 z-1 pl-4 pb-4">
+            <h2 className="mb-2 text-2xl font-bold font-serif">Who’s Attending?</h2>
+            {/* Search Bar */}
+            <div className="relative mt-2">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    viewBox="0 0 16 16"
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                >
+                    <path d="M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001l3.85 3.85a1 1 0 001.415-1.414l-3.867-3.867zM12.5 6.5a6 6 0 11-12 0 6 6 0 0112 0z" />
+                </svg>
+                <input
+                    type="text"
+                    placeholder="Search attending clubs..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-10 pr-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                />
+            </div>
+        </div>
 
-      {/* InfoPopup with slide-up animation */}
-      <AnimatePresence>
-        {selectedClub && (
-          <InfoPopup club={selectedClub} onClose={() => setSelectedClub(null)} />
-        )}
-      </AnimatePresence>
+    {/* Components */}
+        <div className="h-auto max-h-[65vh] overflow-y-auto pl-4 pb-4 mb-4">
+            {/* Clubs List */}
+            <div>
+                {filteredClubs.map((club) => (
+                    <div
+                        key={club.id}
+                        className="bg-gray-200 p-3 cursor-pointer mb-2"
+                        onClick={() => handlePopup(club)}
+                    >
+                        {club.name}
+                    </div>
+                ))}
+            </div>
+
+        {/* InfoPopup with slide-up animation */}
+            <AnimatePresence>
+                {selectedClub && <InfoPopup club={selectedClub} onClose={() => setSelectedClub(null)} />}
+            </AnimatePresence>
+        </div>
     </div>
   );
 }
