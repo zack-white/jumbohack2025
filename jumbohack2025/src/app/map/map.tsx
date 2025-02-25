@@ -82,7 +82,7 @@ export default function FullScreenMap({ long, lat, scale, onLocationSelect }: Fu
 
   return (
     <div className="relative w-full h-screen">
-      <div ref={mapContainerRef} className="absolute top-0 left-0 w-full h-full" />
+      <div ref={mapContainerRef} className="absolute top-0 left-0" style={{width: "100%", height: "300px"}}/>
       <div className="absolute bottom-4 right-4 z-10">
         <button
           onClick={handleSaveLocation}
