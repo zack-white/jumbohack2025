@@ -158,14 +158,14 @@ export default function PlacementPage() {
         <InfoPopup club={clubInfo} onClose={() => setShowClubInfo(false)} />
       )}
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold mb-4">Unplaced Clubs</h1>
+        <h1 className="text-2xl font-bold mb-4 font-serif">Unplaced Clubs</h1>
 
         {/* Category Dropdown */}
         <div className="mb-4 w-3/5">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full p-3 border rounded"
+            className="w-full p-3 border"
           >
             <option value="">Select a category</option>
             {categories.map((category) => (
@@ -180,7 +180,7 @@ export default function PlacementPage() {
         <div className="mb-4">
           <ul className="flex flex-row overflow-auto">
             {queue.map((club) => (
-              <li key={club.id} className="p-4 mr-2 border-b min-w-[8vw] truncate text-center">
+              <li key={club.id} className="p-4 mr-2 border-b min-w-[8vw] truncate text-center bg-[#F7F9FB]">
                 {club.name}
               </li>
             ))}

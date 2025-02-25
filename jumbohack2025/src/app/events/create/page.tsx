@@ -393,7 +393,7 @@ export default function CreateEventPage() {
               </div>
 
               {/* ACTION BUTTONS */}
-              <div className="flex justify-end gap-3 pt-6 pb-10">
+              <div className="flex justify-end gap-3 pt-6">
                 <Button type="button" variant="outline" className="h-11 px-6" onClick={handleCancel}>
                   Cancel
                 </Button>

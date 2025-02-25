@@ -69,13 +69,13 @@ export default function EventPage() {
             </p>
             <ShowMapButton eventID={id} />
 
-            <div className='flex flex-row justify-between'>
-                <h1 className="text-2xl md:text-3xl font-bold font-serif mb-1 px-4">Event Description</h1>
+            <div className='flex flex-row justify-between pb-2'>
+                <h1 className="text-xl md:text-2xl font-bold font-serif mb-1 px-4">Event Description</h1>
                 {/* Show Edit Button if the logged-in user is the creator */}
                 {userEmail === event.creator && (
                     <div className="flex justify-center">
                         <button
-                            className="bg-[#2971AC] text-white px-4 py-2 font-inter"
+                            className="bg-[#2971AC] text-white px-4 py-2 font-inter md:text-base text-xs font-medium"
                             onClick={handleEdit}
                         >
                             Edit Event
@@ -87,9 +87,7 @@ export default function EventPage() {
         </div>
 
         <div className='md:w-1/2'>
-            {/* <div className='overflow-y-auto max-h-[75vh]'> */}
-                <ClubsSearch eventId={id} />
-            {/* </div> */}
+            <ClubsSearch eventId={id} />
         </div>
     </div>
   );

@@ -51,7 +51,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
     <div className="max-w-md mx-auto p-4 bg-white">
     {/* Fixed Header */}
         <div className="max-w-md bg-white sticky top-4 z-1 pl-4 pb-4">
-            <h2 className="mb-2 text-2xl font-bold font-serif">Who’s Attending?</h2>
+            <h2 className="mb-2 text-xl md:text-2xl font-bold font-serif">Who’s Attending?</h2>
             {/* Search Bar */}
             <div className="relative mt-2">
                 <svg
@@ -81,7 +81,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
                 {filteredClubs.map((club) => (
                     <div
                         key={club.id}
-                        className="bg-gray-200 p-3 cursor-pointer mb-2"
+                        className="bg-[#F7F9FB] border p-3 cursor-pointer mb-2"
                         onClick={() => handlePopup(club)}
                     >
                         {club.name}
