@@ -23,7 +23,7 @@ export default function CreateEventPage() {
   }
 
   const router = useRouter();
-  const { isSignedIn, user, isLoaded } = useUser();
+  const { user } = useUser();
   const userEmail = user?.emailAddresses[0];
   const [showMap, setShowMap] = useState(false);
   const [formData, setFormData] = useState({
@@ -416,7 +416,13 @@ export default function CreateEventPage() {
               </Button>
             </CardHeader>
             <CardContent className="h-[500px]">
-              <MapboxMap onLocationSelect={handleLocationSelect} />
+            <MapboxMap 
+              long={-71.120} 
+              lat={42.4075} 
+              scale={17.33} 
+              onLocationSelect={handleLocationSelect} 
+/>
+
             </CardContent>
           </Card>
         </div>

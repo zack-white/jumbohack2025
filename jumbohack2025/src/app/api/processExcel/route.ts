@@ -23,18 +23,24 @@ export async function POST(request: Request) {
     const workbook = XLSX.read(buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    const jsonData: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+    // Define a type for rows
+    type ClubRow = [string, string, string, string?]; // name, category, contact, description (optional)
 
     // Process the data into the desired format
-    const clubs = jsonData.slice(1).map((row: any) => ({
-      name: row[0], // club name
-      category: row[1], // category
-      contact: row[2], // contact
-      description: row[3] || '', // description (use empty string if undefined)
-      coordinates: null, // coordinates
-      confirmed: false, // not confirmed
-      event_id: nextEventId // dynamic event ID
-    }));
+    const clubs = jsonData.slice(1).map((row) => {
+      const [name, category, contact, description]: ClubRow = row as ClubRow;
+      return {
+        name,
+        category,
+        contact,
+        description: description || '', // Default empty string if undefined
+        coordinates: null, // Coordinates are null initially
+        confirmed: false, // Not confirmed
+        event_id: nextEventId, // Dynamic event ID
+      };
+    });
 
     // Insert data into the database using the query wrapper
     for (const club of clubs) {

@@ -40,6 +40,7 @@ export default function RegistrationForm() {
 
       router.push("/thank-you");
     } catch (error) {
+      console.error("Registration error:", error); 
       toast.error("Registration Failed", {
         description: "Please try again or contact support if the problem persists.",
       });

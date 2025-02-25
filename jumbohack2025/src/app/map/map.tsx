@@ -1,25 +1,25 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
-import style from "./map.module.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 
-mapboxgl.accessToken = "pk.eyJ1Ijoic2FsbW9uLXN1c2hpIiwiYSI6ImNtN2dqYWdrZzA4ZnIyam9qNWx1NnAybjcifQ._YD8GYWPtpZ09AwYHzR2Og";
+const accessToken: string = 'pk.eyJ1Ijoic2FsbW9uLXN1c2hpIiwiYSI6ImNtN2dqYWdrZzA4ZnIyam9qNWx1NnAybjcifQ._YD8GYWPtpZ09AwYHzR2Og';
 
-interface MapboxMapProps {
+mapboxgl.accessToken = accessToken;
+
+interface FullScreenMapProps {
+  long: number;
+  lat: number;
+  scale: number;
   onLocationSelect: (coordinates: { x: number; y: number }, zoom: number) => void;
 }
 
-export default function MapboxMap({ onLocationSelect }: MapboxMapProps) {
+export default function FullScreenMap({ long, lat, scale, onLocationSelect }: FullScreenMapProps) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
-
-  const INITIAL_LONG = -71.120;
-  const INITIAL_LAT = 42.4075;
-  const INITIAL_ZOOM = 17.33;
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -27,64 +27,66 @@ export default function MapboxMap({ onLocationSelect }: MapboxMapProps) {
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
-      center: [INITIAL_LONG, INITIAL_LAT],
-      zoom: INITIAL_ZOOM,
+      center: [long, lat], // Use provided long, lat
+      zoom: scale, // Use provided scale
     });
 
     mapRef.current = map;
 
+    // Add Search Bar
     const geocoder = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken,
-      mapboxgl: mapboxgl,
+      accessToken, 
       marker: false,
       placeholder: "Search for places",
     });
 
     map.addControl(geocoder, "top-right");
 
-    map.on("click", (e) => {
+    // Add marker at the initial position
+    markerRef.current = new mapboxgl.Marker()
+      .setLngLat([long, lat])
+      .addTo(map);
+
+    // Click event to update marker
+    const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
       const { lng, lat } = e.lngLat;
-      
+
       // Remove existing marker if any
       if (markerRef.current) {
         markerRef.current.remove();
       }
 
       // Add new marker
-      const marker = new mapboxgl.Marker()
+      markerRef.current = new mapboxgl.Marker()
         .setLngLat([lng, lat])
         .addTo(map);
-      
-      markerRef.current = marker;
-    });
-
-    return () => {
-      map?.remove();
     };
-  }, []);
+
+    map.on("click", handleMapClick);
+
+    // Cleanup function
+    return () => {
+      map.off("click", handleMapClick);
+      map.remove();
+    };
+  }, [long, lat, scale]); // Ensure map updates when these props change
 
   const handleSaveLocation = () => {
     if (!mapRef.current || !markerRef.current) return;
-    
+
     const coordinates = markerRef.current.getLngLat();
     const zoom = mapRef.current.getZoom();
-    
-    onLocationSelect(
-      { x: coordinates.lat, y: coordinates.lng },
-      zoom
-    );
+
+    onLocationSelect({ x: coordinates.lng, y: coordinates.lat }, zoom);
   };
 
   return (
-    <div className="wrapper">
-      <div
-        ref={mapContainerRef}
-        style={{ width: "100%", height: "300px" }}
-      />
-      <div className="bottom-4 right-4">
+    <div className="relative w-full h-screen">
+      <div ref={mapContainerRef} className="absolute top-0 left-0 w-full h-full" />
+      <div className="absolute bottom-4 right-4 z-10">
         <button
           onClick={handleSaveLocation}
-          className="bg-blue-500 text-white px-4 py-2 rounded mt-5"
+          className="bg-blue-500 text-white px-4 py-2 rounded"
         >
           Save Location
         </button>

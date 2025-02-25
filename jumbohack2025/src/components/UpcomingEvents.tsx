@@ -3,7 +3,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
-import Router, { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface Event {
   name: string;
@@ -79,7 +79,7 @@ export default function UpcomingEvents() {
 
       {/* MOBILE Layout (unchanged) */}
       <div className="md:hidden space-y-2">
-        {limitedEvents.map((event, index) => {
+        {limitedEvents.map((event) => {
           const daysUntil = calculateDays(event.date);
           const isToday = daysUntil === 0;
 

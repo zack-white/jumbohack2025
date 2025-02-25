@@ -1,8 +1,5 @@
 import React from 'react';
 
-interface TooltipProps {
-  text?: string;
-}
 
 export default function Tooltip() {
   return (

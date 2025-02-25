@@ -1,6 +1,5 @@
-import { Pool } from 'pg';
+import { Pool, QueryResult, QueryResultRow } from 'pg';
 
-// Database connection configuration
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 10, // maximum number of connections in the pool
@@ -8,17 +7,20 @@ const pool = new Pool({
 });
 
 /**
- * Execute a SQL query using the connection pool.
- * @param query - The SQL query string.
- * @param params - The query parameters (optional).
- * @returns The result of the query.
+ * Executes a query using the pooled connection.
+ * @param text SQL query string
+ * @param params Optional array of parameters
+ * @returns The query result from the database.
  */
-export async function query(query: string, params?: any[]) {
+export async function query<T extends QueryResultRow = QueryResultRow>(
+  text: string,
+  params?: unknown[]
+): Promise<QueryResult<T>> {
   const client = await pool.connect();
   try {
-    const result = await client.query(query, params);
-    return result;
+    const res = await client.query<T>(text, params);
+    return res;
   } finally {
-    client.release();
+    client.release(); // Return the client to the pool
   }
 }

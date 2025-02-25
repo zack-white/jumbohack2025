@@ -17,7 +17,7 @@ export default function EventPage() {
   const eventId = Number(searchParams.get("id")) || 0; 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null); 
 
   useEffect(() => {
     async function fetchEvent() {
@@ -38,10 +38,10 @@ export default function EventPage() {
         if (res.ok) {
           setEvent(Array.isArray(data) ? data[0] : data);
         } else {
-          setError(data.error || "Failed to fetch event");
+          throw new Error(data.error || "Failed to fetch event");
         }
-      } catch (error) {
-        setError("Failed to fetch event");
+      } catch (err) {
+        setError((err as Error).message); 
       } finally {
         setLoading(false);
       }
@@ -51,18 +51,13 @@ export default function EventPage() {
   }, [eventId]);
 
   if (loading) return <p>Loading event...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (!event) return <p>No event found</p>;
+  if (error) return <p className="text-red-500">Error: {error}</p>; 
+
+  if (!event) return <p className="text-gray-500">No event found</p>;
 
   const eventDate = new Date(event.date);
-  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
-  ];
-
-  const dayName = days[eventDate.getDay()];
-  const month = months[eventDate.getMonth()];
+  const dayName = eventDate.toLocaleDateString("en-US", { weekday: "long" });
+  const month = eventDate.toLocaleDateString("en-US", { month: "long" });
   const day = eventDate.getDate();
 
   return (
