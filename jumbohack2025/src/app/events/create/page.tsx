@@ -415,7 +415,7 @@ export default function CreateEventPage() {
                 ×
               </Button>
             </CardHeader>
-            <CardContent className="h-[500px]">
+            <CardContent className="h-[382px]">
             <MapboxMap 
               long={-71.120} 
               lat={42.4075} 
