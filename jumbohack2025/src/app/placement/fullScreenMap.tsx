@@ -22,26 +22,27 @@ export default function FullScreenMap({ long, lat, scale }: FullScreenMapProps) 
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    console.log('Initializing FullScreenMap with:');
-    console.log('long:', long);
-    console.log('lat:', lat);
-    console.log('scale:', scale);
+    console.log('Initializing FullScreenMap with:', { long, lat, scale });
+
+    // Destroy existing map before creating a new one
+    if (mapRef.current) {
+      mapRef.current.remove();
+    }
 
     // Initialize the map
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
-      center: [lat, long],
+      center: [lat, long], // Longitude and Latitude
       zoom: scale,
     });
 
     mapRef.current = map;
 
-    // Cleanup on unmount
     return () => {
       map.remove();
     };
-  }, []); // Add [long, lat, scale] here if the map should update when these props change
+  }, [long, lat, scale]); 
 
   return (
     <div className="wrapper">

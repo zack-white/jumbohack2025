@@ -1,23 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, IBM_Plex_Serif } from "next/font/google";
+import { IBM_Plex_Serif, Inter } from "next/font/google";
 import "./globals.css";
+
 import NavBar from '../components/NavBar';
+import { ClerkProvider } from '@clerk/nextjs';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const ibmPlexSerif = IBM_Plex_Serif({
-  weight: ['400', '500', '600', '700'],
-  subsets: ['latin'],
-  variable: '--font-ibm-plex-serif',
-})
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-ibm-plex-serif",
+});
+
+const inter = Inter({
+  weight: ["400", "500", "600", "700", "800", "900"],
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "JumboMap",
@@ -25,19 +24,20 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <NavBar />
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${inter.variable} ${ibmPlexSerif.variable} antialiased`}
+        >
+          <NavBar />
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
-

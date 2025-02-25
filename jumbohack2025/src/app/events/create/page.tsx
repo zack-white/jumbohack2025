@@ -9,8 +9,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
+
+import Tooltip from "@/components/tooltip";
+
 export default function CreateEventPage() {
+  const { userId } = useAuth();
+  
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   const router = useRouter();
+  const { user } = useUser();
+  const userEmail = user?.emailAddresses[0];
   const [showMap, setShowMap] = useState(false);
   const [formData, setFormData] = useState({
     eventName: "",
@@ -18,7 +32,7 @@ export default function CreateEventPage() {
     time: "",
     duration: "",
     description: "",
-    spreadsheet: "",
+    spreadsheet: null as File | null,
     location: null as { x: number; y: number } | null,
     scale: 0,
   });
@@ -86,7 +100,7 @@ export default function CreateEventPage() {
       time: "",
       duration: "",
       description: "",
-      spreadsheet: "",
+      spreadsheet: null,
       location: null,
       scale: 0,
     });
@@ -105,7 +119,7 @@ export default function CreateEventPage() {
     if (e.target.files && e.target.files[0]) {
       setFormData((prev) => ({
         ...prev,
-        spreadsheet: e.target.files![0].name,
+        spreadsheet: e.target.files ? e.target.files[0] : null,
       }));
       setErrors((prev) => ({ ...prev, spreadsheet: "" }));
     }
@@ -133,6 +147,7 @@ export default function CreateEventPage() {
     }
 
     try {
+      console.log(userEmail);
       const promise = fetch("/api/event", {
         method: "POST",
         headers: {
@@ -146,14 +161,22 @@ export default function CreateEventPage() {
           description: formData.description,
           location: formData.location,
           scale: formData.scale,
+          creator: userEmail?.emailAddress,
         }),
       });
 
       toast.promise(promise, {
         loading: "Creating event...",
-        success: (response) => {
+        success: async (response) => {
+          // Call the excel processing API here
+          if (formData.spreadsheet) {
+            await processExcel(formData.spreadsheet);
+          }
+          const result = await response.json();
+          const eventId = result.eventId; // Access the `id` from the response
           resetForm();
-          router.push("/placement");
+          console.log("AAAAAAAA", eventId);
+          router.push(`/placement/${eventId}`);
           return "Event created successfully!";
         },
         error: "Failed to create event",
@@ -164,217 +187,246 @@ export default function CreateEventPage() {
     }
   };
 
+  const handleCancel = () => {
+    router.push("/");
+  };
+  
+  const processExcel = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/api/processExcel", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to process Excel file");
+      }
+
+      const data = await response.json();
+      console.log("Excel processing result:", data);
+    } catch (error) {
+      console.error("Error processing Excel file:", error);
+      toast.error("Error processing Excel file. Please try again.");
+    }
+  };
+
   return (
-    // Light-gray background & full height to mimic the screenshot
-<div className="bg-white min-h-screen">
-  {/* Center the form with less max width */}
-  <div className="max-w-xl mx-auto pt-8">
-    {/* Remove Card styling completely since the image doesn't show any card effects */}
-    <div>
-      {/* Header: Adjusted spacing and text size */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-normal">Create Event</h1>
+    <div className="bg-white min-h-screen overflow-hidden">
+      <div className="bg-[#F7F9FB] max-w-4xl mx-auto pt-8 px-16">
+        <div>
+          <div className="mb-3">
+            <h1 className="text-2xl font-bold font-serif text-primary">Create Event</h1>
+          </div>
+
+          <div>
+            <form onSubmit={handleSubmit} className="space-y-2">
+              {/* EVENT NAME */}
+              <div className="space-y-1">
+                <label className="text-sm text-primary">Event Name*</label>
+                <Input
+                  placeholder="e.g. JumboHack"
+                  value={formData.eventName}
+                  onChange={(e) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      eventName: e.target.value,
+                    }));
+                    setErrors((prev) => ({ ...prev, eventName: "" }));
+                  }}
+                  className={`${errors.eventName ? "border-red-500" : "border-gray-200"} h-11`}
+                />
+                {errors.eventName && (
+                  <p className="text-sm text-red-500">{errors.eventName}</p>
+                )}
+              </div>
+
+              {/* DATE / TIME / DURATION with adjusted spacing */}
+              <div className="grid grid-cols-3 gap-6">
+                {/* DATE */}
+                <div className="space-y-1">
+                  <label className="text-sm text-primary">Date*</label>
+                  <Input
+                    type="text"
+                    placeholder="00/00/0000"
+                    value={formData.date}
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        date: e.target.value,
+                      }));
+                      setErrors((prev) => ({ ...prev, date: "" }));
+                    }}
+                    className={`${errors.date ? "border-red-500" : "border-gray-200"} h-11`}
+                  />
+                  {errors.date && (
+                    <p className="text-sm text-red-500">{errors.date}</p>
+                  )}
+                </div>
+
+                {/* TIME */}
+                <div className="space-y-1">
+                  <label className="text-sm text-primary">Time*</label>
+                  <Input
+                    type="text"
+                    placeholder="00:00 PM"
+                    value={formData.time}
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        time: e.target.value,
+                      }));
+                      setErrors((prev) => ({ ...prev, time: "" }));
+                    }}
+                    className={`${errors.time ? "border-red-500" : "border-gray-200"} h-11`}
+                  />
+                  {errors.time && (
+                    <p className="text-sm text-red-500">{errors.time}</p>
+                  )}
+                </div>
+
+                {/* DURATION */}
+                <div className="space-y-1">
+                  <label className="text-sm text-primary">Duration*</label>
+                  <Input
+                    type="text"
+                    placeholder="e.g. 24hr 30m"
+                    value={formData.duration}
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        duration: e.target.value,
+                      }));
+                      setErrors((prev) => ({ ...prev, duration: "" }));
+                    }}
+                    className={`${errors.duration ? "border-red-500" : "border-gray-200"} h-11`}
+                  />
+                  {errors.duration && (
+                    <p className="text-sm text-red-500">{errors.duration}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* DESCRIPTION */}
+              <div className="space-y-1">
+                <label className="text-sm text-primary">Description*</label>
+                <Textarea
+                  placeholder="Add additional information about the event"
+                  value={formData.description}
+                  onChange={(e) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }));
+                    setErrors((prev) => ({ ...prev, description: "" }));
+                  }}
+                  className={`min-h-[120px] ${errors.description ? "border-red-500" : "border-gray-200"}`}
+                />
+                {errors.description && (
+                  <p className="text-sm text-red-500">{errors.description}</p>
+                )}
+              </div>
+
+              {/* SPREADSHEET */}
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <label className="text-sm text-primary">Select Spreadsheet*</label>
+                  <Tooltip />
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Choose a spreadsheet file (.xlsx)"
+                    value={formData.spreadsheet ? formData.spreadsheet.name : ""}
+                    readOnly
+                    className={`flex-grow h-11 ${errors.spreadsheet ? "border-red-500" : "border-gray-200"}`}
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-11 px-6 bg-[#2E73B5] text-[#fff]"
+                    onClick={() => document.getElementById("file-upload")?.click()}
+                  >
+                    Upload
+                  </Button>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    className="hidden"
+                    accept=".xlsx,.xls"
+                    onChange={handleFileUpload}
+                  />
+                </div>
+                {errors.spreadsheet && (
+                  <p className="text-sm text-red-500">{errors.spreadsheet}</p>
+                )}
+              </div>
+
+              {/* LOCATION */}
+              <div className="space-y-1">
+                <label className="text-sm text-primary">Location*</label>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    value={
+                      formData.location
+                        ? `${formData.location.x}, ${formData.location.y}`
+                        : ""
+                    }
+                    readOnly
+                    className={`flex-grow h-11 ${errors.location ? "border-red-500" : "border-gray-200"}`}
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-11 px-6 bg-[#2E73B5] text-[#fff]"
+                    onClick={() => setShowMap(true)}
+                  >
+                    Choose Location
+                  </Button>
+                </div>
+                {errors.location && (
+                  <p className="text-sm text-red-500">{errors.location}</p>
+                )}
+              </div>
+
+              {/* ACTION BUTTONS */}
+              <div className="flex justify-end gap-3 pt-6 pb-10">
+                <Button type="button" variant="outline" className="h-11 px-6" onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="h-11 px-6 bg-[#2E73B5]">
+                  Create Event
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
 
-      {/* Form content with adjusted spacing */}
-      <div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* EVENT NAME */}
-          <div className="space-y-2">
-            <label className="text-sm">Event Name*</label>
-            <Input
-              placeholder="e.g. JumboHack"
-              value={formData.eventName}
-              onChange={(e) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  eventName: e.target.value,
-                }));
-                setErrors((prev) => ({ ...prev, eventName: "" }));
-              }}
-              className={`${errors.eventName ? "border-red-500" : "border-gray-200"} h-11`}
-            />
-            {errors.eventName && (
-              <p className="text-sm text-red-500">{errors.eventName}</p>
-            )}
-          </div>
-
-          {/* DATE / TIME / DURATION with adjusted spacing */}
-          <div className="grid grid-cols-3 gap-6">
-            {/* DATE */}
-            <div className="space-y-2">
-              <label className="text-sm">Date*</label>
-              <Input
-                type="text"
-                placeholder="00/00/0000"
-                value={formData.date}
-                onChange={(e) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    date: e.target.value,
-                  }));
-                  setErrors((prev) => ({ ...prev, date: "" }));
-                }}
-                className={`${errors.date ? "border-red-500" : "border-gray-200"} h-11`}
-              />
-              {errors.date && (
-                <p className="text-sm text-red-500">{errors.date}</p>
-              )}
-            </div>
-
-            {/* TIME */}
-            <div className="space-y-2">
-              <label className="text-sm">Time*</label>
-              <Input
-                type="text"
-                placeholder="00:00 PM"
-                value={formData.time}
-                onChange={(e) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    time: e.target.value,
-                  }));
-                  setErrors((prev) => ({ ...prev, time: "" }));
-                }}
-                className={`${errors.time ? "border-red-500" : "border-gray-200"} h-11`}
-              />
-              {errors.time && (
-                <p className="text-sm text-red-500">{errors.time}</p>
-              )}
-            </div>
-
-            {/* DURATION */}
-            <div className="space-y-2">
-              <label className="text-sm">Duration*</label>
-              <Input
-                type="text"
-                placeholder="e.g. 24hr 30m"
-                value={formData.duration}
-                onChange={(e) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    duration: e.target.value,
-                  }));
-                  setErrors((prev) => ({ ...prev, duration: "" }));
-                }}
-                className={`${errors.duration ? "border-red-500" : "border-gray-200"} h-11`}
-              />
-              {errors.duration && (
-                <p className="text-sm text-red-500">{errors.duration}</p>
-              )}
-            </div>
-          </div>
-
-          {/* DESCRIPTION */}
-          <div className="space-y-2">
-            <label className="text-sm">Description*</label>
-            <Textarea
-              placeholder="Additional information about the event"
-              value={formData.description}
-              onChange={(e) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }));
-                setErrors((prev) => ({ ...prev, description: "" }));
-              }}
-              className={`min-h-[120px] ${errors.description ? "border-red-500" : "border-gray-200"}`}
-            />
-            {errors.description && (
-              <p className="text-sm text-red-500">{errors.description}</p>
-            )}
-          </div>
-
-          {/* SPREADSHEET */}
-          <div className="space-y-2">
-            <label className="text-sm">Select Spreadsheet*</label>
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="academicquadclubs.xlsx"
-                value={formData.spreadsheet}
-                readOnly
-                className={`flex-grow h-11 ${errors.spreadsheet ? "border-red-500" : "border-gray-200"}`}
-              />
-              <Button
-                type="button"
-                variant="secondary"
-                className="h-11 px-6"
-                onClick={() => document.getElementById("file-upload")?.click()}
-              >
-                Upload
+      {showMap && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-4xl h-[600px] shadow-lg">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Choose a General Location</CardTitle>
+              <Button variant="ghost" onClick={() => setShowMap(false)}>
+                ×
               </Button>
-              <input
-                id="file-upload"
-                type="file"
-                className="hidden"
-                accept=".xlsx,.xls"
-                onChange={handleFileUpload}
-              />
-            </div>
-            {errors.spreadsheet && (
-              <p className="text-sm text-red-500">{errors.spreadsheet}</p>
-            )}
-          </div>
+            </CardHeader>
+            <CardContent className="h-[500px]">
+            <MapboxMap 
+              long={-71.120} 
+              lat={42.4075} 
+              scale={17.33} 
+              onLocationSelect={handleLocationSelect} 
+/>
 
-          {/* LOCATION */}
-          <div className="space-y-2">
-            <label className="text-sm">Location*</label>
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                value={
-                  formData.location
-                    ? `${formData.location.x}, ${formData.location.y}`
-                    : ""
-                }
-                readOnly
-                className={`flex-grow h-11 ${errors.location ? "border-red-500" : "border-gray-200"}`}
-              />
-              <Button
-                type="button"
-                variant="secondary"
-                className="h-11 px-6"
-                onClick={() => setShowMap(true)}
-              >
-                Choose Location
-              </Button>
-            </div>
-            {errors.location && (
-              <p className="text-sm text-red-500">{errors.location}</p>
-            )}
-          </div>
-
-          {/* ACTION BUTTONS */}
-          <div className="flex justify-end gap-3 pt-6">
-            <Button type="button" variant="outline" className="px-6">
-              Cancel
-            </Button>
-            <Button type="submit" className="px-6 bg-[#2E73B5]">
-              Create Event
-            </Button>
-          </div>
-        </form>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
-  </div>
-
-  {/* MAP MODAL - kept the same since it's not visible in the screenshot */}
-  {showMap && (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl h-[600px] shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Choose a General Location</CardTitle>
-          <Button variant="ghost" onClick={() => setShowMap(false)}>
-            ×
-          </Button>
-        </CardHeader>
-        <CardContent className="h-[500px]">
-          <MapboxMap onLocationSelect={handleLocationSelect} />
-        </CardContent>
-      </Card>
-    </div>
-  )}
-</div>
   );
 }

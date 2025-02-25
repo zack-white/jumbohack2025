@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   try {
     // Get clubs with the provided event_id
     const result = await query(
-      'SELECT contact FROM clubs WHERE event_id = $1',
+      'SELECT contact FROM clubs WHERE event_id = $1 AND confirmed = false AND description IS NULL AND coordinates IS NOT NULL',
       [event_id]
     );
 
@@ -24,14 +24,15 @@ export async function POST(request: Request) {
     if (clubs.length === 0) {
       return NextResponse.json(
         { message: 'No clubs found for the provided event ID' },
-        // { status: 404 }
       );
     }
+
+    console.log(clubs);
 
     const emails = clubs.map(club => club.contact);
 
     const results = await Promise.all(emails.map(async (email) => {
-      const token = Buffer.from(email + Date.now().toString()).toString('base64');
+      const token = Buffer.from(Date.now().toString() + email).toString('hex');
 
       // Store the token temporarily -- needed for secure email response handling
       await query(
@@ -41,6 +42,8 @@ export async function POST(request: Request) {
 
       const yesLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invitation-response?token=${token}&response=yes`;
       const noLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invitation-response?token=${token}&response=no`;
+
+      console.log('about to send email');
 
       await sendEmail({
         to: email,

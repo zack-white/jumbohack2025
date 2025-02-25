@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { query } from '../query/route';
+import { query } from '../../../lib/query';
 
 export async function GET() {
   try {
     const result = await query(
-      'SELECT name, date FROM event WHERE date >= CURRENT_DATE ORDER BY date ASC'
+      'SELECT name, date, id FROM event WHERE date >= CURRENT_DATE ORDER BY date ASC'
     );
 
     return NextResponse.json(result.rows);

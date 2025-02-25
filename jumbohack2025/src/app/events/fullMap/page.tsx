@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import FullScreenMap from '../../map/fullScreenMap';
+import FullScreenMap from '../../map/map';
 
 interface MapData {
   long: number;
@@ -21,7 +21,6 @@ export default function FullScreen() {
         const response = await fetch(`/api/getEventInfo?eventId=${eventId}`, {
           method: 'GET'
         });
-        console.log('Response from backend:', response);
 
         if (!response.ok) {
           throw new Error('Failed to fetch event info');
@@ -29,9 +28,8 @@ export default function FullScreen() {
 
         const result = await response.json();
         const { x, y } = result.location;
-        console.log('Fetched values:', { long: x, lat: y, scale: result.scale });
 
-        // Set the new map data
+        // Update state
         setMapData({ long: x, lat: y, scale: result.scale });
       } catch (error) {
         console.error('Error fetching event info:', error);
@@ -42,7 +40,12 @@ export default function FullScreen() {
     fetchEventInfo();
   }, []);
 
-  // Render a loading state until the map data is fetched
+  // Handle location selection
+  const handleLocationSelect = (coordinates: { x: number; y: number }, zoom: number) => {
+    console.log('Selected Location:', coordinates, 'Zoom:', zoom);
+    setMapData({ long: coordinates.x, lat: coordinates.y, scale: zoom });
+  };
+
   if (!mapData) {
     return <div>Loading...</div>;
   }
@@ -52,6 +55,7 @@ export default function FullScreen() {
       long={mapData.long} 
       lat={mapData.lat} 
       scale={mapData.scale} 
+      onLocationSelect={handleLocationSelect}
     />
   );
 }

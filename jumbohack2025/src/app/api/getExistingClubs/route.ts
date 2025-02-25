@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
-import { query } from '../query/route'; 
+import { query } from '../../../lib/query'; 
 
-export async function GET() {
+export async function POST(request: Request) {
   try {
-    const eventId = 1; // Hardcoded event ID
+    const body = await request.json();
+    const eventId = body.eventID;
+    console.log(eventId)
     const result = await query(
       'SELECT id, name, category, coordinates FROM clubs WHERE event_id = $1 AND coordinates IS NOT NULL',
       [eventId]
