@@ -7,7 +7,7 @@ export default function Tooltip() {
       {/* Group container to enable hover effect */}
       <div className="group">
         {/* The "?" icon */}
-        <span className="cursor-pointer text-blue-500 rounded-full border border-blue-500 w-6 h-6 flex items-center justify-center">
+        <span className="cursor-pointer text-blue-500 rounded-full border border-blue-500 w-5 h-5 flex items-center justify-center">
           ?
         </span>
         {/* Tooltip popup */}
