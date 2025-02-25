@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import ClubsSearch from "../components/ClubsSearch"
-import ShowMapButton from '../components/showMapButton';
+import ClubsSearch from "../../components/ClubsSearch"
+import ShowMapButton from '../../components/showMapButton';
 
 interface Event {
   id: number;
