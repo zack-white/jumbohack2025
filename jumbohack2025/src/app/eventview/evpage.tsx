@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ClubsSearch from "../../components/ClubsSearch";
 import ShowMapButton from '../../components/showMapButton';
 import { useSearchParams, useRouter } from "next/navigation";
