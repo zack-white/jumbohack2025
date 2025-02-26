@@ -148,8 +148,10 @@ export default function MapboxMap() {
         setClubs(data);
         console.log(data)
         // Extract unique categories
-        const uniqueCategories = [...new Set(data.map((club: any) => club.category))];
+        const uniqueCategories: string[] = Array.from(new Set<string>(data.map((club: any) => club.category))) as string[];
         setCategories(uniqueCategories);
+
+
       } catch(error) {
         console.error("Error" + error);
       }
@@ -242,8 +244,13 @@ export default function MapboxMap() {
       setStatus(data.message);
     } catch (error) {
       console.error('Error:', error);
-      setStatus(error.message || 'Error sending invitations. Please check the console for details.');
-    } finally {
+      if (error instanceof Error) {
+        setStatus(error.message);
+      } else {
+        setStatus('Error sending invitations. Please check the console for details.');
+      }
+    }
+     finally {
       setIsLoading(false);
     }
 
