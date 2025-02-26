@@ -69,7 +69,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
                     placeholder="Search attending clubs..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="pl-10 pr-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                    className="bg-[#F7F9FB] pl-10 pr-4 py-3 border shadow focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                 />
             </div>
         </div>
@@ -81,7 +81,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
                 {filteredClubs.map((club) => (
                     <div
                         key={club.id}
-                        className="bg-[#F7F9FB] border p-3 cursor-pointer mb-2"
+                        className="shadow bg-[#F7F9FB] border p-3 cursor-pointer mb-2"
                         onClick={() => handlePopup(club)}
                     >
                         {club.name}

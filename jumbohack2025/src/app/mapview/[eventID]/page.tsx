@@ -6,6 +6,7 @@ import mapboxgl from "mapbox-gl";
 import InfoPopup from "@/components/ClubInfo";
 import "./mapview.css";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { Club } from "lucide-react";
 
 interface Club {
   id: number;
@@ -177,13 +178,13 @@ export default function MapboxMap() {
 
   return (
     <div className="wrapper">
-      <div className="flex items-center mb-4 pt-4 px-10">
+      <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <input
-          type="text"
-          placeholder="Search attending clubs..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 p-2 border rounded border-gray-300"
+            type="text"
+            placeholder="Search attending clubs..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="shadow pl-4 pr-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-[#F7F9FB]"
         />
       </div>
 
@@ -194,17 +195,17 @@ export default function MapboxMap() {
       )}
 
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold mb-4">Student Org. Club Fair</h1>
+        <h1 className="text-xl md:text-2xl font-bold mb-4 font-serif">CLUB NAME NOT IMPLEMENTED!!!</h1>
 
         <div className="mb-4 w-3/5">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full p-4 border rounded"
+            className="w-full p-3 border shadow text-[#23394A] font-inter bg-[#F7F9FB] focus:ring-2 focus:ring-blue-50"
           >
             <option value="">Select a category</option>
             {categories.map((category) => (
-              <option key={category} value={category}>
+              <option key={category} value={category} className="bg-gray-100 text-white">
                 {category}
               </option>
             ))}
@@ -216,7 +217,7 @@ export default function MapboxMap() {
             {queue.map((club) => (
               <li key={club.id} className="mr-2">
                 <button
-                  className="p-4 border-b min-w-[8vw] truncate text-center w-full"
+                  className="p-3 mr-2 border-b min-w-[8vw] truncate text-center bg-[#F7F9FB]"
                   onClick={() => {
                     setClubInfo(club);
                     setShowClubInfo(true);

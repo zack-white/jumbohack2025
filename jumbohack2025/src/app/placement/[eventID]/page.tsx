@@ -165,7 +165,7 @@ export default function PlacementPage() {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full p-3 border"
+            className="w-full p-3 border shadow text-[#23394A] font-inter bg-[#F7F9FB] focus:ring-2 focus:ring-blue-50"
           >
             <option value="">Select a category</option>
             {categories.map((category) => (
@@ -180,7 +180,7 @@ export default function PlacementPage() {
         <div className="mb-4">
           <ul className="flex flex-row overflow-auto">
             {queue.map((club) => (
-              <li key={club.id} className="p-4 mr-2 border-b min-w-[8vw] truncate text-center bg-[#F7F9FB]">
+              <li key={club.id} className="p-3 mr-2 border-b min-w-[8vw] truncate text-center bg-[#F7F9FB]">
                 {club.name}
               </li>
             ))}
