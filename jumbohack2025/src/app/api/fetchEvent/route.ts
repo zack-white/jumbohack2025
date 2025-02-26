@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     // Run the SQL query and log results
     const event = await query(`SELECT * FROM event WHERE id = $1`, [id]);
 
-    console.log(event.rows);
+    // console.log(event.rows);
 
     // Fix: Check event.rows.length instead of event.length
     if (!event || event.rows.length === 0) {

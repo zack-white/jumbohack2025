@@ -35,6 +35,7 @@ const INITIAL_ZOOM = 17.33;
 
 export default function MapboxMap() {
   const { eventID } = useParams();
+  const [eventName, setEventName] = useState("None");
   const id = Number(eventID); // Ensure ID is a number
   console.log("Event ID:", id);
 
@@ -72,6 +73,33 @@ export default function MapboxMap() {
       console.error("Error fetching club:", error);
     }
   };
+
+
+  useEffect(() => {
+    const fetchEventName = async () => {
+      try {
+        const response = await fetch("/api/fetchEvent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: id }),
+        });
+  
+        if (!response.ok) {
+          throw new Error(`Error fetching event name (status: ${response.status})`);
+        }
+  
+        const data = await response.json();
+        console.log(data);
+        setEventName(data[0].name); // Assuming the API returns { name: "Event Name" }
+      } catch (error) {
+        console.error("Error fetching event name:", error);
+      }
+    };
+  
+    if (id) {
+      fetchEventName();
+    }
+  }, [id]);
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -176,6 +204,7 @@ export default function MapboxMap() {
     }
   }, [selectedCategory, clubs]);
 
+
   return (
     <div className="wrapper">
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -195,7 +224,7 @@ export default function MapboxMap() {
       )}
 
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-xl md:text-2xl font-bold mb-4 font-serif">CLUB NAME NOT IMPLEMENTED!!!</h1>
+        <h1 className="text-xl md:text-2xl font-bold mb-4 font-serif">{eventName}</h1>
 
         <div className="mb-4 w-3/5">
           <select
