@@ -48,10 +48,10 @@ export default function MapboxMap() {
   const latRef = useRef(INITIAL_LAT);
   const zoomRef = useRef(INITIAL_ZOOM);
 
-  const [clubs, setClubs] = useState<Club[]>([]);
+  // const [clubs, setClubs] = useState<Club[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [queue, setQueue] = useState<Club[]>([]);
+  // const [queue, setQueue] = useState<Club[]>([]);
 
   const [clubInfo, setClubInfo] = useState<ClubInfo | null>(null);
   const [showClubInfo, setShowClubInfo] = useState(false);
@@ -133,7 +133,7 @@ export default function MapboxMap() {
 
     map.on("load", async () => {
       const existingClubs: Club[] = await getExistingClubs();
-      setClubs(existingClubs);
+      // setClubs(existingClubs);
 
       const uniqueCategories = [...new Set(existingClubs.map((club) => club.category))];
       setCategories(uniqueCategories);

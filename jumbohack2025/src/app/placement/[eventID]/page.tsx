@@ -8,11 +8,11 @@ import InfoPopup from "@/components/ClubInfo"
 import "./placement.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 
-interface Club {
-    id: number;
-    name: string;
-    description: string;
-  }
+// interface Club {
+//     id: number;
+//     name: string;
+//     description: string;
+//   }
 
 mapboxgl.accessToken =
   "pk.eyJ1Ijoic2FsbW9uLXN1c2hpIiwiYSI6ImNtN2dqYWdrZzA4ZnIyam9qNWx1NnAybjcifQ._YD8GYWPtpZ09AwYHzR2Og";
@@ -46,7 +46,7 @@ export default function MapboxMap() {
 
   // consts for sending emails
   const [status, setStatus] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   // On page render, create map and fetch all old clubs w/ for given event.
   useEffect(() => {
@@ -224,7 +224,7 @@ export default function MapboxMap() {
   }, []);
 
   const handleSubmit = async () => {
-    setIsLoading(true);
+    // setIsLoading(true);
     setStatus('');
 
     try {
@@ -249,9 +249,6 @@ export default function MapboxMap() {
       } else {
         setStatus('Error sending invitations. Please check the console for details.');
       }
-    }
-     finally {
-      setIsLoading(false);
     }
 
     handleClose();
