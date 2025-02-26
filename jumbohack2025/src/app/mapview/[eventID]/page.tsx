@@ -43,9 +43,10 @@ export default function MapboxMap() {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  const [long, setLong] = useState(INITIAL_LONG);
-  const [lat, setLat] = useState(INITIAL_LAT);
-  const [zoom, setZoom] = useState(INITIAL_ZOOM);
+  // Use refs for long, lat, zoom to avoid unnecessary re-renders
+  const longRef = useRef(INITIAL_LONG);
+  const latRef = useRef(INITIAL_LAT);
+  const zoomRef = useRef(INITIAL_ZOOM);
 
   const [clubs, setClubs] = useState<Club[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -74,7 +75,6 @@ export default function MapboxMap() {
     }
   };
 
-
   useEffect(() => {
     const fetchEventName = async () => {
       try {
@@ -83,19 +83,19 @@ export default function MapboxMap() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: id }),
         });
-  
+
         if (!response.ok) {
           throw new Error(`Error fetching event name (status: ${response.status})`);
         }
-  
+
         const data = await response.json();
         console.log(data);
-        setEventName(data[0].name); // Assuming the API returns { name: "Event Name" }
+        setEventName(data[0].name); // Assuming the API returns an array
       } catch (error) {
         console.error("Error fetching event name:", error);
       }
     };
-  
+
     if (id) {
       fetchEventName();
     }
@@ -107,8 +107,8 @@ export default function MapboxMap() {
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
-      center: [long, lat],
-      zoom: zoom,
+      center: [longRef.current, latRef.current],
+      zoom: zoomRef.current,
     });
 
     mapRef.current = map;
@@ -159,51 +159,17 @@ export default function MapboxMap() {
       });
     });
 
+    // Fix: Prevent re-renders when moving the map
     map.on("move", () => {
       const mapCenter = map.getCenter();
-      setLong(mapCenter.lng);
-      setLat(mapCenter.lat);
-      setZoom(map.getZoom());
+      longRef.current = mapCenter.lng;
+      latRef.current = mapCenter.lat;
+      zoomRef.current = map.getZoom();
     });
 
     return () => map.remove();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, long, lat, zoom]);
-
-  useEffect(() => {
-    async function fetchClubs() {
-      try {
-        const response = await fetch("/api/holdenRoute", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ eventId: id }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Network response was not ok (status: ${response.status})`);
-        }
-
-        const data: Club[] = await response.json();
-        setClubs(data);
-
-        const uniqueCategories = [...new Set(data.map((club) => club.category))];
-        setCategories(uniqueCategories);
-      } catch (error) {
-        console.error("Error fetching clubs:", error);
-      }
-    }
-
-    fetchClubs();
-  }, [id]);
-
-  useEffect(() => {
-    if (selectedCategory) {
-      const filteredQueue = clubs.filter((club) => club.category === selectedCategory);
-      setQueue(filteredQueue);
-    }
-  }, [selectedCategory, clubs]);
-
+  }, [id]); // Only re-run on ID change
 
   return (
     <div className="wrapper">
@@ -234,29 +200,11 @@ export default function MapboxMap() {
           >
             <option value="">Select a category</option>
             {categories.map((category) => (
-              <option key={category} value={category} className="bg-gray-100 text-white">
+              <option key={category} value={category}>
                 {category}
               </option>
             ))}
           </select>
-        </div>
-
-        <div className="mb-4">
-          <ul className="flex flex-row overflow-auto">
-            {queue.map((club) => (
-              <li key={club.id} className="mr-2">
-                <button
-                  className="p-3 mr-2 border-b min-w-[8vw] truncate text-center bg-[#F7F9FB]"
-                  onClick={() => {
-                    setClubInfo(club);
-                    setShowClubInfo(true);
-                  }}
-                >
-                  {club.name}
-                </button>
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </div>
