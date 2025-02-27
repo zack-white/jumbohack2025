@@ -8,11 +8,18 @@ import InfoPopup from "@/components/ClubInfo"
 import "./placement.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 
-// interface Club {
-//     id: number;
-//     name: string;
-//     description: string;
-//   }
+interface Club {
+  id: number;
+  name: string;
+  description: string;
+  category: string;
+  coordinates?: {
+    x: number;
+    y: number;
+  };
+  x?: number;
+  y?: number;
+}
 
 mapboxgl.accessToken =
   "pk.eyJ1Ijoic2FsbW9uLXN1c2hpIiwiYSI6ImNtN2dqYWdrZzA4ZnIyam9qNWx1NnAybjcifQ._YD8GYWPtpZ09AwYHzR2Og";
@@ -35,13 +42,13 @@ export default function MapboxMap() {
   const [zoom, setZoom] = useState(INITIAL_ZOOM);
 
   // Keep track of clubs to add to map
-  const [clubs, setClubs] = useState<any[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [queue, setQueue] = useState<any[]>([]);
+  const [queue, setQueue] = useState<Club[]>([]);
 
   // Track club to show popup for
-  const [clubInfo, setClubInfo] = useState<any>();
+  const [clubInfo, setClubInfo] = useState<Club>();
   const [showClubInfo, setShowClubInfo] = useState(false);
 
   // consts for sending emails
@@ -106,27 +113,33 @@ export default function MapboxMap() {
         }
     }
 
-    // On load, import all existing club pins and add to map
-    map.on('load', async () => {
-        const existingClubs = await getExistingClubs();
-        existingClubs.map((club: any) => {
-            const marker = new mapboxgl.Marker()
-                .setLngLat([club.coordinates.x, club.coordinates.y])
-                .addTo(map);
-    
-            // Add a click event listener to the marker
-            marker.getElement().addEventListener("click", async (event) => {
-                event.stopPropagation();  // Prevents map click from triggering
-                
-                // Get club by long and lat coords
-                const { lng, lat } = marker.getLngLat();
-                const club = await getClubByCoords(lng, lat)
-                console.log(club);
-                setClubInfo({ id: club.id, name: club.name, description: club.description });
-                setShowClubInfo(true);
-            });
-        });
-    });
+map.on("load", async () => {
+  const existingClubs = await getExistingClubs();
+  existingClubs.forEach((club:Club) => {
+      if (!club.coordinates) return; 
+
+      const marker = new mapboxgl.Marker()
+          .setLngLat([club.coordinates.x, club.coordinates.y])
+          .addTo(map);
+
+      marker.getElement().addEventListener("click", async (event) => {
+          event.stopPropagation();
+
+          const { lng, lat } = marker.getLngLat();
+          const fetchedClub = await getClubByCoords(lng, lat);
+
+          if (fetchedClub) {
+              setClubInfo({
+                  id: fetchedClub.id,
+                  name: fetchedClub.name,
+                  description: fetchedClub.description,
+                  category: fetchedClub.category,
+              });
+              setShowClubInfo(true);
+          }
+      });
+  });
+});
   
   
 
@@ -148,7 +161,7 @@ export default function MapboxMap() {
         setClubs(data);
         console.log(data)
         // Extract unique categories
-        const uniqueCategories: string[] = Array.from(new Set<string>(data.map((club: any) => club.category))) as string[];
+        const uniqueCategories: string[] = Array.from(new Set<string>(data.map((club: Club) => club.category))) as string[];
         setCategories(uniqueCategories);
 
 
@@ -276,7 +289,7 @@ export default function MapboxMap() {
   return (
     <div className="wrapper">
       <div ref={mapContainerRef} className="mapContainer"/>
-      {showClubInfo && <InfoPopup club={clubInfo} onClose={() => setShowClubInfo(false)} />}
+      {showClubInfo && clubInfo !== undefined && <InfoPopup club={clubInfo} onClose={() => setShowClubInfo(false)} />}
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-bold mb-4">Unplaced Clubs</h1>
 

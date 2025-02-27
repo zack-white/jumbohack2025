@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      eventId: result.rows[0].id 
+      eventId: result.rows[0].id - 1
     });
   } catch (error) {
     console.error('Error creating event:', error);
