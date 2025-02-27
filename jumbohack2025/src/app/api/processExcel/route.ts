@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
     // Get the latest event_id from the database
     const result = await query('SELECT MAX(id) as max_id FROM event', []);
-    const nextEventId = (result.rows[0]?.max_id ?? 0) + 1;
+    const nextEventId = (result.rows[0]?.max_id ?? 0);
 
     // Convert the file to a buffer
     const buffer = Buffer.from(await file.arrayBuffer());
