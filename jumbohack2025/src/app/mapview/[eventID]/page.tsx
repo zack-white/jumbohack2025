@@ -6,6 +6,7 @@ import mapboxgl from "mapbox-gl";
 import InfoPopup from "@/components/ClubInfo";
 import "./mapview.css";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { Club } from "lucide-react";
 
 interface Club {
   id: number;
@@ -34,6 +35,7 @@ const INITIAL_ZOOM = 17.33;
 
 export default function MapboxMap() {
   const { eventID } = useParams();
+  const [eventName, setEventName] = useState("None");
   const id = Number(eventID); // Ensure ID is a number
   console.log("Event ID:", id);
 
@@ -41,14 +43,15 @@ export default function MapboxMap() {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  const [long, setLong] = useState(INITIAL_LONG);
-  const [lat, setLat] = useState(INITIAL_LAT);
-  const [zoom, setZoom] = useState(INITIAL_ZOOM);
+  // Use refs for long, lat, zoom to avoid unnecessary re-renders
+  const longRef = useRef(INITIAL_LONG);
+  const latRef = useRef(INITIAL_LAT);
+  const zoomRef = useRef(INITIAL_ZOOM);
 
-  const [clubs, setClubs] = useState<Club[]>([]);
+  // const [clubs, setClubs] = useState<Club[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [queue, setQueue] = useState<Club[]>([]);
+  // const [queue, setQueue] = useState<Club[]>([]);
 
   const [clubInfo, setClubInfo] = useState<ClubInfo | null>(null);
   const [showClubInfo, setShowClubInfo] = useState(false);
@@ -73,13 +76,39 @@ export default function MapboxMap() {
   };
 
   useEffect(() => {
+    const fetchEventName = async () => {
+      try {
+        const response = await fetch("/api/fetchEvent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: id }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error fetching event name (status: ${response.status})`);
+        }
+
+        const data = await response.json();
+        console.log(data);
+        setEventName(data[0].name); // Assuming the API returns an array
+      } catch (error) {
+        console.error("Error fetching event name:", error);
+      }
+    };
+
+    if (id) {
+      fetchEventName();
+    }
+  }, [id]);
+
+  useEffect(() => {
     if (!mapContainerRef.current) return;
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/dark-v11",
-      center: [long, lat],
-      zoom: zoom,
+      center: [longRef.current, latRef.current],
+      zoom: zoomRef.current,
     });
 
     mapRef.current = map;
@@ -104,7 +133,7 @@ export default function MapboxMap() {
 
     map.on("load", async () => {
       const existingClubs: Club[] = await getExistingClubs();
-      setClubs(existingClubs);
+      // setClubs(existingClubs);
 
       const uniqueCategories = [...new Set(existingClubs.map((club) => club.category))];
       setCategories(uniqueCategories);
@@ -130,60 +159,27 @@ export default function MapboxMap() {
       });
     });
 
+    // Fix: Prevent re-renders when moving the map
     map.on("move", () => {
       const mapCenter = map.getCenter();
-      setLong(mapCenter.lng);
-      setLat(mapCenter.lat);
-      setZoom(map.getZoom());
+      longRef.current = mapCenter.lng;
+      latRef.current = mapCenter.lat;
+      zoomRef.current = map.getZoom();
     });
 
     return () => map.remove();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, long, lat, zoom]);
-
-  useEffect(() => {
-    async function fetchClubs() {
-      try {
-        const response = await fetch("/api/holdenRoute", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ eventId: id }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Network response was not ok (status: ${response.status})`);
-        }
-
-        const data: Club[] = await response.json();
-        setClubs(data);
-
-        const uniqueCategories = [...new Set(data.map((club) => club.category))];
-        setCategories(uniqueCategories);
-      } catch (error) {
-        console.error("Error fetching clubs:", error);
-      }
-    }
-
-    fetchClubs();
-  }, [id]);
-
-  useEffect(() => {
-    if (selectedCategory) {
-      const filteredQueue = clubs.filter((club) => club.category === selectedCategory);
-      setQueue(filteredQueue);
-    }
-  }, [selectedCategory, clubs]);
+  }, [id]); // Only re-run on ID change
 
   return (
     <div className="wrapper">
-      <div className="flex items-center mb-4 pt-4 px-10">
+      <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <input
-          type="text"
-          placeholder="Search attending clubs..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 p-2 border rounded border-gray-300"
+            type="text"
+            placeholder="Search attending clubs..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="shadow pl-4 pr-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-[#F7F9FB]"
         />
       </div>
 
@@ -194,13 +190,13 @@ export default function MapboxMap() {
       )}
 
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold mb-4">Student Org. Club Fair</h1>
+        <h1 className="text-xl md:text-2xl font-bold mb-4 font-serif">{eventName}</h1>
 
         <div className="mb-4 w-3/5">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full p-4 border rounded"
+            className="w-full p-3 border shadow text-[#23394A] font-inter bg-[#F7F9FB] focus:ring-2 focus:ring-blue-50"
           >
             <option value="">Select a category</option>
             {categories.map((category) => (
@@ -209,24 +205,6 @@ export default function MapboxMap() {
               </option>
             ))}
           </select>
-        </div>
-
-        <div className="mb-4">
-          <ul className="flex flex-row overflow-auto">
-            {queue.map((club) => (
-              <li key={club.id} className="mr-2">
-                <button
-                  className="p-4 border-b min-w-[8vw] truncate text-center w-full"
-                  onClick={() => {
-                    setClubInfo(club);
-                    setShowClubInfo(true);
-                  }}
-                >
-                  {club.name}
-                </button>
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </div>

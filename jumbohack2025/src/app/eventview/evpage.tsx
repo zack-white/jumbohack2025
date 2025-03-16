@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ClubsSearch from "../../components/ClubsSearch";
 import ShowMapButton from '../../components/showMapButton';
 import { useSearchParams, useRouter } from "next/navigation";
@@ -61,28 +61,34 @@ export default function EventPage() {
   const day = eventDate.getDate();
 
   return (
-    <Suspense fallback={<p>loading event...</p>}>
-      <div className="p-4">
-        <h1 className="text-xl font-bold">{event.name}</h1>
-        <p className="text-gray-600">{event.description}</p>
-        <p className="text-gray-500">
-          {dayName}, {month} {day}
-        </p>
-        <ShowMapButton eventID={id} />
+    <div className="md:h-[calc(100vh-5rem)] h-screen bg-white md:overflow-hidden p-4 mx-auto w-full py-6 px-[10vw] flex flex-col md:flex-row space-y-4 md:space-y-0">
+        <div className='md:w-1/2 p-4'>
+            <h1 className="px-4 text-2xl md:text-3xl font-bold font-serif">{event.name}</h1>
+            <p className="px-4 text-gray-500">
+                {dayName}, {month} {day}
+            </p>
+            <ShowMapButton eventID={id} />
 
-        {/* Show Edit Button if the logged-in user is the creator */}
-        {userEmail === event.creator && (
-          <div className="mt-4 flex justify-center">
-            <button
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-              onClick={handleEdit}
-            >
-              Edit Event
-            </button>
-          </div>
-        )}
-        <ClubsSearch eventId={id} />
-      </div>
-    </Suspense>
+            <div className='flex flex-row justify-between pb-2'>
+                <h1 className="text-xl md:text-2xl font-bold font-serif mb-1 px-4">Event Description</h1>
+                {/* Show Edit Button if the logged-in user is the creator */}
+                {userEmail === event.creator && (
+                    <div className="flex justify-center">
+                        <button
+                            className="bg-[#2971AC] text-white px-4 py-2 font-inter md:text-base text-xs font-medium"
+                            onClick={handleEdit}
+                        >
+                            Edit Event
+                        </button>
+                    </div>
+                )}
+            </div>
+            <p className="px-4 text-gray-500">{event.description}</p>
+        </div>
+
+        <div className='md:w-1/2'>
+            <ClubsSearch eventId={id} />
+        </div>
+    </div>
   );
 }

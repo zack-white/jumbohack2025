@@ -214,8 +214,8 @@ export default function CreateEventPage() {
   };
 
   return (
-    <div className="bg-white min-h-screen overflow-hidden">
-      <div className="bg-[#F7F9FB] max-w-4xl mx-auto pt-8 px-16">
+    <div className="bg-[#F7F9FB] md:bg-white min-h-screen overflow-hidden md:flex md:items-center md:justify-center">
+        <div className="bg-[#F7F9FB] max-w-4xl w-full md:w-[80%] lg:w-[60%] mx-auto p-8">
         <div>
           <div className="mb-3">
             <h1 className="text-2xl font-bold font-serif text-primary">Create Event</h1>
@@ -393,7 +393,7 @@ export default function CreateEventPage() {
               </div>
 
               {/* ACTION BUTTONS */}
-              <div className="flex justify-end gap-3 pt-6 pb-10">
+              <div className="flex justify-end gap-3 pt-6">
                 <Button type="button" variant="outline" className="h-11 px-6" onClick={handleCancel}>
                   Cancel
                 </Button>
@@ -408,14 +408,14 @@ export default function CreateEventPage() {
 
       {showMap && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-4xl h-[600px] shadow-lg">
+          <Card className="w-full max-w-4xl h-auto shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Choose a General Location</CardTitle>
-              <Button variant="ghost" onClick={() => setShowMap(false)}>
+              <Button variant="ghost" onClick={() => setShowMap(false)} className="text-2xl px-0 pb-3 pr-1">
                 ×
               </Button>
             </CardHeader>
-            <CardContent className="h-[500px]">
+            <CardContent className="h-[382px]">
             <MapboxMap 
               long={-71.120} 
               lat={42.4075} 

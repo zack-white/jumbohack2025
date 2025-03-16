@@ -17,6 +17,8 @@ export async function POST(request: Request) {
       creator,
     } = data;
 
+    console.log(data);
+
     const result = await query(
       `INSERT INTO event (name, description, date, location, scale, start_time, duration, creator) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      eventId: result.rows[0].id 
+      eventId: result.rows[0].id - 1
     });
   } catch (error) {
     console.error('Error creating event:', error);
