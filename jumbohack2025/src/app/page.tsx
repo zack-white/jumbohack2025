@@ -39,8 +39,8 @@ export default function Home() {
 
                 
                 {/* Text overlay */}
-                <div className="absolute bottom-8 right-8 bg-white p-2 md:max-w-[30vw] md:bg-transparent md:bottom-1/2 md:left-0 md:p-0 md:transform md:translate-y-3/4">
-                  <h2 className="text-2xl font-medium pl-2 md:p-10 md:text-3xl md:bg-white text-primary font-serif">
+                <div className="absolute bottom-8 left-0 right-10 md: bg-white pt-2 pb-2 md:max-w-[30vw] md:bg-transparent md:bottom-1/2 md:left-0 md:p-0 md:transform md:translate-y-full">
+                  <h2 className="text-xl font-medium pl-2 md:p-5 md:text-3xl md:bg-white text-primary font-serif">
                     Making events more accessible for students
                   </h2>
                 </div>

@@ -78,7 +78,7 @@ export default function UpcomingEvents() {
       </h2>
 
       {/* MOBILE Layout (unchanged) */}
-      <div className="md:hidden space-y-2">
+      <div className="md:hidden">
         {limitedEvents.map((event) => {
           const daysUntil = calculateDays(event.date);
           const isToday = daysUntil === 0;
@@ -86,7 +86,7 @@ export default function UpcomingEvents() {
           return (
             <div 
               key={event.name} 
-              className="bg-white p-4 shadow-sm cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
+              className="bg-categoryBg shadow-sm p-4 cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
               onClick={() => handleEvent(event)}
             >
               <div className="flex justify-between items-start">
@@ -114,7 +114,7 @@ export default function UpcomingEvents() {
           return (
             <div
               key={event.name}
-              className="bg-white p-6 border border-gray-200 shadow-sm cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
+              className="bg-categoryBg p-6 border border-gray-200 shadow-sm cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
               onClick={() => handleEvent(event)}
             >
               <div className="flex justify-between items-start mb-2">
