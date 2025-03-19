@@ -308,20 +308,27 @@ map.on("load", async () => {
             ))}
           </select>
         </div>
-        <div className="queueAndSubmit">
-          <button type="submit" className="h-11 px-6 bg-[#2E73B5] text-white" onClick={handleSubmit}>
-            Submit
-          </button>
-        </div>
         {/* Queue */}
-        <div className="mb-4">
-          <ul className="flex flex-row overflow-auto">
-            {queue.map((club) => (
-              <li key={club.id} className="p-4 mr-2 border-b bg-categoryBg min-w-[8vw] truncate text-center">
-                {club.name}
-              </li>
-            ))}
-          </ul>
+        <div className="flex flex-row overflow-auto items-center gap-[1vw]">
+          {/* Queue container (conditionally hidden when empty) */}
+          {queue.length > 0 && (
+            <div className="flex-grow min-w-0">
+              <ul className="flex flex-row overflow-x-auto no-scrollbar">
+                {queue.map((club) => (
+                  <li key={club.id} className="p-4 mr-2 border-b bg-categoryBg min-w-[8vw] h-[6vh] truncate text-center">
+                    {club.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Submit button (moves left when queue is empty) */}
+          <div className={`queueAndSubmit flex-shrink-0 ${queue.length > 0 ? 'ml-4' : ''}`}>
+            <button type="submit" className="h-[6vh] px-6 bg-[#2E73B5] text-white" onClick={handleSubmit}>
+              Submit
+            </button>
+          </div>
         </div>
       </div>
       {status && (
