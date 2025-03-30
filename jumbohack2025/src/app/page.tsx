@@ -26,7 +26,7 @@ export default function Home() {
             <div className="relative mb-8 flex justify-center">
               <div className="relative w-full md:h-[50vh]">
                 <Image
-                  src="/images/JumboMap_Group.jpeg"
+                  src="/images/HomePage_Banner.jpg"
                   alt="Team photo"
                   width={800}
                   height={400}

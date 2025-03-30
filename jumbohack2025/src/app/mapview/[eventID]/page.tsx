@@ -173,16 +173,17 @@ export default function MapboxMap() {
 
   return (
     <div className="wrapper">
-      <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <input
-            type="text"
-            placeholder="Search attending clubs..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="shadow pl-4 pr-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-[#F7F9FB]"
-        />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mt-[1%] min-w-[25%] absolute z-10">
+            <input
+                type="text"
+                placeholder="Search attending clubs..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="shadow pl-4 pr-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-[#F7F9FB]"
+            />
+        </div>
       </div>
-
       <div ref={mapContainerRef} className="mapContainer" />
 
       {showClubInfo && clubInfo && (

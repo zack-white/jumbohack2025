@@ -61,7 +61,7 @@ export default function EventPage() {
   const day = eventDate.getDate();
 
   return (
-    <div className="md:h-[calc(100vh-5rem)] h-screen bg-white md:overflow-hidden p-4 mx-auto w-full py-6 px-[10vw] flex flex-col md:flex-row space-y-4 md:space-y-0">
+    <div className="md:h-[calc(100vh-5rem)] bg-white md:overflow-hidden p-4 mx-auto w-full py-6 px-[10vw] flex flex-col md:flex-row space-y-4 md:space-y-0">
         <div className='md:w-1/2 p-4'>
             <h1 className="px-4 text-2xl md:text-3xl font-bold font-serif">{event.name}</h1>
             <p className="px-4 text-gray-500">

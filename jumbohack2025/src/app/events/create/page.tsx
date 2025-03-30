@@ -346,7 +346,7 @@ export default function CreateEventPage() {
   };
 
   return (
-    <div className="bg-[#F7F9FB] md:bg-white min-h-screen overflow-hidden md:flex md:items-center md:justify-center">
+    <div className="bg-[#F7F9FB] md:bg-white m-[3%] overflow-hidden md:flex md:items-center md:justify-center">
       <div className="bg-[#F7F9FB] max-w-4xl w-full md:w-[80%] lg:w-[60%] mx-auto p-8">
         <div>
           <div className="mb-3">
