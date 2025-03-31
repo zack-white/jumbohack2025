@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation";
 import { useRouter } from 'next/navigation';
 import mapboxgl from "mapbox-gl";
-import InfoPopup from "@/components/ClubInfo"
+import InfoPopup from "@/components/ClubInfo";
 import "./placement.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -31,15 +31,22 @@ const INITIAL_ZOOM = 17.33;
 export default function MapboxMap() {
   const router = useRouter();
   const id = useParams().eventID; // Access the dynamic id from URL
+  const searchParams = useSearchParams();
+  
+  // For now this really only loads the proper map going from rhe create event to
+  // the placement page -- later should fix
+  const paramLong = searchParams.get('x') ? parseFloat(searchParams.get('x') || '') : INITIAL_LONG;
+  const paramLat = searchParams.get('y') ? parseFloat(searchParams.get('y') || '') : INITIAL_LAT;
+  const paramZoom = searchParams.get('scale') ? parseFloat(searchParams.get('scale') || '') : INITIAL_ZOOM;
 
   // Map container and map instance
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // Initial position of map (Tufts Academic Quad rn)
-  const [long, setLong] = useState(INITIAL_LONG);
-  const [lat, setLat] = useState(INITIAL_LAT);
-  const [zoom, setZoom] = useState(INITIAL_ZOOM);
+  // Initial position of map - now using URL parameters if available
+  const [long, setLong] = useState(paramLong);
+  const [lat, setLat] = useState(paramLat);
+  const [zoom, setZoom] = useState(paramZoom);
 
   // Keep track of clubs to add to map
   const [clubs, setClubs] = useState<Club[]>([]);
@@ -58,7 +65,7 @@ export default function MapboxMap() {
   // On page render, create map and fetch all old clubs w/ for given event.
   useEffect(() => {
     if (!mapContainerRef.current) return;
-
+  
     // Create map
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,

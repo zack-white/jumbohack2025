@@ -290,8 +290,11 @@ export default function CreateEventPage() {
           }
           const result = await response.json();
           const eventId = result.eventId;
+          const locationParam = formData.location ? 
+          `?x=${formData.location.x}&y=${formData.location.y}&scale=${formData.scale}` : '';
           resetForm();
-          router.push(`/placement/${eventId}`);
+          
+          router.push(`/placement/${eventId}${locationParam}`);
           return "Event created successfully!";
         },
         error: (error) => {
