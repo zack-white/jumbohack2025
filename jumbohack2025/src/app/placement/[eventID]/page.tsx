@@ -29,9 +29,8 @@ const INITIAL_LAT = 42.4075;
 const INITIAL_ZOOM = 17.33;
 
 export default function MapboxMap() {
-  const { eventID } = useParams();
+  const id = useParams().eventID;
   const router = useRouter();
-  const id = 1 + Number(eventID); // Access the dynamic id from URL
   const searchParams = useSearchParams();
   
   // For now this really only loads the proper map going from rhe create event to
@@ -62,26 +61,16 @@ export default function MapboxMap() {
   // consts for sending emails
   const [status, setStatus] = useState('');
   // const [isLoading, setIsLoading] = useState(false);
-
   // On page render, create map and fetch all old clubs w/ for given event.
   useEffect(() => {
     if (!mapContainerRef.current) return;
   
-    // Create map
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/dark-v11",
-      center: [long, lat],
-      zoom: zoom,
-    });
-    mapRef.current = map;
-
-    // Function to fetch all existing clubs to add to map
-    const getExistingClubs = async () => {
-      try {
-          console.log("Fetching existing clubs for event ID:", id);
+    const initializeMap = async () => {
+      const updateMap = async () => {
+        try {
+          console.log("Fetching map location for this event:", id);
           
-          const response = await fetch("/api/getExistingClubs", {
+          const response = await fetch("/api/getEventLocation", {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -90,169 +79,240 @@ export default function MapboxMap() {
           });
   
           if (!response.ok) {
-              console.error("Error fetching existing clubs:", response.status);
-              return [];
+              console.error("Error fetching map location:", response.status);
+              return;
           }
   
           const data = await response.json();
-          console.log("Existing clubs data:", data);
+  
+          if (data.location) {
+            setLong(data.location.x);
+            setLat(data.location.y);
+            console.log("UPDATED MAP POSITION")
+          }
+          if (data.scale) {
+            setZoom(data.scale);
+          }
+  
           return data;
-      } catch(error) {
-          console.error("Error fetching existing clubs:", error);
+        } catch(error) {
+          console.error("Error fetching map location:", error);
           return [];
+        }
+      };
+  
+      // Get updated coordinates first
+      const locationData = await updateMap();
+      
+      // Use the fetched coordinates directly instead of using state
+      let mapLong = long;
+      let mapLat = lat;
+      let mapZoom = zoom;
+      
+      if (locationData && locationData.location) {
+        mapLong = locationData.location.x;
+        mapLat = locationData.location.y;
+        console.log("UPDATED MAP POSITION to:", mapLong, mapLat);
+        
+        // Also update state for other components that might need it
+        setLong(mapLong);
+        setLat(mapLat);
       }
-  }
+      
+      if (locationData && locationData.scale) {
+        mapZoom = locationData.scale;
+        setZoom(mapZoom);
+      }
 
-    // EXECUTED ON LOAD
-
-    // Fetch a club by clicking on their table (specified by coords)
-    const getClubByCoords = async (lng: number, lat: number) => {
+      // Create map with directly fetched coordinates
+      const map = new mapboxgl.Map({
+        container: mapContainerRef.current!,
+        style: "mapbox://styles/mapbox/dark-v11",
+        center: [mapLong, mapLat], // Use direct variables, not state
+        zoom: mapZoom, // Use direct variable, not state
+      });
+      mapRef.current = map;
+  
+      // Function to fetch all existing clubs to add to map
+      const getExistingClubs = async () => {
         try {
-            const response = await fetch("/api/getClubByCoords", {
+            console.log("Fetching existing clubs for event ID:", id);
+            
+            const response = await fetch("/api/getExistingClubs", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    x: lng,
-                    y: lat
+                  eventID: id
                 })
             });
-
+    
             if (!response.ok) {
-                console.log("Error fetching existing clubs.");
+                console.error("Error fetching existing clubs:", response.status);
+                return [];
             }
-
-            return await response.json();;
+    
+            const data = await response.json();
+            console.log("Existing clubs data:", data);
+            return data;
         } catch(error) {
-            console.error("Error" + error);
+            console.error("Error fetching existing clubs:", error);
+            return [];
         }
-    }
-
-map.on("load", async () => {
-  const existingClubs = await getExistingClubs();
-  existingClubs.forEach((club:Club) => {
-      if (!club.coordinates) return; 
-
-      const marker = new mapboxgl.Marker()
-          .setLngLat([club.coordinates.x, club.coordinates.y])
-          .addTo(map);
-
-      marker.getElement().addEventListener("click", async (event) => {
-          event.stopPropagation();
-
-          const { lng, lat } = marker.getLngLat();
-          const fetchedClub = await getClubByCoords(lng, lat);
-
-          if (fetchedClub) {
-              setClubInfo({
-                  id: fetchedClub.id,
-                  name: fetchedClub.name,
-                  description: fetchedClub.description,
-                  category: fetchedClub.category,
-              });
-              setShowClubInfo(true);
-          }
-      });
-  });
-});
-  
-
-    async function fetchClubs() {
-      try {
-        const eventIDFromParams = id;
-        console.log("Fetching clubs for event ID:", eventIDFromParams);
-        
-        const response = await fetch("/api/getClubs", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              eventID: eventIDFromParams
-            })
-        });
-
-        if (!response.ok) {
-            console.error("Error fetching clubs:", response.status);
-            return;
-        }
-
-        const data = await response.json();
-        console.log("Fetched clubs:", data);
-        setClubs(data);
-        
-        // Extract unique categories
-        const uniqueCategories: string[] = Array.from(new Set<string>(data.map((club: Club) => club.category))) as string[];
-        setCategories(uniqueCategories);
-
-      } catch(error) {
-        console.error("Error fetching clubs:", error);
       }
+  
+      // EXECUTED ON LOAD
+  
+      // Fetch a club by clicking on their table (specified by coords)
+      const getClubByCoords = async (lng: number, lat: number) => {
+          try {
+              const response = await fetch("/api/getClubByCoords", {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                      x: lng,
+                      y: lat
+                  })
+              });
+  
+              if (!response.ok) {
+                  console.log("Error fetching existing clubs.");
+              }
+  
+              return await response.json();;
+          } catch(error) {
+              console.error("Error" + error);
+          }
+      }
+  
+      map.on("load", async () => {
+        const existingClubs = await getExistingClubs();
+        existingClubs.forEach((club:Club) => {
+            if (!club.coordinates) return; 
+  
+            const marker = new mapboxgl.Marker()
+                .setLngLat([club.coordinates.x, club.coordinates.y])
+                .addTo(map);
+  
+            marker.getElement().addEventListener("click", async (event) => {
+                event.stopPropagation();
+  
+                const { lng, lat } = marker.getLngLat();
+                const fetchedClub = await getClubByCoords(lng, lat);
+  
+                if (fetchedClub) {
+                    setClubInfo({
+                        id: fetchedClub.id,
+                        name: fetchedClub.name,
+                        description: fetchedClub.description,
+                        category: fetchedClub.category,
+                    });
+                    setShowClubInfo(true);
+                }
+            });
+        });
+      });
+    
+  
+      async function fetchClubs() {
+        try {
+          const eventIDFromParams = id;
+          console.log("Fetching clubs for event ID:", eventIDFromParams);
+          
+          const response = await fetch("/api/getClubs", {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                eventID: eventIDFromParams
+              })
+          });
+  
+          if (!response.ok) {
+              console.error("Error fetching clubs:", response.status);
+              return;
+          }
+  
+          const data = await response.json();
+          console.log("Fetched clubs:", data);
+          setClubs(data);
+          
+          // Extract unique categories
+          const uniqueCategories: string[] = Array.from(new Set<string>(data.map((club: Club) => club.category))) as string[];
+          setCategories(uniqueCategories);
+  
+        } catch(error) {
+          console.error("Error fetching clubs:", error);
+        }
+      };
+    
+      // Fetch clubs on page load
+      setTimeout(() => {
+        fetchClubs();
+      }, 500);
+  
+      mapRef.current.on("move", () => {
+        // Get the current center coordinates and zoom level from the map
+        const mapCenter = map.getCenter();
+        const mapZoom = map.getZoom();
+  
+        setLong(mapCenter.lng);
+        setLat(mapCenter.lat);
+        setZoom(mapZoom);
+      });
+  
+      // Assign coordinates to the next club in the queue
+      const handlePlaceClub = async (lng: number, lat: number) => {
+        setQueue((prevQueue) => {
+          if (prevQueue.length === 0) return prevQueue; // No clubs left to place; means markers with no associated club could be place but not saved
+      
+          const nextClub = prevQueue[0];
+      
+          // Send update request
+          fetch('/api/updateClub', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id: nextClub.id,
+              x: lng,
+              y: lat,
+            })
+          }).then((response) => {
+            if (response.ok) {
+              // Update the club in the main clubs array
+              setClubs((prevClubs) =>
+                prevClubs.map((club) =>
+                  club.id === nextClub.id ? { ...nextClub, x: lng, y: lat } : club
+                )
+              );
+            } else {
+              console.error('Failed to update club coordinates');
+            }
+          }).catch((error) => {
+            console.error('Error updating club:', error);
+          });
+      
+          // Remove the first club from the queue and return the updated state
+          return prevQueue.slice(1);
+        });
+      };
+      
+      // Listener for map click to add a marker
+      map.on("click", async (e) => {
+        const { lng, lat } = e.lngLat; // Get the clicked coordinates
+        new mapboxgl.Marker() 
+          .setLngLat([lng, lat])
+          .addTo(map);
+  
+        // Pop front element off the queue for given category
+        await handlePlaceClub(lng, lat);
+      });
+  
+      // Cleanup on unmount
+      return () => map.remove();
     };
   
-    // Fetch clubs on page load
-    setTimeout(() => {
-      fetchClubs();
-    }, 500);
-
-    mapRef.current.on("move", () => {
-      // Get the current center coordinates and zoom level from the map
-      const mapCenter = map.getCenter();
-      const mapZoom = map.getZoom();
-
-      setLong(mapCenter.lng);
-      setLat(mapCenter.lat);
-      setZoom(mapZoom);
-    });
-
-    // Assign coordinates to the next club in the queue
-    const handlePlaceClub = async (lng: number, lat: number) => {
-      setQueue((prevQueue) => {
-        if (prevQueue.length === 0) return prevQueue; // No clubs left to place; means markers with no associated club could be place but not saved
-    
-        const nextClub = prevQueue[0];
-    
-        // Send update request
-        fetch('/api/updateClub', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id: nextClub.id,
-            x: lng,
-            y: lat,
-          })
-        }).then((response) => {
-          if (response.ok) {
-            // Update the club in the main clubs array
-            setClubs((prevClubs) =>
-              prevClubs.map((club) =>
-                club.id === nextClub.id ? { ...nextClub, x: lng, y: lat } : club
-              )
-            );
-          } else {
-            console.error('Failed to update club coordinates');
-          }
-        }).catch((error) => {
-          console.error('Error updating club:', error);
-        });
-    
-        // Remove the first club from the queue and return the updated state
-        return prevQueue.slice(1);
-      });
-    };
-    
-    // Listener for map click to add a marker
-    map.on("click", async (e) => {
-      const { lng, lat } = e.lngLat; // Get the clicked coordinates
-      new mapboxgl.Marker() 
-        .setLngLat([lng, lat])
-        .addTo(map);
-
-      // Pop front element off the queue for given category
-      await handlePlaceClub(lng, lat);
-    });
-
-    // Cleanup on unmount
-    return () => map.remove();
+    initializeMap();
   }, []);
 
   const handleSubmit = async () => {

@@ -289,7 +289,7 @@ export default function CreateEventPage() {
             await processExcel(formData.spreadsheet);
           }
           const result = await response.json();
-          const eventId = result.eventId;
+          const eventId = result.eventId + 1;
           const locationParam = formData.location ? 
           `?x=${formData.location.x}&y=${formData.location.y}&scale=${formData.scale}` : '';
           resetForm();
