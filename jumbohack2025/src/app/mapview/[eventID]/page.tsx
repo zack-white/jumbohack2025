@@ -44,10 +44,9 @@ export default function MapboxMap() {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  // Use refs for long, lat, zoom to avoid unnecessary re-renders
-  const longRef = useRef(INITIAL_LONG);
-  const latRef = useRef(INITIAL_LAT);
-  const zoomRef = useRef(INITIAL_ZOOM);
+  const [long, setLong] = useState(INITIAL_LONG);
+  const [lat, setLat] = useState(INITIAL_LAT);
+  const [zoom, setZoom] = useState(INITIAL_ZOOM);
 
   const [clubs, setClubs] = useState<Club[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -106,85 +105,145 @@ export default function MapboxMap() {
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/dark-v11",
-      center: [longRef.current, latRef.current],
-      zoom: zoomRef.current,
-    });
-
-    mapRef.current = map;
-
-    const getExistingClubs = async () => {
-      try {
-        const response = await fetch("/api/getExistingClubs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ eventID: id }),
-        });
-
-        if (!response.ok) {
-          console.error("Error fetching existing clubs.");
-        }
-
-        return await response.json();
-      } catch (error) {
-        console.error("Error fetching clubs:", error);
-      }
-    };
-
-    map.on("load", async () => {
-      const existingClubs: Club[] = await getExistingClubs();
-      setClubs(existingClubs);
-      setQueue(existingClubs);
-
-      const uniqueCategories = [...new Set(existingClubs.map((club) => club.category))];
-      setCategories(uniqueCategories);
-
-      existingClubs.forEach((club) => {
-        if (!club.coordinates) return;
-
-        const marker = new mapboxgl.Marker()
-          .setLngLat([club.coordinates.x, club.coordinates.y])
-          .addTo(map);
-
-        marker.getElement().addEventListener("click", async (event) => {
-          event.stopPropagation();
-          const { lng, lat } = marker.getLngLat();
-          const club = await getClubByCoords(lng, lat);
-          if (club) {
-            setClubInfo({ id: club.id, name: club.name, description: club.description });
-            setShowClubInfo(true);
+    const initializeMap = async () => {
+      const updateMap = async () => {
+        try {
+          console.log("Fetching map location for this event:", id);
+          
+          const response = await fetch("/api/getEventLocation", {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                eventID: id
+              })
+          });
+  
+          if (!response.ok) {
+              console.error("Error fetching map location:", response.status);
+              return;
           }
-        });
+  
+          const data = await response.json();
+  
+          if (data.location) {
+            setLong(data.location.x);
+            setLat(data.location.y);
+            console.log("UPDATED MAP POSITION")
+          }
+          if (data.scale) {
+            setZoom(data.scale);
+          }
+  
+          return data;
+        } catch(error) {
+          console.error("Error fetching map location:", error);
+          return [];
+        }
+      };
+  
+      // Get updated coordinates first
+      const locationData = await updateMap();
+      
+      // Use the fetched coordinates directly instead of using state
+      let mapLong = long;
+      let mapLat = lat;
+      let mapZoom = zoom;
+      
+      if (locationData && locationData.location) {
+        mapLong = locationData.location.x;
+        mapLat = locationData.location.y;
+        console.log("UPDATED MAP POSITION to:", mapLong, mapLat);
+        
+        // Also update state for other components that might need it
+        setLong(mapLong);
+        setLat(mapLat);
+      }
+      
+      if (locationData && locationData.scale) {
+        mapZoom = locationData.scale;
+        setZoom(mapZoom);
+      }
 
-        markersRef.current.push(marker);
+      // Create map with directly fetched coordinates
+      const map = new mapboxgl.Map({
+        container: mapContainerRef.current!,
+        style: "mapbox://styles/mapbox/dark-v11",
+        center: [mapLong, mapLat], // Use direct variables, not state
+        zoom: mapZoom, // Use direct variable, not state
       });
-    });
+      mapRef.current = map;
 
-    // Fix: Prevent re-renders when moving the map
-    map.on("move", () => {
-      const mapCenter = map.getCenter();
-      longRef.current = mapCenter.lng;
-      latRef.current = mapCenter.lat;
-      zoomRef.current = map.getZoom();
-    });
+      const getExistingClubs = async () => {
+        try {
+          const response = await fetch("/api/getExistingClubs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ eventID: id }),
+          });
 
-    return () => {
-      map.remove();
-      return undefined;
+          if (!response.ok) {
+            console.error("Error fetching existing clubs.");
+          }
+
+          return await response.json();
+        } catch (error) {
+          console.error("Error fetching clubs:", error);
+        }
+      };
+
+      map.on("load", async () => {
+        const existingClubs: Club[] = await getExistingClubs();
+        setClubs(existingClubs);
+        setQueue(existingClubs);
+
+        const uniqueCategories = [...new Set(existingClubs.map((club) => club.category))];
+        setCategories(uniqueCategories);
+
+        existingClubs.forEach((club) => {
+          if (!club.coordinates) return;
+
+          const marker = new mapboxgl.Marker()
+            .setLngLat([club.coordinates.x, club.coordinates.y])
+            .addTo(map);
+
+          marker.getElement().addEventListener("click", async (event) => {
+            event.stopPropagation();
+            const { lng, lat } = marker.getLngLat();
+            const club = await getClubByCoords(lng, lat);
+            if (club) {
+              setClubInfo({ id: club.id, name: club.name, description: club.description });
+              setShowClubInfo(true);
+            }
+          });
+
+          markersRef.current.push(marker);
+        });
+      });
+
+      // Update state when moving the map
+      map.on("move", () => {
+        const mapCenter = map.getCenter();
+        setLong(mapCenter.lng);
+        setLat(mapCenter.lat);
+        setZoom(map.getZoom());
+      });
+
+      return () => {
+        map.remove();
+      };
     };
 
+    initializeMap();
   }, [id]); // Only re-run on ID change
 
-    // Compute filtered clubs based on the search input and current category.
-    // When search is empty, all clubs are shown.
-    const filteredClubs = selectedCategory === ""? clubs.filter((club) =>
-      club.name.toLowerCase().includes(search.toLowerCase())
-    ): clubs.filter((club) =>
-      club.category === selectedCategory &&
-      club.name.toLowerCase().includes(search.toLowerCase())
-    );
+  // Compute filtered clubs based on the search input and current category.
+  // When search is empty, all clubs are shown.
+  const filteredClubs = selectedCategory === ""? clubs.filter((club) =>
+    club.name.toLowerCase().includes(search.toLowerCase())
+  ): clubs.filter((club) =>
+    club.category === selectedCategory &&
+    club.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   // Update map markers whenever the filtered clubs change.
   useEffect(() => {
