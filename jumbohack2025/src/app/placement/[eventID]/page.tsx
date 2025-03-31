@@ -29,8 +29,9 @@ const INITIAL_LAT = 42.4075;
 const INITIAL_ZOOM = 17.33;
 
 export default function MapboxMap() {
+  const { eventID } = useParams();
   const router = useRouter();
-  const id = useParams().eventID; // Access the dynamic id from URL
+  const id = 1 + Number(eventID); // Access the dynamic id from URL
   const searchParams = useSearchParams();
   
   // For now this really only loads the proper map going from rhe create event to
@@ -77,24 +78,30 @@ export default function MapboxMap() {
 
     // Function to fetch all existing clubs to add to map
     const getExistingClubs = async () => {
-        try {
-            const response = await fetch("/api/getExistingClubs", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  eventID: id
-                })
-            });
-
-            if (!response.ok) {
-                console.log("Error fetching existing clubs.");
-            }
-
-            return await response.json();;
-        } catch(error) {
-            console.error("Error" + error);
-        }
-    }
+      try {
+          console.log("Fetching existing clubs for event ID:", id);
+          
+          const response = await fetch("/api/getExistingClubs", {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                eventID: id
+              })
+          });
+  
+          if (!response.ok) {
+              console.error("Error fetching existing clubs:", response.status);
+              return [];
+          }
+  
+          const data = await response.json();
+          console.log("Existing clubs data:", data);
+          return data;
+      } catch(error) {
+          console.error("Error fetching existing clubs:", error);
+          return [];
+      }
+  }
 
     // EXECUTED ON LOAD
 
@@ -148,37 +155,42 @@ map.on("load", async () => {
   });
 });
   
-  
 
     async function fetchClubs() {
       try {
+        const eventIDFromParams = id;
+        console.log("Fetching clubs for event ID:", eventIDFromParams);
+        
         const response = await fetch("/api/getClubs", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              eventID: id
+              eventID: eventIDFromParams
             })
         });
 
         if (!response.ok) {
-            console.log("Error fetching existing clubs.");
+            console.error("Error fetching clubs:", response.status);
+            return;
         }
 
         const data = await response.json();
+        console.log("Fetched clubs:", data);
         setClubs(data);
-        console.log(data)
+        
         // Extract unique categories
         const uniqueCategories: string[] = Array.from(new Set<string>(data.map((club: Club) => club.category))) as string[];
         setCategories(uniqueCategories);
 
-
       } catch(error) {
-        console.error("Error" + error);
+        console.error("Error fetching clubs:", error);
       }
     };
   
     // Fetch clubs on page load
-    fetchClubs();
+    setTimeout(() => {
+      fetchClubs();
+    }, 500);
 
     mapRef.current.on("move", () => {
       // Get the current center coordinates and zoom level from the map
