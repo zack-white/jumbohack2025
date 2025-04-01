@@ -7,7 +7,7 @@ import InfoPopup from "@/components/ClubInfo";
 import "./mapview.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Club } from "lucide-react";
-import { set } from "date-fns";
+// import { set } from "date-fns";
 
 interface Club {
   id: number;
@@ -248,24 +248,22 @@ export default function MapboxMap() {
   // Update map markers whenever the filtered clubs change.
   useEffect(() => {
     if (!mapRef.current) return;
-
+  
     const updateMarkers = () => {
       // Remove existing markers
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
-
+  
       // Add a marker for each club in the filtered list
       filteredClubs.forEach((club) => {
-        // Determine coordinates (supports both club.coordinates and club.x/club.y)
         const lng = club.coordinates ? club.coordinates.x : club.x;
         const lat = club.coordinates ? club.coordinates.y : club.y;
-        if (lng == null || lat == null) return; // Skip if no coordinates
-
+        if (lng == null || lat == null) return;
+  
         const marker = new mapboxgl.Marker()
           .setLngLat([lng, lat])
           .addTo(mapRef.current!);
-
-        // Attach click event to marker
+  
         marker.getElement().addEventListener("click", async (event) => {
           event.stopPropagation();
           const { lng, lat } = marker.getLngLat();
@@ -279,85 +277,92 @@ export default function MapboxMap() {
             setShowClubInfo(true);
           }
         });
-
+  
         markersRef.current.push(marker);
-        console.log("Marker added:", { lng, lat }); 
+        console.log("Marker added:", { lng, lat });
       });
     };
-
+  
     if (!mapRef.current.loaded()) {
       mapRef.current.on("load", updateMarkers);
-      return () => mapRef.current?.off("load", updateMarkers);
+      return () => {
+        mapRef.current?.off("load", updateMarkers);
+      };
     } else {
       updateMarkers();
     }
   }, [filteredClubs]);
+  
 
-  // Update queue when category is selected
   useEffect(() => {
     if (!mapRef.current) return;
+  
     if (selectedCategory === "") {
       setQueue(clubs);
     } else {
-     // Filter clubs by category (and optionally by coordinate existence)
-     const filteredQueue = clubs.filter(
-       (club) =>
-         club.category === selectedCategory &&
-         ((club.x === undefined || club.x === null) &&
+      // Filter clubs by category (and optionally by coordinate existence)
+      const filteredQueue = clubs.filter(
+        (club) =>
+          club.category === selectedCategory &&
+          ((club.x === undefined || club.x === null) &&
            (club.y === undefined || club.y === null))
-     );
-     setQueue(filteredQueue);
-
-     const updateMarkers = () => {
-      // Remove existing markers
-      markersRef.current.forEach((marker) => marker.remove());
-      markersRef.current = [];
-      console.log("markersRef", markersRef.current);
-
-      // Add a marker for each club in the filtered list
-      filteredQueue.forEach((club) => {
-        console.log("Adding marker for club:", club);
-        // Determine coordinates (supports both club.coordinates and club.x/club.y)
-        const lng = club.coordinates ? club.coordinates.x : club.x;
-        const lat = club.coordinates ? club.coordinates.y : club.y;
-        if (lng == null || lat == null) return; // Skip if no coordinates
-
-        const marker = new mapboxgl.Marker()
-          .setLngLat([lng, lat])
-          .addTo(mapRef.current!);
-
-        console.log("Marker added:", { lng, lat });
-        // Attach click event to marker
-        marker.getElement().addEventListener("click", async (event) => {
-          event.stopPropagation();
-          const { lng, lat } = marker.getLngLat();
-          const clubData = await getClubByCoords(lng, lat);
-          if (clubData) {
-            setClubInfo({
-              id: clubData.id,
-              name: clubData.name,
-              description: clubData.description,
-            });
-            setShowClubInfo(true);
-          }
+      );
+      setQueue(filteredQueue);
+  
+      const updateMarkers = () => {
+        // Remove existing markers
+        markersRef.current.forEach((marker) => marker.remove());
+        markersRef.current = [];
+        console.log("markersRef", markersRef.current);
+  
+        // Add a marker for each club in the filtered list
+        filteredQueue.forEach((club) => {
+          console.log("Adding marker for club:", club);
+          const lng = club.coordinates ? club.coordinates.x : club.x;
+          const lat = club.coordinates ? club.coordinates.y : club.y;
+          if (lng == null || lat == null) return;
+  
+          const marker = new mapboxgl.Marker()
+            .setLngLat([lng, lat])
+            .addTo(mapRef.current!);
+  
+          console.log("Marker added:", { lng, lat });
+  
+          marker.getElement().addEventListener("click", async (event) => {
+            event.stopPropagation();
+            const { lng, lat } = marker.getLngLat();
+            const clubData = await getClubByCoords(lng, lat);
+            if (clubData) {
+              setClubInfo({
+                id: clubData.id,
+                name: clubData.name,
+                description: clubData.description,
+              });
+              setShowClubInfo(true);
+            }
+          });
+  
+          markersRef.current.push(marker);
+          console.log("markersRef after push", markersRef.current);
         });
-
-        markersRef.current.push(marker);
-        console.log("markersRef after push", markersRef.current);
-      });
-    };
-
-    if (!mapRef.current.loaded()) {
-      console.log("Map not loaded yet, waiting...");
-      mapRef.current.on("load", updateMarkers);
-      return () => mapRef.current?.off("load", updateMarkers);
-    } else {
-      console.log("Map loaded, updating markers..."); 
-      updateMarkers();
+      };
+  
+      if (!mapRef.current.loaded()) {
+        console.log("Map not loaded yet, waiting...");
+        mapRef.current.on("load", updateMarkers);
+  
+        return () => {
+          mapRef.current?.off("load", updateMarkers);
+        };
+      } else {
+        console.log("Map loaded, updating markers...");
+        updateMarkers();
+      }
     }
-   }
-
- }, [selectedCategory, clubs]);
+  
+    return;
+  }, [selectedCategory, clubs]);
+  
 
   return (
     <div className="wrapper">
