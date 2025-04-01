@@ -47,6 +47,45 @@ export default function CreateEventPage() {
     location: "",
   });
 
+  // Helper function to validate date format (MM/DD/YYYY)
+  const isValidDate = (dateStr: string) => {
+    const regex = /^(0?[1-9]|1[0-2])\/(0?[1-9]|[12]\d|3[01])\/\d{2,4}$/;
+    if (!regex.test(dateStr)) return false;
+    
+    // Additional validation for actual date validity
+    const parts = dateStr.split('/');
+    const month = parseInt(parts[0], 10);
+    const day = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+    
+    const date = new Date(year, month - 1, day);
+    return date.getMonth() === month - 1 && 
+           date.getDate() === day && 
+           date.getFullYear() === year;
+  };
+
+  // Helper function to validate time format (HH:MM AM/PM)
+  const isValidTime = (timeStr: string) => {
+    const regex = /^(0?[1-9]|1[0-2]):([0-5][0-9])\s?(AM|PM|am|pm)$/;
+    return regex.test(timeStr);
+  };
+
+  // Helper function to validate duration format
+  const isValidDuration = (durationStr: string) => {
+    // Accept formats like "24hr 30m", "24 hours", "1hr 30min", "90m", etc.
+    const regex = /^(\d+\s?(hr|hour|hours|h))?\s?(\d+\s?(m|min|minute|minutes))?$/;
+    return regex.test(durationStr) && durationStr.trim() !== "";
+  };
+
+  // Helper function to validate file type
+  const isValidSpreadsheet = (file: File | null) => {
+    if (!file) return false;
+    
+    const validExtensions = ['.xlsx', '.xls'];
+    const fileName = file.name.toLowerCase();
+    return validExtensions.some(ext => fileName.endsWith(ext));
+  };
+
   const validateForm = () => {
     const newErrors = {
       eventName: "",
@@ -60,30 +99,61 @@ export default function CreateEventPage() {
 
     let isValid = true;
 
+    // Event name validation
     if (!formData.eventName.trim()) {
       newErrors.eventName = "Event name is required";
       isValid = false;
+    } else if (formData.eventName.length > 100) {
+      newErrors.eventName = "Event name must be less than 100 characters";
+      isValid = false;
     }
+
+    // Date validation
     if (!formData.date.trim()) {
       newErrors.date = "Date is required";
       isValid = false;
+    } else if (!isValidDate(formData.date)) {
+      newErrors.date = "Please use MM/DD/YYYY format";
+      isValid = false;
     }
+
+    // Time validation
     if (!formData.time.trim()) {
       newErrors.time = "Time is required";
       isValid = false;
+    } else if (!isValidTime(formData.time)) {
+      newErrors.time = "Please use HH:MM AM/PM format";
+      isValid = false;
     }
+
+    // Duration validation
     if (!formData.duration.trim()) {
       newErrors.duration = "Duration is required";
       isValid = false;
+    } else if (!isValidDuration(formData.duration)) {
+      newErrors.duration = "Use format like '24hr 30m' or '2 hours'";
+      isValid = false;
     }
+
+    // Description validation
     if (!formData.description.trim()) {
       newErrors.description = "Description is required";
       isValid = false;
+    } else if (formData.description.length < 10) {
+      newErrors.description = "Description must be at least 10 characters";
+      isValid = false;
     }
+
+    // Spreadsheet validation
     if (!formData.spreadsheet) {
       newErrors.spreadsheet = "Spreadsheet is required";
       isValid = false;
+    } else if (!isValidSpreadsheet(formData.spreadsheet)) {
+      newErrors.spreadsheet = "Only .xlsx or .xls files are allowed";
+      isValid = false;
     }
+
+    // Location validation
     if (!formData.location) {
       newErrors.location = "Location is required";
       isValid = false;
@@ -115,13 +185,37 @@ export default function CreateEventPage() {
     });
   };
 
+  const handleInputChange = (
+    field: keyof typeof formData,
+    value: string
+  ) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setErrors(prev => ({ ...prev, [field]: "" }));
+    
+    // Real-time validation for specific fields
+    if (field === 'date' && value && !isValidDate(value)) {
+      setErrors(prev => ({ ...prev, date: "Please use MM/DD/YYYY format" }));
+    }
+    
+    if (field === 'time' && value && !isValidTime(value)) {
+      setErrors(prev => ({ ...prev, time: "Please use HH:MM AM/PM format" }));
+    }
+    
+    if (field === 'duration' && value && !isValidDuration(value)) {
+      setErrors(prev => ({ ...prev, duration: "Use format like '24hr 30m' or '2 hours'" }));
+    }
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFormData((prev) => ({
-        ...prev,
-        spreadsheet: e.target.files ? e.target.files[0] : null,
-      }));
-      setErrors((prev) => ({ ...prev, spreadsheet: "" }));
+      const file = e.target.files[0];
+      setFormData(prev => ({ ...prev, spreadsheet: file }));
+      
+      if (!isValidSpreadsheet(file)) {
+        setErrors(prev => ({ ...prev, spreadsheet: "Only .xlsx or .xls files are allowed" }));
+      } else {
+        setErrors(prev => ({ ...prev, spreadsheet: "" }));
+      }
     }
   };
 
@@ -129,25 +223,47 @@ export default function CreateEventPage() {
     coordinates: { x: number; y: number },
     zoom: number
   ) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       location: coordinates,
       scale: zoom,
     }));
-    setErrors((prev) => ({ ...prev, location: "" }));
+    setErrors(prev => ({ ...prev, location: "" }));
     setShowMap(false);
+    
+    // Show a success toast when location is selected
+    toast.success("Location selected successfully");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
-      toast.error("Please fill in all required fields");
+      // Improved error feedback with more specific information
+      const errorFields = Object.keys(errors).filter(key => 
+        errors[key as keyof typeof errors] !== ""
+      );
+      
+      if (errorFields.length > 0) {
+        toast.error(`Please correct the errors in: ${errorFields.join(', ')}`);
+      } else {
+        toast.error("Please fill in all required fields correctly");
+      }
+      
+      // Fixed: Only scroll to first error if there are errors
+      const firstErrorField = errorFields[0];
+      if (firstErrorField) {
+        // Using a valid selector by making sure we have a proper class name
+        const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+      
       return;
     }
 
     try {
-      console.log(userEmail);
       const promise = fetch("/api/event", {
         method: "POST",
         headers: {
@@ -173,13 +289,18 @@ export default function CreateEventPage() {
             await processExcel(formData.spreadsheet);
           }
           const result = await response.json();
-          const eventId = result.eventId; // Access the `id` from the response
+          const eventId = result.eventId + 1;
+          const locationParam = formData.location ? 
+          `?x=${formData.location.x}&y=${formData.location.y}&scale=${formData.scale}` : '';
           resetForm();
-          console.log("AAAAAAAA", eventId);
-          router.push(`/placement/${eventId}`);
+          
+          router.push(`/placement/${eventId}${locationParam}`);
           return "Event created successfully!";
         },
-        error: "Failed to create event",
+        error: (error) => {
+          console.error("Error creating event:", error);
+          return "Failed to create event. Please try again.";
+        },
       });
     } catch (error) {
       console.error("Error creating event:", error);
@@ -188,7 +309,16 @@ export default function CreateEventPage() {
   };
 
   const handleCancel = () => {
-    router.push("/");
+    if (Object.values(formData).some(value => 
+      value !== null && value !== "" && value !== 0
+    )) {
+      // Confirm before discarding changes
+      if (confirm("Discard changes and return to home?")) {
+        router.push("/");
+      }
+    } else {
+      router.push("/");
+    }
   };
   
   const processExcel = async (file: File) => {
@@ -213,9 +343,14 @@ export default function CreateEventPage() {
     }
   };
 
+  // Helper function to get input classes based on error state
+  const getInputClasses = (field: keyof typeof errors) => {
+    return `${errors[field] ? "border-red-500 focus:ring-red-500" : "border-gray-200"} h-11`;
+  };
+
   return (
-    <div className="bg-[#F7F9FB] md:bg-white min-h-screen overflow-hidden md:flex md:items-center md:justify-center">
-        <div className="bg-[#F7F9FB] max-w-4xl w-full md:w-[80%] lg:w-[60%] mx-auto p-8">
+    <div className="bg-[#F7F9FB] md:bg-white m-[3%] overflow-hidden md:flex md:items-center md:justify-center">
+      <div className="bg-[#F7F9FB] max-w-4xl w-full md:w-[80%] lg:w-[60%] mx-auto p-8">
         <div>
           <div className="mb-3">
             <h1 className="text-2xl font-bold font-serif text-primary">Create Event</h1>
@@ -225,18 +360,21 @@ export default function CreateEventPage() {
             <form onSubmit={handleSubmit} className="space-y-2">
               {/* EVENT NAME */}
               <div className="space-y-1">
-                <label className="text-sm text-primary">Event Name*</label>
+                <label className="text-sm text-primary flex items-center">
+                  Event Name*
+                  {errors.eventName && (
+                    <span className="ml-2 text-xs text-red-500">
+                      (Required)
+                    </span>
+                  )}
+                </label>
                 <Input
+                  name="eventName"
                   placeholder="e.g. JumboHack"
                   value={formData.eventName}
-                  onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      eventName: e.target.value,
-                    }));
-                    setErrors((prev) => ({ ...prev, eventName: "" }));
-                  }}
-                  className={`${errors.eventName ? "border-red-500" : "border-gray-200"} h-11`}
+                  onChange={(e) => handleInputChange("eventName", e.target.value)}
+                  className={getInputClasses("eventName")}
+                  aria-invalid={errors.eventName ? "true" : "false"}
                 />
                 {errors.eventName && (
                   <p className="text-sm text-red-500">{errors.eventName}</p>
@@ -247,19 +385,22 @@ export default function CreateEventPage() {
               <div className="grid grid-cols-3 gap-6">
                 {/* DATE */}
                 <div className="space-y-1">
-                  <label className="text-sm text-primary">Date*</label>
+                  <label className="text-sm text-primary flex items-center">
+                    Date*
+                    {errors.date && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )}
+                  </label>
                   <Input
+                    name="date"
                     type="text"
-                    placeholder="00/00/0000"
+                    placeholder="MM/DD/YYYY"
                     value={formData.date}
-                    onChange={(e) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        date: e.target.value,
-                      }));
-                      setErrors((prev) => ({ ...prev, date: "" }));
-                    }}
-                    className={`${errors.date ? "border-red-500" : "border-gray-200"} h-11`}
+                    onChange={(e) => handleInputChange("date", e.target.value)}
+                    className={getInputClasses("date")}
+                    aria-invalid={errors.date ? "true" : "false"}
                   />
                   {errors.date && (
                     <p className="text-sm text-red-500">{errors.date}</p>
@@ -268,19 +409,22 @@ export default function CreateEventPage() {
 
                 {/* TIME */}
                 <div className="space-y-1">
-                  <label className="text-sm text-primary">Time*</label>
+                  <label className="text-sm text-primary flex items-center">
+                    Time*
+                    {errors.time && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )}
+                  </label>
                   <Input
+                    name="time"
                     type="text"
-                    placeholder="00:00 PM"
+                    placeholder="HH:MM AM/PM"
                     value={formData.time}
-                    onChange={(e) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        time: e.target.value,
-                      }));
-                      setErrors((prev) => ({ ...prev, time: "" }));
-                    }}
-                    className={`${errors.time ? "border-red-500" : "border-gray-200"} h-11`}
+                    onChange={(e) => handleInputChange("time", e.target.value)}
+                    className={getInputClasses("time")}
+                    aria-invalid={errors.time ? "true" : "false"}
                   />
                   {errors.time && (
                     <p className="text-sm text-red-500">{errors.time}</p>
@@ -289,19 +433,22 @@ export default function CreateEventPage() {
 
                 {/* DURATION */}
                 <div className="space-y-1">
-                  <label className="text-sm text-primary">Duration*</label>
+                  <label className="text-sm text-primary flex items-center">
+                    Duration*
+                    {errors.duration && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )}
+                  </label>
                   <Input
+                    name="duration"
                     type="text"
                     placeholder="e.g. 24hr 30m"
                     value={formData.duration}
-                    onChange={(e) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        duration: e.target.value,
-                      }));
-                      setErrors((prev) => ({ ...prev, duration: "" }));
-                    }}
-                    className={`${errors.duration ? "border-red-500" : "border-gray-200"} h-11`}
+                    onChange={(e) => handleInputChange("duration", e.target.value)}
+                    className={getInputClasses("duration")}
+                    aria-invalid={errors.duration ? "true" : "false"}
                   />
                   {errors.duration && (
                     <p className="text-sm text-red-500">{errors.duration}</p>
@@ -311,42 +458,57 @@ export default function CreateEventPage() {
 
               {/* DESCRIPTION */}
               <div className="space-y-1">
-                <label className="text-sm text-primary">Description*</label>
+                <label className="text-sm text-primary flex items-center">
+                  Description*
+                  {errors.description && (
+                    <span className="ml-2 text-xs text-red-500">
+                      (Required)
+                    </span>
+                  )}
+                </label>
                 <Textarea
+                  name="description"
                   placeholder="Add additional information about the event"
                   value={formData.description}
-                  onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }));
-                    setErrors((prev) => ({ ...prev, description: "" }));
-                  }}
-                  className={`min-h-[120px] ${errors.description ? "border-red-500" : "border-gray-200"}`}
+                  onChange={(e) => handleInputChange("description", e.target.value)}
+                  className={`min-h-[120px] ${errors.description ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`}
+                  aria-invalid={errors.description ? "true" : "false"}
                 />
                 {errors.description && (
                   <p className="text-sm text-red-500">{errors.description}</p>
                 )}
+                <p className="text-xs text-gray-500 mt-1">
+                  {formData.description.length} / 500 characters
+                </p>
               </div>
 
               {/* SPREADSHEET */}
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
-                  <label className="text-sm text-primary">Select Spreadsheet*</label>
+                  <label className="text-sm text-primary flex items-center">
+                    Select Spreadsheet*
+                    {errors.spreadsheet && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )}
+                  </label>
                   <Tooltip />
                 </div>
                 <div className="flex gap-2">
                   <Input
+                    name="spreadsheet"
                     type="text"
                     placeholder="Choose a spreadsheet file (.xlsx)"
                     value={formData.spreadsheet ? formData.spreadsheet.name : ""}
                     readOnly
-                    className={`flex-grow h-11 ${errors.spreadsheet ? "border-red-500" : "border-gray-200"}`}
+                    className={`flex-grow h-11 ${errors.spreadsheet ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`}
+                    aria-invalid={errors.spreadsheet ? "true" : "false"}
                   />
                   <Button
                     type="button"
                     variant="secondary"
-                    className="h-11 px-6 bg-[#2E73B5] text-[#fff]"
+                    className="h-11 px-6 bg-[#2E73B5] text-[#fff] hover:bg-[#235d92]"
                     onClick={() => document.getElementById("file-upload")?.click()}
                   >
                     Upload
@@ -366,22 +528,32 @@ export default function CreateEventPage() {
 
               {/* LOCATION */}
               <div className="space-y-1">
-                <label className="text-sm text-primary">Location*</label>
+                <label className="text-sm text-primary flex items-center">
+                  Location*
+                  {errors.location && (
+                    <span className="ml-2 text-xs text-red-500">
+                      (Required)
+                    </span>
+                  )}
+                </label>
                 <div className="flex gap-2">
                   <Input
+                    name="location"
                     type="text"
                     value={
                       formData.location
-                        ? `${formData.location.x}, ${formData.location.y}`
+                        ? `${formData.location.x.toFixed(4)}, ${formData.location.y.toFixed(4)}`
                         : ""
                     }
                     readOnly
-                    className={`flex-grow h-11 ${errors.location ? "border-red-500" : "border-gray-200"}`}
+                    placeholder="Click 'Choose Location' to select"
+                    className={`flex-grow h-11 ${errors.location ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`}
+                    aria-invalid={errors.location ? "true" : "false"}
                   />
                   <Button
                     type="button"
                     variant="secondary"
-                    className="h-11 px-6 bg-[#2E73B5] text-[#fff]"
+                    className="h-11 px-6 bg-[#2E73B5] text-[#fff] hover:bg-[#235d92]"
                     onClick={() => setShowMap(true)}
                   >
                     Choose Location
@@ -394,10 +566,18 @@ export default function CreateEventPage() {
 
               {/* ACTION BUTTONS */}
               <div className="flex justify-end gap-3 pt-6">
-                <Button type="button" variant="outline" className="h-11 px-6" onClick={handleCancel}>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="h-11 px-6" 
+                  onClick={handleCancel}
+                >
                   Cancel
                 </Button>
-                <Button type="submit" className="h-11 px-6 bg-[#2E73B5]">
+                <Button 
+                  type="submit" 
+                  className="h-11 px-6 bg-[#2E73B5] hover:bg-[#235d92]"
+                >
                   Create Event
                 </Button>
               </div>
@@ -407,22 +587,26 @@ export default function CreateEventPage() {
       </div>
 
       {showMap && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <Card className="w-full max-w-4xl h-auto shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Choose a General Location</CardTitle>
-              <Button variant="ghost" onClick={() => setShowMap(false)} className="text-2xl px-0 pb-3 pr-1">
+              <Button 
+                variant="ghost" 
+                onClick={() => setShowMap(false)} 
+                className="text-2xl px-0 pb-3 pr-1"
+                aria-label="Close map"
+              >
                 ×
               </Button>
             </CardHeader>
             <CardContent className="h-[382px]">
-            <MapboxMap 
-              long={-71.120} 
-              lat={42.4075} 
-              scale={17.33} 
-              onLocationSelect={handleLocationSelect} 
-/>
-
+              <MapboxMap 
+                long={-71.120} 
+                lat={42.4075} 
+                scale={17.33} 
+                onLocationSelect={handleLocationSelect} 
+              />
             </CardContent>
           </Card>
         </div>
