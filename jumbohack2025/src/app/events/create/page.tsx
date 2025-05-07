@@ -117,6 +117,18 @@ export default function CreateEventPage() {
       time: "",
       duration: "",
       description: "",
+      contactInfo: {
+        organizationName: "",
+        firstName: "",
+        lastName: "",
+        email: "",
+        phoneNumber: "",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
+      },
+      toggleTimedTables: false,
       spreadsheet: "",
       location: "",
     };
