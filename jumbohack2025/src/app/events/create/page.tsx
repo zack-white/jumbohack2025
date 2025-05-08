@@ -415,7 +415,10 @@ export default function CreateEventPage() {
           <div className="mb-3">
             <h1 className="text-2xl font-bold font-serif text-primary">Create Event</h1>
           </div>
-
+          <hr style={{ width: "100%", borderTop: "1px solid #ccc", marginBottom: "1rem"}} />
+          <div className="mb-3">
+            <h1 className="text-l font-bold font-serif text-primary">Event Information</h1>
+          </div>
           <div>
             <form onSubmit={handleSubmit} className="space-y-2">
               {/* EVENT NAME */}
@@ -540,6 +543,38 @@ export default function CreateEventPage() {
                 <p className="text-xs text-gray-500 mt-1">
                   {formData.description.length} / 500 characters
                 </p>
+              </div>
+              
+              {/* CONTACT INFORMATION SECTION */}
+              <div className="mb-3">
+                <h1 className="text-l font-bold font-serif text-primary" style={{marginBottom: "0.5rem", marginTop: "2rem"}}>Contact Information</h1>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm text-primary flex items-center">
+                  Organization Name*
+                  {errors.contactInfo.organizationName && (
+                    <span className="ml-2 text-xs text-red-500">
+                      (Required)
+                    </span>
+                  )}
+                </label>
+                <Input
+                  name="organizationName"
+                  placeholder="e.g. JumboCode"
+                  value={formData.contactInfo.organizationName}
+                  onChange={(e) => handleInputChange("contactInfo", e.target.value)}
+                  className={getInputClasses("contactInfo")}
+                  aria-invalid={errors.contactInfo.organizationName ? "true" : "false"}
+                />
+                {errors.contactInfo.organizationName && (
+                  <p className="text-sm text-red-500">{errors.contactInfo.organizationName}</p>
+                )}
+              </div>
+              
+              {/* TABLE AND LOCATION INFORMATION SECTION */}
+              <div className="mb-3">
+                <h1 className="text-l font-bold font-serif text-primary" style={{marginBottom: "0.5rem", marginTop: "2rem"}}>Table and Location Information</h1>
               </div>
 
               {/* SPREADSHEET */}
