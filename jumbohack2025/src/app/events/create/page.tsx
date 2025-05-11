@@ -32,18 +32,17 @@ export default function CreateEventPage() {
     time: "",
     duration: "",
     description: "",
-    contactInfo: {
-      organizationName: "",
-      firstName: "",
-      lastName: "",
-      email: "",
-      phoneNumber: "",
-      address: "",
-      city: "",
-      state: "",
-      zipCode: "",
-    },
-    toggleTimedTables: false,
+    organizationName: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    timedTables: false,
+    eventImage: null as File | null,
     spreadsheet: null as File | null,
     location: null as { x: number; y: number } | null,
     scale: 0,
@@ -55,18 +54,17 @@ export default function CreateEventPage() {
     time: "",
     duration: "",
     description: "",
-    contactInfo: {
-      organizationName: "",
-      firstName: "",
-      lastName: "",
-      email: "",
-      phoneNumber: "",
-      address: "",
-      city: "",
-      state: "",
-      zipCode: "",
-    },
-    toggleTimedTables: false,
+    organizationName: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    timedTables: "",
+    eventImage: "",
     spreadsheet: "",
     location: "",
   });
@@ -101,6 +99,27 @@ export default function CreateEventPage() {
     return regex.test(durationStr) && durationStr.trim() !== "";
   };
 
+  // Helper function to validate email format
+  const isValidEmail = (email: string): boolean => {
+    // Basic email regex pattern
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+  
+  // Helper function to validate phone number format
+  const isValidPhoneNumber = (phone: string): boolean => {
+    // Allow digits, optional spaces, dashes, parentheses, and optional leading +
+    const phoneRegex = /^\+?[\d\s\-().]{7,}$/;
+    return phoneRegex.test(phone);
+  }
+
+  // Helper function for validating zip code
+  const isValidZipCode = (zip: string): boolean => {
+    // Matches 5-digit or 5+4 ZIP code formats like 12345 or 12345-6789
+    const zipRegex = /^\d{5}(-\d{4})?$/;
+    return zipRegex.test(zip);
+  }
+
   // Helper function to validate file type
   const isValidSpreadsheet = (file: File | null) => {
     if (!file) return false;
@@ -117,18 +136,17 @@ export default function CreateEventPage() {
       time: "",
       duration: "",
       description: "",
-      contactInfo: {
-        organizationName: "",
-        firstName: "",
-        lastName: "",
-        email: "",
-        phoneNumber: "",
-        address: "",
-        city: "",
-        state: "",
-        zipCode: "",
-      },
-      toggleTimedTables: false,
+      organizationName: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      timedTables: "",
+      eventImage: "",
       spreadsheet: "",
       location: "",
     };
@@ -180,6 +198,57 @@ export default function CreateEventPage() {
       isValid = false;
     }
 
+    // Organization name validation
+    if (!formData.organizationName.trim()) {
+      newErrors.organizationName = "Organization name is required";
+      isValid = false;
+    } else if (formData.description.length >= 100) {
+      newErrors.organizationName = "Organization name must be less than 100 characters";
+      isValid = false;
+    }
+
+    // Representative first name validation
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "Representative first name is required";
+      isValid = false;
+    } else if (formData.description.length >= 100) {
+      newErrors.firstName = "Representative first name must be less than 100 characters";
+      isValid = false;
+    }
+
+    // Representative last name validation
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Representative last name is required";
+      isValid = false;
+    } else if (formData.description.length >= 100) {
+      newErrors.lastName = "Representative last name must be less than 100 characters";
+      isValid = false;
+    }
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    } else if (!isValidEmail(formData.email)) {
+      newErrors.email = "Email must be in the form example@gmail.com";
+      isValid = false;
+    }
+
+    // Phone number validation
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = "Phone number is required";
+      isValid = false;
+    } else if (!isValidPhoneNumber(formData.phoneNumber)) {
+      newErrors.phoneNumber = "Phone number must be in the form (XXX)-XXX-XXXX";
+      isValid = false;
+    }
+
+    // Zip code validation
+    if (formData.zipCode != "" && !isValidZipCode(formData.zipCode)) {
+      newErrors.zipCode = "ZIP code must be in the form XXXXX or XXXXX-XXXX";
+      isValid = false;
+    }
+
     // Spreadsheet validation
     if (!formData.spreadsheet) {
       newErrors.spreadsheet = "Spreadsheet is required";
@@ -206,18 +275,17 @@ export default function CreateEventPage() {
       time: "",
       duration: "",
       description: "",
-      contactInfo: {
-        organizationName: "",
-        firstName: "",
-        lastName: "",
-        email: "",
-        phoneNumber: "",
-        address: "",
-        city: "",
-        state: "",
-        zipCode: "",
-      },
-      toggleTimedTables: false,
+      organizationName: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      timedTables: false,
+      eventImage: null,
       spreadsheet: null,
       location: null,
       scale: 0,
@@ -228,18 +296,17 @@ export default function CreateEventPage() {
       time: "",
       duration: "",
       description: "",
-      contactInfo: {
-        organizationName: "",
-        firstName: "",
-        lastName: "",
-        email: "",
-        phoneNumber: "",
-        address: "",
-        city: "",
-        state: "",
-        zipCode: "",
-      },
-      toggleTimedTables: false,
+      organizationName: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      timedTables: "",
+      eventImage: "",
       spreadsheet: "",
       location: "",
     });
@@ -547,13 +614,14 @@ export default function CreateEventPage() {
               
               {/* CONTACT INFORMATION SECTION */}
               <div className="mb-3">
-                <h1 className="text-l font-bold font-serif text-primary" style={{marginBottom: "0.5rem", marginTop: "2rem"}}>Contact Information</h1>
+                <h1 className="text-l font-bold font-serif text-primary" style={{ marginBottom: "0.5rem", marginTop: "2rem" }}>Contact Information</h1>
               </div>
-
+              
+              {/* ORGANIZATION NAME */}
               <div className="space-y-1">
                 <label className="text-sm text-primary flex items-center">
                   Organization Name*
-                  {errors.contactInfo.organizationName && (
+                  {errors.organizationName && (
                     <span className="ml-2 text-xs text-red-500">
                       (Required)
                     </span>
@@ -562,102 +630,322 @@ export default function CreateEventPage() {
                 <Input
                   name="organizationName"
                   placeholder="e.g. JumboCode"
-                  value={formData.contactInfo.organizationName}
-                  onChange={(e) => handleInputChange("contactInfo", e.target.value)}
-                  className={getInputClasses("contactInfo")}
-                  aria-invalid={errors.contactInfo.organizationName ? "true" : "false"}
+                  value={formData.organizationName}
+                  onChange={(e) => handleInputChange("organizationName", e.target.value)}
+                  className={getInputClasses("organizationName")}
+                  aria-invalid={errors.organizationName ? "true" : "false"}
                 />
-                {errors.contactInfo.organizationName && (
-                  <p className="text-sm text-red-500">{errors.contactInfo.organizationName}</p>
+                {errors.organizationName && (
+                  <p className="text-sm text-red-500">{errors.organizationName}</p>
                 )}
               </div>
-              
-              {/* TABLE AND LOCATION INFORMATION SECTION */}
-              <div className="mb-3">
-                <h1 className="text-l font-bold font-serif text-primary" style={{marginBottom: "0.5rem", marginTop: "2rem"}}>Table and Location Information</h1>
-              </div>
 
-              {/* SPREADSHEET */}
-              <div className="space-y-1">
-                <div className="flex items-center gap-3">
+              {/* REPRESENTATIVE NAME */}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1"> 
                   <label className="text-sm text-primary flex items-center">
-                    Select Spreadsheet*
-                    {errors.spreadsheet && (
+                    Representative First Name*
+                    {errors.firstName && (
                       <span className="ml-2 text-xs text-red-500">
                         (Required)
                       </span>
                     )}
                   </label>
-                  <Tooltip />
-                </div>
-                <div className="flex gap-2">
                   <Input
-                    name="spreadsheet"
+                    name="firstName"
                     type="text"
-                    placeholder="Choose a spreadsheet file (.xlsx)"
-                    value={formData.spreadsheet ? formData.spreadsheet.name : ""}
-                    readOnly
-                    className={`flex-grow h-11 ${errors.spreadsheet ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`}
-                    aria-invalid={errors.spreadsheet ? "true" : "false"}
+                    placeholder=""
+                    value={formData.firstName}
+                    onChange={(e) => handleInputChange("firstName", e.target.value)}
+                    className={getInputClasses("firstName")}
+                    aria-invalid={errors.firstName ? "true" : "false"}
                   />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="h-11 px-6 bg-[#2E73B5] text-[#fff] hover:bg-[#235d92]"
-                    onClick={() => document.getElementById("file-upload")?.click()}
-                  >
-                    Upload
-                  </Button>
-                  <input
-                    id="file-upload"
-                    type="file"
-                    className="hidden"
-                    accept=".xlsx,.xls"
-                    onChange={handleFileUpload}
-                  />
+                  {errors.firstName && (
+                    <p className="text-sm text-red-500">{errors.firstName}</p>
+                  )}
                 </div>
-                {errors.spreadsheet && (
-                  <p className="text-sm text-red-500">{errors.spreadsheet}</p>
-                )}
+                <div className="space-y-1"> 
+                  <label className="text-sm text-primary flex items-center">
+                    Representative Last Name*
+                    {errors.lastName && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )}
+                  </label>
+                  <Input
+                    name="lastName"
+                    type="text"
+                    placeholder=""
+                    value={formData.lastName}
+                    onChange={(e) => handleInputChange("lastName", e.target.value)}
+                    className={getInputClasses("lastName")}
+                    aria-invalid={errors.lastName ? "true" : "false"}
+                  />
+                  {errors.lastName && (
+                    <p className="text-sm text-red-500">{errors.lastName}</p>
+                  )}
+                </div>
               </div>
 
-              {/* LOCATION */}
-              <div className="space-y-1">
-                <label className="text-sm text-primary flex items-center">
-                  Location*
-                  {errors.location && (
-                    <span className="ml-2 text-xs text-red-500">
-                      (Required)
-                    </span>
-                  )}
-                </label>
-                <div className="flex gap-2">
+              {/* CONTACT INFO */}
+              <div className="grid grid-cols-2 gap-6">
+                {/* EMAIL */}
+                <div className="space-y-1"> 
+                  <label className="text-sm text-primary flex items-center">
+                    Email*
+                    {errors.email && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )}
+                  </label>
                   <Input
-                    name="location"
+                    name="email"
                     type="text"
-                    value={
-                      formData.location
-                        ? `${formData.location.x.toFixed(4)}, ${formData.location.y.toFixed(4)}`
-                        : ""
-                    }
-                    readOnly
-                    placeholder="Click 'Choose Location' to select"
-                    className={`flex-grow h-11 ${errors.location ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`}
-                    aria-invalid={errors.location ? "true" : "false"}
+                    placeholder="example@gmail.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    className={getInputClasses("email")}
+                    aria-invalid={errors.email ? "true" : "false"}
                   />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="h-11 px-6 bg-[#2E73B5] text-[#fff] hover:bg-[#235d92]"
-                    onClick={() => setShowMap(true)}
-                  >
-                    Choose Location
-                  </Button>
+                  {errors.email && (
+                    <p className="text-sm text-red-500">{errors.email}</p>
+                  )}
                 </div>
-                {errors.location && (
-                  <p className="text-sm text-red-500">{errors.location}</p>
-                )}
+                {/* PHONE NUMBER */}
+                <div className="space-y-1"> 
+                  <label className="text-sm text-primary flex items-center">
+                    Phone Number*
+                    {errors.phoneNumber && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )}
+                  </label>
+                  <Input
+                    name="phoneNumber"
+                    type="text"
+                    placeholder="(XXX)-XXX-XXXX"
+                    value={formData.phoneNumber}
+                    onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+                    className={getInputClasses("phoneNumber")}
+                    aria-invalid={errors.phoneNumber ? "true" : "false"}
+                  />
+                  {errors.phoneNumber && (
+                    <p className="text-sm text-red-500">{errors.phoneNumber}</p>
+                  )}
+                </div>
               </div>
+
+              {/* LOCATION INFO */}
+              <div className="grid grid-cols-3 gap-6" style={{marginBottom: "2rem"}}>
+                {/* CITY */}
+                <div className="space-y-1"> 
+                  <label className="text-sm text-primary flex items-center">
+                    City
+                    {/* {errors.city && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )} */}
+                  </label>
+                  <Input
+                    name="city"
+                    type="text"
+                    placeholder=""
+                    value={formData.city}
+                    onChange={(e) => handleInputChange("city", e.target.value)}
+                    className={getInputClasses("city")}
+                    aria-invalid={errors.city ? "true" : "false"}
+                  />
+                  {errors.city && (
+                    <p className="text-sm text-red-500">{errors.city}</p>
+                  )}
+                </div>
+                {/* STATE */}
+                <div className="space-y-1"> 
+                  <label className="text-sm text-primary flex items-center">
+                    State
+                    {/* {errors.phoneNumber && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )} */}
+                  </label>
+                  <Input
+                    name="state"
+                    type="text"
+                    placeholder=""
+                    value={formData.state}
+                    onChange={(e) => handleInputChange("state", e.target.value)}
+                    className={getInputClasses("state")}
+                    aria-invalid={errors.state ? "true" : "false"}
+                  />
+                  {errors.state && (
+                    <p className="text-sm text-red-500">{errors.state}</p>
+                  )}
+                </div>
+                {/* ZIP CODE */}
+                <div className="space-y-1"> 
+                  <label className="text-sm text-primary flex items-center">
+                    ZIP Code
+                    {/* {errors.phoneNumber && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )} */}
+                  </label>
+                  <Input
+                    name="zipCode"
+                    type="text"
+                    placeholder=""
+                    value={formData.zipCode}
+                    onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                    className={getInputClasses("zipCode")}
+                    aria-invalid={errors.zipCode ? "true" : "false"}
+                  />
+                  {errors.zipCode && (
+                    <p className="text-sm text-red-500">{errors.zipCode}</p>
+                  )}
+                </div>
+              </div>
+              
+              {/* TABLE AND LOCATION INFORMATION SECTION */}
+              <div className="mb-3 flex flex-row justify-between">
+                <h1 className="text-l font-bold font-serif text-primary">Table and Location Information</h1>
+                <div className="self-end">
+                  <h2 className="text-xs font-bold font-serif text-primary">Toggle Timed Tables</h2>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-6" style={{marginBottom: "2rem"}}>
+                {/* SPREADSHEET */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-3">
+                    <label className="text-sm text-primary flex items-center">
+                      Select Spreadsheet*
+                      {errors.spreadsheet && (
+                        <span className="ml-2 text-xs text-red-500">
+                          (Required)
+                        </span>
+                      )}
+                    </label>
+                    <Tooltip />
+                  </div>
+                  <div className="flex gap-2 relative">
+                    <Input
+                      name="spreadsheet"
+                      type="text"
+                      placeholder="Choose a spreadsheet file (.xlsx)"
+                      value={formData.spreadsheet ? formData.spreadsheet.name : ""}
+                      readOnly
+                      className={`flex-grow h-11 ${errors.spreadsheet ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`}
+                      aria-invalid={errors.spreadsheet ? "true" : "false"}
+                    />
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="h-7 px-3 bg-[#2E73B5] text-xs text-[#fff] hover:bg-[#235d92]"
+                        onClick={() => document.getElementById("file-upload")?.click()}
+                      >
+                        Upload
+                      </Button>
+                    </div>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      className="hidden"
+                      accept=".xlsx,.xls"
+                      onChange={handleFileUpload}
+                    />
+                  </div>
+                  {errors.spreadsheet && (
+                    <p className="text-sm text-red-500">{errors.spreadsheet}</p>
+                  )}
+                </div>
+
+                {/* LOCATION */}
+                <div className="space-y-1 relative">
+                  <label className="text-sm text-primary flex items-center">
+                    Location*
+                    {errors.location && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )}
+                  </label>
+                  <div className="flex gap-2 relative">
+                    <Input
+                      name="location"
+                      type="text"
+                      value={
+                        formData.location
+                          ? `${formData.location.x.toFixed(4)}, ${formData.location.y.toFixed(4)}`
+                          : ""
+                      }
+                      readOnly
+                      className={`flex-grow h-11 ${errors.location ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`}
+                      aria-invalid={errors.location ? "true" : "false"}
+                    />
+                    <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="h-7 px-3 bg-[#2E73B5] text-xs text-[#fff] hover:bg-[#235d92]"
+                        onClick={() => setShowMap(true)}
+                      >
+                        Choose Location
+                      </Button>
+                    </div>
+                  </div>
+                  {errors.location && (
+                    <p className="text-sm text-red-500">{errors.location}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* UPLOAD EVENT IMAGE */}
+              {/* <div className="mb-3 flex flex-row justify-between">
+                <h1 className="text-l font-bold font-serif text-primary">Upload Event Image</h1>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-6" style={{marginBottom: "2rem"}}>
+                <div className="space-y-1">
+                  <div className="flex gap-2 flex-col">
+                    <Input
+                      name="image"
+                      type="text"
+                      placeholder="Choose a spreadsheet file (.xlsx)"
+                      value={formData.spreadsheet ? formData.spreadsheet.name : ""}
+                      readOnly
+                      className={`flex-grow h-32 ${errors.spreadsheet ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`}
+                      aria-invalid={errors.spreadsheet ? "true" : "false"}
+                    />
+                    <div className="flex flex-col">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="h-7 px-3 bg-[#2E73B5] text-[#fff] hover:bg-[#235d92]"
+                        onClick={() => document.getElementById("file-upload")?.click()}
+                      >
+                        Upload
+                      </Button>
+                    </div>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      className="hidden"
+                      accept=".xlsx,.xls"
+                      onChange={handleFileUpload}
+                    />
+                  </div>
+                  {errors.spreadsheet && (
+                    <p className="text-sm text-red-500">{errors.spreadsheet}</p>
+                  )}
+                </div>
+                {}
+              </div> */}
 
               {/* ACTION BUTTONS */}
               <div className="flex justify-end gap-3 pt-6">
