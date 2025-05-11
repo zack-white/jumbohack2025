@@ -202,7 +202,7 @@ export default function CreateEventPage() {
     if (!formData.organizationName.trim()) {
       newErrors.organizationName = "Organization name is required";
       isValid = false;
-    } else if (formData.description.length >= 100) {
+    } else if (formData.organizationName.length >= 100) {
       newErrors.organizationName = "Organization name must be less than 100 characters";
       isValid = false;
     }
@@ -211,7 +211,7 @@ export default function CreateEventPage() {
     if (!formData.firstName.trim()) {
       newErrors.firstName = "Representative first name is required";
       isValid = false;
-    } else if (formData.description.length >= 100) {
+    } else if (formData.firstName.length >= 100) {
       newErrors.firstName = "Representative first name must be less than 100 characters";
       isValid = false;
     }
@@ -220,7 +220,7 @@ export default function CreateEventPage() {
     if (!formData.lastName.trim()) {
       newErrors.lastName = "Representative last name is required";
       isValid = false;
-    } else if (formData.description.length >= 100) {
+    } else if (formData.lastName.length >= 100) {
       newErrors.lastName = "Representative last name must be less than 100 characters";
       isValid = false;
     }
@@ -331,6 +331,18 @@ export default function CreateEventPage() {
     if (field === 'duration' && value && !isValidDuration(value)) {
       setErrors(prev => ({ ...prev, duration: "Use format like '24hr 30m' or '2 hours'" }));
     }
+
+    if (field === 'email' && value && !isValidEmail(value)) {
+      setErrors(prev => ({ ...prev, email: "Email must be in the form example@gmail.com" }));
+    }
+
+    if (field === 'phoneNumber' && value && !isValidPhoneNumber(value)) {
+      setErrors(prev => ({ ...prev, phoneNumber: "Phone number must be in the form (XXX)-XXX-XXXX" }));
+    }
+
+    if (field === 'zipCode' && value && !isValidZipCode(value)) {
+      setErrors(prev => ({ ...prev, zipCode: "ZIP code must be in the form XXXXX or XXXXX-XXXX" }));
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -402,6 +414,15 @@ export default function CreateEventPage() {
           startTime: formData.time,
           duration: formData.duration,
           description: formData.description,
+          organizationName: formData.organizationName,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
           location: formData.location,
           scale: formData.scale,
           creator: userEmail?.emailAddress,
