@@ -5,6 +5,15 @@ import MapboxMap from "@/app/map/map";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -23,9 +32,17 @@ export default function CreateEventPage() {
   }
 
   const router = useRouter();
+  const usStates = [
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+    "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+    "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+    "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+  ];  
   const { user } = useUser();
   const userEmail = user?.emailAddresses[0];
   const [showMap, setShowMap] = useState(false);
+  const [selectedState, setSelectedState] = useState("");
   const [formData, setFormData] = useState({
     eventName: "",
     date: "",
@@ -421,7 +438,7 @@ export default function CreateEventPage() {
           phoneNumber: formData.phoneNumber,
           address: formData.address,
           city: formData.city,
-          state: formData.state,
+          state: selectedState,
           zipCode: formData.zipCode,
           location: formData.location,
           scale: formData.scale,
@@ -760,16 +777,28 @@ export default function CreateEventPage() {
               </div>
 
               {/* LOCATION INFO */}
+
+              {/* ORGANIZATION NAME */}
+              <div className="space-y-1">
+                <label className="text-sm text-primary flex items-center">
+                  Address
+                </label>
+                <Input
+                  name="address"
+                  value={formData.address}
+                  onChange={(e) => handleInputChange("address", e.target.value)}
+                  className={getInputClasses("address")}
+                  aria-invalid={errors.address ? "true" : "false"}
+                />
+                {errors.address && (
+                  <p className="text-sm text-red-500">{errors.address}</p>
+                )}
+              </div>
               <div className="grid grid-cols-3 gap-6" style={{marginBottom: "2rem"}}>
                 {/* CITY */}
                 <div className="space-y-1"> 
                   <label className="text-sm text-primary flex items-center">
                     City
-                    {/* {errors.city && (
-                      <span className="ml-2 text-xs text-red-500">
-                        (Required)
-                      </span>
-                    )} */}
                   </label>
                   <Input
                     name="city"
@@ -788,21 +817,30 @@ export default function CreateEventPage() {
                 <div className="space-y-1"> 
                   <label className="text-sm text-primary flex items-center">
                     State
-                    {/* {errors.phoneNumber && (
-                      <span className="ml-2 text-xs text-red-500">
-                        (Required)
-                      </span>
-                    )} */}
                   </label>
-                  <Input
-                    name="state"
-                    type="text"
-                    placeholder=""
-                    value={formData.state}
-                    onChange={(e) => handleInputChange("state", e.target.value)}
-                    className={getInputClasses("state")}
-                    aria-invalid={errors.state ? "true" : "false"}
-                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                    <div className="relative">
+                      <Button
+                        variant="dropdown"
+                        className={`${getInputClasses("state")} flex items-center`}
+                      >
+                        {selectedState}
+                      </Button>
+                      <ChevronDown className="w-4 h-4 ml-auto opacity-70 absolute right-2 top-1/2 transform -translate-y-1/2" />
+                    </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="max-h-60 overflow-y-auto">
+                      <DropdownMenuLabel>Select a State</DropdownMenuLabel>
+                      <DropdownMenuRadioGroup value={selectedState} onValueChange={setSelectedState}>
+                        {usStates.map((abbr) => (
+                          <DropdownMenuRadioItem key={abbr} value={abbr}>
+                            {abbr}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   {errors.state && (
                     <p className="text-sm text-red-500">{errors.state}</p>
                   )}
@@ -811,11 +849,6 @@ export default function CreateEventPage() {
                 <div className="space-y-1"> 
                   <label className="text-sm text-primary flex items-center">
                     ZIP Code
-                    {/* {errors.phoneNumber && (
-                      <span className="ml-2 text-xs text-red-500">
-                        (Required)
-                      </span>
-                    )} */}
                   </label>
                   <Input
                     name="zipCode"
@@ -926,47 +959,7 @@ export default function CreateEventPage() {
                 </div>
               </div>
 
-              {/* UPLOAD EVENT IMAGE */}
-              {/* <div className="mb-3 flex flex-row justify-between">
-                <h1 className="text-l font-bold font-serif text-primary">Upload Event Image</h1>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-6" style={{marginBottom: "2rem"}}>
-                <div className="space-y-1">
-                  <div className="flex gap-2 flex-col">
-                    <Input
-                      name="image"
-                      type="text"
-                      placeholder="Choose a spreadsheet file (.xlsx)"
-                      value={formData.spreadsheet ? formData.spreadsheet.name : ""}
-                      readOnly
-                      className={`flex-grow h-32 ${errors.spreadsheet ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`}
-                      aria-invalid={errors.spreadsheet ? "true" : "false"}
-                    />
-                    <div className="flex flex-col">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        className="h-7 px-3 bg-[#2E73B5] text-[#fff] hover:bg-[#235d92]"
-                        onClick={() => document.getElementById("file-upload")?.click()}
-                      >
-                        Upload
-                      </Button>
-                    </div>
-                    <input
-                      id="file-upload"
-                      type="file"
-                      className="hidden"
-                      accept=".xlsx,.xls"
-                      onChange={handleFileUpload}
-                    />
-                  </div>
-                  {errors.spreadsheet && (
-                    <p className="text-sm text-red-500">{errors.spreadsheet}</p>
-                  )}
-                </div>
-                {}
-              </div> */}
+              {/* UPLOAD EVENT IMAGE WILL GO HERE */}
 
               {/* ACTION BUTTONS */}
               <div className="flex justify-end gap-3 pt-6">
