@@ -5,7 +5,7 @@ import Image from "next/image";
 import UpcomingEvents from "@/components/UpcomingEvents";
 import QueryProvider from "@/components/QueryProvider";
 import { useTheme } from "next-themes";
-import { ArrowUp, Info, Phone } from "lucide-react";
+import { ArrowUpToLineIcon, Info, Phone } from "lucide-react";
 
 export default function Home() {
   const { theme } = useTheme();
@@ -77,66 +77,81 @@ export default function Home() {
               <div className="flex flex-col md:flex-row justify-between gap-6">
                 {/* Emergency Section 1 */}
                 <div className="bg-gray-50 p-4 rounded-lg flex-1">
-                  <h3 className="text-base font-bold">Emergency: <span className="font-normal">Tufts University Police Department</span></h3>
-                  <div className="mt-2 text-sm text-gray-700 ml-1">
-                    <p>419 Boston Ave</p>
-                    <p>Medford, MA 02155</p>
-                  </div>
-                  <div className="mt-2 ml-1">
-                    <p className="flex items-center gap-1 text-sm">
-                      <span className="font-semibold">Emergency:</span> 
-                      <a href="tel:617-627-3780" className="text-blue-600 flex items-center">
-                        617-627-3780
-                        <Info size={14} className="ml-1 text-gray-500" />
-                      </a>
-                    </p>
-                    <p className="flex items-center gap-1 text-sm">
-                      <span className="font-semibold">Non-Emergency:</span> 
-                      <a href="tel:617-627-3030" className="text-blue-600 flex items-center">
-                        617-627-3030
-                        <Phone size={14} className="ml-1 text-gray-500" />
-                      </a>
-                    </p>
+                  <h3 className="text-base md:text-xl">
+                    Emergency: <span className="font-bold">Tufts University Police Department</span>
+                  </h3>
+
+                  <div className="mt-2 flex flex-col md:flex-row gap-6">
+                    <div className="text-base md:text-lg text-gray-700 ml-1">
+                      <p>419 Boston Ave</p>
+                      <p>Medford, MA 02155</p>
+                    </div>
+
+                    <div className="ml-auto w-full md:w-auto">
+                      <p className="flex items-center justify-between md:justify-end gap-1 text-base md:text-lg">
+                        <span className="font-semibold">Emergency:</span> 
+                        <a href="tel:617-627-3780" className="text-blue-600 flex items-center">
+                          617-627-3780
+                          <Info size={16} className="ml-1 text-gray-900" />
+                        </a>
+                      </p>
+                      <p className="flex items-center justify-between md:justify-end gap-1 text-base md:text-lg">
+                        <span className="font-semibold">Non-Emergency:</span> 
+                        <a href="tel:617-627-3030" className="text-blue-600 flex items-center">
+                          617-627-3030
+                          <Phone size={16} className="ml-1 text-gray-900" />
+                        </a>
+                      </p>
+                    </div>
                   </div>
                 </div>
                 
                 {/* Emergency Section 2 */}
                 <div className="bg-gray-50 p-4 rounded-lg flex-1">
-                  <h3 className="text-base font-bold">Emergency: <span className="font-normal">Health Services</span></h3>
-                  <div className="mt-2 text-sm text-gray-700 ml-1">
-                    <p>124 Professors Row</p>
-                    <p>Medford, MA 02155</p>
-                  </div>
-                  <div className="mt-2 ml-1">
-                    <p className="flex items-center gap-1 text-sm">
-                      <span className="font-semibold">Phone:</span> 
-                      <a href="tel:617-627-3350" className="text-blue-600 flex items-center">
-                        617-627-3350
-                        <Phone size={14} className="ml-1 text-gray-500" />
-                      </a>
-                    </p>
-                    <p className="flex items-center gap-1 text-sm">
-                      <span className="font-semibold">Fax:</span> 
-                      <a href="tel:617-627-3592" className="text-blue-600 flex items-center">
-                        617-627-3592
-                        <Info size={14} className="ml-1 text-gray-500" />
-                      </a>
-                    </p>
+                  <h3 className="text-base md:text-xl">
+                    Emergency: <span className="font-bold">Health Services</span>
+                  </h3>
+
+                  {/* Wrap address and contacts in a flex container */}
+                  <div className="mt-2 flex flex-col md:flex-row gap-6">
+                    {/* Address */}
+                    <div className="text-base md:text-lg text-gray-700 ml-1">
+                      <p>124 Professors Row</p>
+                      <p>Medford, MA 02155</p>
+                    </div>
+
+                    {/* Contact Info */}
+                    <div className="ml-auto w-full md:w-auto">
+                      <p className="flex items-center justify-between md:justify-end gap-1 text-base md:text-lg">
+                        <span className="font-semibold">Phone:</span> 
+                        <a href="tel:617-627-3350" className="text-blue-600 flex items-center">
+                          617-627-3350
+                          <Phone size={16} className="ml-1 text-gray-900" />
+                        </a>
+                      </p>
+                      <p className="flex items-center justify-between md:justify-end gap-1 text-base md:text-lg">
+                        <span className="font-semibold">Fax:</span> 
+                        <a href="tel:617-627-3592" className="text-blue-600 flex items-center">
+                          617-627-3592
+                          <Info size={16} className="ml-1 text-gray-900" />
+                        </a>
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div className="flex justify-between items-center mt-6">
+              <div className="flex flex-col md:flex-row justify-between items-center mt-6 gap-4 md:gap-0">
                 <p className="text-xs md:text-sm text-gray-500 font-inter">
                   © 2025 Elisa Yu, Hannah Jiang, Holden Kittelberger, Shayne Sidman,
                   William Goldman, Zachary White
                 </p>
                 <button 
                   onClick={scrollToTop}
-                  className="bg-blue-600 text-white px-4 py-2 rounded text-sm flex items-center"
+                  className="bg-[#2E73B5] text-white px-4 h-10 text-sm flex items-center"
                 >
                   Back to top
-                  <ArrowUp size={16} className="ml-1" />
+                  <ArrowUpToLineIcon size={16} className="ml-1" />
                 </button>
               </div>
             </footer>
