@@ -51,15 +51,29 @@ export default function BugReportForm() {
     handleFile(e.target.files);
     };
 
-    const handleSubmit = () => {
-        const bugReport = {
+    const handleSubmit = async () => {
+        const response = await fetch("/api/bug-report", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
             selectedReason,
             description,
             priority,
             additionalInfo,
-        };
-        console.log("Submitted Bug Report:", bugReport);
-    };
+            file: file ? { name: file.name } : null, // send only metadata unless attaching
+          }),
+        });
+      
+        const data = await response.json();
+        if (response.ok) {
+          alert("Bug report sent!");
+        } else {
+          alert("Failed to send: " + data.error);
+        }
+      };
+      
 
     return (
         <div className="bg-categoryBg p-12 shadow-md mx-auto w-full text-left">
