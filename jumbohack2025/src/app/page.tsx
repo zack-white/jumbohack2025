@@ -72,8 +72,11 @@ export default function Home() {
           </div>
 
           {/* Footer */}
-          <div className="px-4 md:px-[10vw]">
-            <footer className="mt-4 py-8 md:mt-8 md:py-4">
+          <div className="px-[10vw]">
+            <div className="flex justify-center md:justify-start mt-4">
+              <img src="/logo-dark.svg" alt="JumboMap Logo" className="h-16 w-auto" />
+            </div>
+            <footer className="py-4 md:mt-8 md:py-4">
               <div className="flex flex-col md:flex-row justify-between gap-6">
                 {/* Emergency Section 1 */}
                 <div className="bg-gray-50 p-4 rounded-lg flex-1">
