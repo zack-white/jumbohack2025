@@ -8,7 +8,7 @@ export async function POST(req: Request) {
       description,
       priority,
       additionalInfo,
-      file, // optional
+      file,
     } = await req.json();
 
     const emailHtml = `

@@ -194,7 +194,7 @@ export default function BugReportForm() {
                         <div>
                         <p className="font-semibold text-sm">{file.name}</p>
                         <p className="text-xs text-gray-500">
-                            {(file.size / 1024).toFixed(0)}kb of 100kb
+                            {(file.size / 1024).toFixed(0)}kb of {(maxSize / 1024).toFixed(0)}kb
                         </p>
                         </div>
                     </div>
