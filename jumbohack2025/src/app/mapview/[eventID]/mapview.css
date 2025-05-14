@@ -1,19 +1,49 @@
 .mapContainer {
-    width: 100vw;
-    height: 65vh;
-    position: relative;
+  width: 100vw;
+  height: 65vh;
+  position: relative;
 }
 
 .saveLocationButton {
-    bottom: "20px";
-    right: "20px";
-    padding: "10px 20px";
-    z-index: 100;
-    cursor: "pointer";
-  }
+  bottom: "20px";
+  right: "20px";
+  padding: "10px 20px";
+  z-index: 100;
+  cursor: "pointer";
+}
 
 .fullMapContainer {
-  width:100vw;
-  height:100vh;
-  position: absolute;
+width:100vw;
+height:100vh;
+position: absolute;
+}
+
+/* Styling for club name labels */
+.club-label-popup .mapboxgl-popup-content {
+background: rgba(35, 57, 74, 0.8);
+padding: 5px 10px;
+border-radius: 4px;
+font-size: 12px;
+text-align: center;
+color: white;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Remove the popup tip/arrow */
+.club-label-popup .mapboxgl-popup-tip {
+display: none;
+}
+
+/* Styling for club label text */
+.club-label {
+font-weight: 500;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+max-width: 150px;
+}
+
+/* Fix for toggle button z-index when popup is active */
+.fixed.inset-0 {
+z-index: 1000; /* Higher than other elements */
 }
