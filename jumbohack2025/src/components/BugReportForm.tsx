@@ -29,6 +29,28 @@ export default function BugReportForm() {
                     </button>
                 ))}
             </div>
+
+            {/* Description */}
+
+
+            {/* Bug Priority */}
+
+
+            {/* Files */}
+
+
+            {/* Additional Info */}
+
+
+            {/* Submit */}
+            <div className="flex justify-end mt-6">
+                <button className="bg-white text-slate-900 px-6 py-3 font-medium border border-[#2971AC] mr-3">
+                    Cancel
+                </button>
+                <button className="bg-[#2971AC] text-white px-6 py-3 font-medium">
+                    Submit Report
+                </button>
+            </div>
         </div>
     );
 }
