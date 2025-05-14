@@ -1,9 +1,66 @@
 "use client";
 
 import React from "react";
+import { useState, DragEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
 
+type UploadedFile = {
+    name: string;
+    size: number;
+    type: string;
+  };
+
 export default function BugReportForm() {
+    const [selectedReason, setSelectedReason] = useState<string | null>(null);
+    const [description, setDescription] = useState("");
+    const [priority, setPriority] = useState<string | null>(null);
+    const [file, setFile] = useState<UploadedFile | null>(null);
+    const [additionalInfo, setAdditionalInfo] = useState("");
+    const maxSize = 50 * 1024 * 1024; // 50 MB
+
+    const handleFile = (fileList: FileList | null) => {
+        if (!fileList || fileList.length === 0) return;
+    
+        const uploaded = fileList[0];
+        const isValidType = ["image/jpeg", "image/png"].includes(uploaded.type);
+        const isValidSize = uploaded.size <= maxSize;
+    
+        if (!isValidType) {
+          alert("Only JPEG and PNG files are allowed.");
+          return;
+        }
+    
+        if (!isValidSize) {
+          alert("File must be less than 50MB.");
+          return;
+        }
+    
+        setFile({
+          name: uploaded.name,
+          size: uploaded.size,
+          type: uploaded.type,
+        });
+      };
+    
+    const onDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    handleFile(e.dataTransfer.files);
+    };
+
+    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFile(e.target.files);
+    };
+
+    const handleSubmit = () => {
+        const bugReport = {
+            selectedReason,
+            description,
+            priority,
+            additionalInfo,
+        };
+        console.log("Submitted Bug Report:", bugReport);
+    };
+
     return (
         <div className="bg-categoryBg p-12 shadow-md mx-auto w-full text-left">
             {/* Title */}
@@ -25,7 +82,15 @@ export default function BugReportForm() {
                     "Usability/UX Issue",
                     "Other"
                 ].map((label, index) => (
-                    <button key={index} className="bg-white text-[#2971AC] border border-[#2971AC] px-6 py-3 font-medium">
+                    <button 
+                        key={index} 
+                        onClick={() => setSelectedReason(selectedReason === label ? null : label)}
+                        className={`px-6 py-3 font-medium border border-[#2971AC] ${
+                            selectedReason === label
+                                ? "bg-[#2971AC] text-white"
+                                : "bg-white text-[#2971AC]"
+                        }`}
+                    >
                         {label}
                     </button>
                 ))}
@@ -35,38 +100,108 @@ export default function BugReportForm() {
             <p className="text-gray-700 text-lg mt-10">Help us understand the issue</p>
             <Textarea
                 name="description"
-                placeholder="Please provide a detailed description of the bug. How to reproduce the bug, expected behavior, and actual behavior. Include any other relevant information or information."
+                placeholder="Please provide a detailed description..."
                 className="mt-4 h-32 min-h-[120px] border-gray-200"
-                // onChange={(e) => handleInputChange("description", e.target.value)}
-                // aria-invalid={errors.description ? "true" : "false"}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
             />
 
             {/* Bug Priority */}
             <p className="text-gray-700 text-lg mt-10">Bug Priority</p>
             <p className="text-gray-500 text-sm mt-2">Choose the priority level of this bug: High/Medium/Low. Priority indicates the impact of the bug on users’ experience or system functionality.</p>
             <div className="flex flex-wrap gap-2">
-                <button className="bg-white text-black border border-[#B01C1C] px-6 py-3 font-medium mt-4">
+                <button
+                    onClick={() => setPriority(priority === "High" ? null : "High")}
+                    className={`px-6 py-3 font-medium mt-4 border ${
+                        priority === "High" ? "bg-[#B01C1C] text-white" : "bg-white text-black"
+                    } border-[#B01C1C]`}
+                >
                     High Priority
                 </button>
-                <button className="bg-white text-black border border-[#D47720] px-6 py-3 font-medium mt-4">
+                <button
+                    onClick={() => setPriority(priority === "Medium" ? null : "Medium")}
+                    className={`px-6 py-3 font-medium mt-4 border ${
+                        priority === "Medium" ? "bg-[#D47720] text-white" : "bg-white text-black"
+                    } border-[#D47720]`}
+                >
                     Medium Priority
                 </button>
-                <button className="bg-white text-black border border-[#109027] px-6 py-3 font-medium mt-4">
+                <button
+                    onClick={() => setPriority(priority === "Low" ? null : "Low")}
+                    className={`px-6 py-3 font-medium mt-4 border ${
+                        priority === "Low" ? "bg-[#109027] text-white" : "bg-white text-black"
+                    } border-[#109027]`}
+                >
                     Low Priority
                 </button>
             </div>
 
             {/* Files */}
+            <p className="text-gray-700 text-lg mt-10">Attach Files</p>
+            <p className="text-gray-500 text-sm mt-2">Upload screenshots, recordings, or relevant files that illustrate the bug you are reporting.</p>
+            <div className="flex gap-4 w-full">
+                {/* Upload Box */}
+                <div
+                    onDrop={onDrop}
+                    onDragOver={(e) => e.preventDefault()}
+                    className="flex flex-col items-center justify-center w-full border-2 border-dashed border-gray-300 mt-4 p-6 text-center bg-white"
+                >
+                    {!file ? (
+                    <>
+                        <p className="text-gray-700 font-medium">
+                        Choose a file or drag & drop here
+                        </p>
+                        <p className="text-sm text-gray-500 mt-1 mb-2">JPEG and PNG, up to 50MB</p>
+                        <label className="mt-3 inline-block">
+                        <input
+                            type="file"
+                            accept=".jpeg,.jpg,.png"
+                            className="hidden"
+                            onChange={onChange}
+                        />
+                        <span className="bg-[#2971AC] text-white px-4 py-2 cursor-pointer">
+                            Browse Files
+                        </span>
+                        </label>
+                        <p className="text-sm text-gray-500 mt-4">Maximum of 1 photo</p>
+                    </>
+                    ) : (
+                    <p className="text-gray-500">File already uploaded.</p>
+                    )}
+                </div>
 
+                {/* Uploaded File Display */}
+                {file && (
+                    <div className="flex items-center justify-between w-1/2 px-4 py-3 bg-white border mt-4 shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-8 h-10 bg-gray-100 rounded">
+                        <span className="text-xs font-bold">PNG</span>
+                        </div>
+                        <div>
+                        <p className="font-semibold text-sm">{file.name}</p>
+                        <p className="text-xs text-gray-500">
+                            {(file.size / 1024).toFixed(0)}kb of 100kb
+                        </p>
+                        </div>
+                    </div>
+                    <button
+                        className="text-gray-600 hover:text-black"
+                        onClick={() => setFile(null)}
+                    >
+                        ×
+                    </button>
+                    </div>
+                )}
+                </div>
 
             {/* Additional Info */}
             <p className="text-gray-700 text-lg mt-10">Additional Information</p>
             <Textarea
-                name="description"
-                placeholder="Anything else you would like to mention, not listed above?"
+                name="additionalInfo"
+                placeholder="Anything else you'd like to mention?"
                 className="mt-4 h-32 min-h-[120px] border-gray-200"
-                // onChange={(e) => handleInputChange("description", e.target.value)}
-                // aria-invalid={errors.description ? "true" : "false"}
+                value={additionalInfo}
+                onChange={(e) => setAdditionalInfo(e.target.value)}
             />
 
             {/* Submit */}
@@ -74,7 +209,9 @@ export default function BugReportForm() {
                 <button className="bg-white text-slate-900 px-6 py-3 font-medium border border-[#2971AC] mr-3">
                     Cancel
                 </button>
-                <button className="bg-[#2971AC] text-white px-6 py-3 font-medium">
+                <button 
+                    onClick={handleSubmit}
+                    className="bg-[#2971AC] text-white px-6 py-3 font-medium">
                     Submit Report
                 </button>
             </div>
