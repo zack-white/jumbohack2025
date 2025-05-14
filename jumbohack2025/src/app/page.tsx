@@ -5,9 +5,17 @@ import Image from "next/image";
 import UpcomingEvents from "@/components/UpcomingEvents";
 import QueryProvider from "@/components/QueryProvider";
 import { useTheme } from "next-themes";
+import { ArrowUpToLineIcon, Info, Phone } from "lucide-react";
 
 export default function Home() {
   const { theme } = useTheme();
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  };
 
   return (
     <QueryProvider>
@@ -36,15 +44,13 @@ export default function Home() {
                 <div className="absolute inset-0 bg-black/30" />
               </div>
             
-
-                
-                {/* Text overlay */}
-                <div className="absolute bottom-8 left-0 right-10 md: bg-white pt-2 pb-2 md:max-w-[30vw] md:bg-transparent md:bottom-1/2 md:left-0 md:p-0 md:transform md:translate-y-full">
-                  <h2 className="text-xl font-medium pl-2 md:p-5 md:text-3xl md:bg-white text-primary font-serif">
-                    Making events more accessible for students
-                  </h2>
-                </div>
+              {/* Text overlay */}
+              <div className="absolute bottom-8 left-0 right-10 md: bg-white pt-2 pb-2 md:max-w-[30vw] md:bg-transparent md:bottom-1/2 md:left-0 md:p-0 md:transform md:translate-y-full">
+                <h2 className="text-xl font-medium pl-2 md:p-5 md:text-3xl md:bg-white text-primary font-serif">
+                  Making events more accessible for students
+                </h2>
               </div>
+            </div>
 
             {/* Upcoming Events (already has its own mobile vs desktop layout) */}
             <UpcomingEvents />
@@ -66,29 +72,91 @@ export default function Home() {
           </div>
 
           {/* Footer */}
-          <div className="px-4 md:px-[10vw]">
-            <footer className="mt-4 py-8 text-center md:mt-8 md:py-4">
-              <Image
-                src={
-                  theme === "dark"
-                    ? "/logo-footer-light.svg"
-                    : "/logo-footer-dark.svg"
-                }
-                alt="JumboMap Logo"
-                width={80}
-                height={80}
-                className="mx-auto mb-4"
-              />
-              <p className="text-sm md:text-lg text-gray-600 max-w-2xl md:max-w-4xl mx-auto font-inter py-2">
-                This project was developed during JumboHack 2025 to create an
-                innovative solution that helps students easily navigate current
-                campus events, explore event layouts, and discover clubs more efficiently.
-                We hope you enjoy!
-              </p>
-              <p className="text-xs md:text-base text-gray-500 mt-4 font-inter">
-                © 2025 Elisa Yu, Hannah Jiang, Holden Kittelberger, Shayne Sidman,
-                William Goldman, Zachary White
-              </p>
+          <div className="px-[10vw]">
+            <div className="flex justify-center md:justify-start mt-4">
+              <img src="/logo-dark.svg" alt="JumboMap Logo" className="h-16 w-auto" />
+            </div>
+            <footer className="py-4 md:mt-8 md:py-4">
+              <div className="flex flex-col md:flex-row justify-between gap-6">
+                {/* Emergency Section 1 */}
+                <div className="bg-gray-50 p-4 rounded-lg flex-1">
+                  <h3 className="text-base md:text-xl">
+                    Emergency: <span className="font-bold">Tufts University Police Department</span>
+                  </h3>
+
+                  <div className="mt-2 flex flex-col md:flex-row gap-6">
+                    <div className="text-base md:text-lg text-gray-700 ml-1">
+                      <p>419 Boston Ave</p>
+                      <p>Medford, MA 02155</p>
+                    </div>
+
+                    <div className="ml-auto w-full md:w-auto">
+                      <p className="flex items-center justify-between md:justify-end gap-1 text-base md:text-lg">
+                        <span className="font-semibold">Emergency:</span> 
+                        <a href="tel:617-627-3780" className="text-blue-600 flex items-center">
+                          617-627-3780
+                          <Info size={16} className="ml-1 text-gray-900" />
+                        </a>
+                      </p>
+                      <p className="flex items-center justify-between md:justify-end gap-1 text-base md:text-lg">
+                        <span className="font-semibold">Non-Emergency:</span> 
+                        <a href="tel:617-627-3030" className="text-blue-600 flex items-center">
+                          617-627-3030
+                          <Phone size={16} className="ml-1 text-gray-900" />
+                        </a>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Emergency Section 2 */}
+                <div className="bg-gray-50 p-4 rounded-lg flex-1">
+                  <h3 className="text-base md:text-xl">
+                    Emergency: <span className="font-bold">Health Services</span>
+                  </h3>
+
+                  {/* Wrap address and contacts in a flex container */}
+                  <div className="mt-2 flex flex-col md:flex-row gap-6">
+                    {/* Address */}
+                    <div className="text-base md:text-lg text-gray-700 ml-1">
+                      <p>124 Professors Row</p>
+                      <p>Medford, MA 02155</p>
+                    </div>
+
+                    {/* Contact Info */}
+                    <div className="ml-auto w-full md:w-auto">
+                      <p className="flex items-center justify-between md:justify-end gap-1 text-base md:text-lg">
+                        <span className="font-semibold">Phone:</span> 
+                        <a href="tel:617-627-3350" className="text-blue-600 flex items-center">
+                          617-627-3350
+                          <Phone size={16} className="ml-1 text-gray-900" />
+                        </a>
+                      </p>
+                      <p className="flex items-center justify-between md:justify-end gap-1 text-base md:text-lg">
+                        <span className="font-semibold">Fax:</span> 
+                        <a href="tel:617-627-3592" className="text-blue-600 flex items-center">
+                          617-627-3592
+                          <Info size={16} className="ml-1 text-gray-900" />
+                        </a>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col md:flex-row justify-between items-center mt-6 gap-4 md:gap-0">
+                <p className="text-xs md:text-sm text-gray-500 font-inter">
+                  © 2025 Elisa Yu, Hannah Jiang, Holden Kittelberger, Shayne Sidman,
+                  William Goldman, Zachary White
+                </p>
+                <button 
+                  onClick={scrollToTop}
+                  className="bg-[#2E73B5] text-white px-4 h-10 text-sm flex items-center"
+                >
+                  Back to top
+                  <ArrowUpToLineIcon size={16} className="ml-1" />
+                </button>
+              </div>
             </footer>
           </div>
         </div>
