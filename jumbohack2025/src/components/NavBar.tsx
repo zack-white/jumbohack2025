@@ -50,6 +50,13 @@ const NavBar = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-8">
+            {/* Bug Report Button */}
+            <Button variant="ghost" className="inline-block bg-white text-gray-900 hover:underline hover:udnerline-offset-4 transition-all duration-200">
+              <Link href="/report-bug">
+                Report a Bug
+              </Link>
+            </Button>
+
             {isSignedIn && protectedNavItems.map((item) => (
               <Link
                 key={item.label}
