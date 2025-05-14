@@ -13,6 +13,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
 import { ChevronDown } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
@@ -39,15 +40,19 @@ export default function CreateEventPage() {
     "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
     "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
   ];  
+  const times = ["AM", "PM"];
   const { user } = useUser();
   const userEmail = user?.emailAddresses[0];
   const [showMap, setShowMap] = useState(false);
   const [selectedState, setSelectedState] = useState("");
+  const [startTimeOfDay, setStartTimeOfDay] = useState("");
+  const [endTimeOfDay, setEndTimeOfDay] = useState("");
+  const [timedTables, setTimedTables] = useState(false);
   const [formData, setFormData] = useState({
     eventName: "",
     date: "",
-    time: "",
-    duration: "",
+    startTime: "",
+    endTime: "",
     description: "",
     organizationName: "",
     firstName: "",
@@ -68,8 +73,8 @@ export default function CreateEventPage() {
   const [errors, setErrors] = useState({
     eventName: "",
     date: "",
-    time: "",
-    duration: "",
+    startTime: "",
+    endTime: "",
     description: "",
     organizationName: "",
     firstName: "",
@@ -103,17 +108,16 @@ export default function CreateEventPage() {
            date.getFullYear() === year;
   };
 
-  // Helper function to validate time format (HH:MM AM/PM)
-  const isValidTime = (timeStr: string) => {
-    const regex = /^(0?[1-9]|1[0-2]):([0-5][0-9])\s?(AM|PM|am|pm)$/;
+  // Helper function to validate start time format (H:MM or HH:MM)
+  const isValidStartTime = (timeStr: string) => {
+    const regex = /^(?:[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
     return regex.test(timeStr);
   };
 
-  // Helper function to validate duration format
-  const isValidDuration = (durationStr: string) => {
-    // Accept formats like "24hr 30m", "24 hours", "1hr 30min", "90m", etc.
-    const regex = /^(\d+\s?(hr|hour|hours|h))?\s?(\d+\s?(m|min|minute|minutes))?$/;
-    return regex.test(durationStr) && durationStr.trim() !== "";
+  // Helper function to validate end time format (H:MM or HH:MM)
+  const isValidEndTime = (timeStr: string) => {
+    const regex = /^(?:[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
+    return regex.test(timeStr);
   };
 
   // Helper function to validate email format
@@ -150,8 +154,8 @@ export default function CreateEventPage() {
     const newErrors = {
       eventName: "",
       date: "",
-      time: "",
-      duration: "",
+      startTime: "",
+      endTime: "",
       description: "",
       organizationName: "",
       firstName: "",
@@ -188,21 +192,21 @@ export default function CreateEventPage() {
       isValid = false;
     }
 
-    // Time validation
-    if (!formData.time.trim()) {
-      newErrors.time = "Time is required";
+    // Start time validation
+    if (!formData.startTime.trim()) {
+      newErrors.startTime = "Start time is required";
       isValid = false;
-    } else if (!isValidTime(formData.time)) {
-      newErrors.time = "Please use HH:MM AM/PM format";
+    } else if (!isValidStartTime(formData.startTime) || startTimeOfDay === "") {
+      newErrors.startTime = "Please use HH:MM format and choose a time of day";
       isValid = false;
     }
 
-    // Duration validation
-    if (!formData.duration.trim()) {
-      newErrors.duration = "Duration is required";
+    // End time validation
+    if (!formData.endTime.trim()) {
+      newErrors.endTime = "End time is required";
       isValid = false;
-    } else if (!isValidDuration(formData.duration)) {
-      newErrors.duration = "Use format like '24hr 30m' or '2 hours'";
+    } else if (!isValidEndTime(formData.endTime) || endTimeOfDay === "") {
+      newErrors.endTime = "Please use HH:MM format and choose a time of day";
       isValid = false;
     }
 
@@ -289,8 +293,8 @@ export default function CreateEventPage() {
     setFormData({
       eventName: "",
       date: "",
-      time: "",
-      duration: "",
+      startTime: "",
+      endTime: "",
       description: "",
       organizationName: "",
       firstName: "",
@@ -310,8 +314,8 @@ export default function CreateEventPage() {
     setErrors({
       eventName: "",
       date: "",
-      time: "",
-      duration: "",
+      startTime: "",
+      endTime: "",
       description: "",
       organizationName: "",
       firstName: "",
@@ -340,13 +344,13 @@ export default function CreateEventPage() {
     if (field === 'date' && value && !isValidDate(value)) {
       setErrors(prev => ({ ...prev, date: "Please use MM/DD/YYYY format" }));
     }
-    
-    if (field === 'time' && value && !isValidTime(value)) {
-      setErrors(prev => ({ ...prev, time: "Please use HH:MM AM/PM format" }));
+
+    if (field === 'startTime' && value && !isValidStartTime(value)) {
+      setErrors(prev => ({ ...prev, startTime: "Please use HH:MM AM/PM format" }));
     }
-    
-    if (field === 'duration' && value && !isValidDuration(value)) {
-      setErrors(prev => ({ ...prev, duration: "Use format like '24hr 30m' or '2 hours'" }));
+
+    if (field === 'endTime' && value && !isValidEndTime(value)) {
+      setErrors(prev => ({ ...prev, endTime: "Please use HH:MM AM/PM format" }));
     }
 
     if (field === 'email' && value && !isValidEmail(value)) {
@@ -428,8 +432,8 @@ export default function CreateEventPage() {
         body: JSON.stringify({
           eventName: formData.eventName,
           date: formData.date,
-          startTime: formData.time,
-          duration: formData.duration,
+          startTime: formData.startTime + " " + startTimeOfDay,
+          endTime: formData.endTime + " " + endTimeOfDay,
           description: formData.description,
           organizationName: formData.organizationName,
           firstName: formData.firstName,
@@ -443,6 +447,7 @@ export default function CreateEventPage() {
           location: formData.location,
           scale: formData.scale,
           creator: userEmail?.emailAddress,
+          timedTables: timedTables
         }),
       });
 
@@ -575,51 +580,109 @@ export default function CreateEventPage() {
                   )}
                 </div>
 
-                {/* TIME */}
+                {/* START TIME */}
                 <div className="space-y-1">
                   <label className="text-sm text-primary flex items-center">
-                    Time*
-                    {errors.time && (
+                    Start Time*
+                    {errors.startTime && (
                       <span className="ml-2 text-xs text-red-500">
                         (Required)
                       </span>
                     )}
                   </label>
-                  <Input
-                    name="time"
-                    type="text"
-                    placeholder="HH:MM AM/PM"
-                    value={formData.time}
-                    onChange={(e) => handleInputChange("time", e.target.value)}
-                    className={getInputClasses("time")}
-                    aria-invalid={errors.time ? "true" : "false"}
-                  />
-                  {errors.time && (
-                    <p className="text-sm text-red-500">{errors.time}</p>
+                  <div className="flex flex-row gap-2">
+                    <Input
+                      name="time"
+                      type="text"
+                      placeholder="HH:MM"
+                      value={formData.startTime}
+                      onChange={(e) => handleInputChange("startTime", e.target.value)}
+                      className={`${getInputClasses("startTime")} basis-2/3`}
+                      aria-invalid={errors.startTime ? "true" : "false"}
+                    />
+                    <div className="basis-1/3">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                        <div className="relative">
+                          <Button
+                            variant="dropdown"
+                            className={`${getInputClasses("startTime")} flex items-center`}
+                          >
+                            {startTimeOfDay === "" ? <div className="text-[#747474]">AM</div> : startTimeOfDay}
+                          </Button>
+                        </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="max-h-60 overflow-y-auto">
+                          <DropdownMenuLabel>Select a Time</DropdownMenuLabel>
+                          <DropdownMenuRadioGroup
+                            value={startTimeOfDay}
+                            onValueChange={setStartTimeOfDay}
+                          >
+                              {times.map((abbr) => (
+                              <DropdownMenuRadioItem key={abbr} value={abbr}>
+                                {abbr}
+                              </DropdownMenuRadioItem>
+                            ))}
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                  {errors.startTime && (
+                    <p className="text-sm text-red-500">{errors.startTime}</p>
                   )}
                 </div>
 
-                {/* DURATION */}
+                {/* END TIME */}
                 <div className="space-y-1">
                   <label className="text-sm text-primary flex items-center">
-                    Duration*
-                    {errors.duration && (
+                    End Time*
+                    {errors.endTime && (
                       <span className="ml-2 text-xs text-red-500">
                         (Required)
                       </span>
                     )}
                   </label>
-                  <Input
-                    name="duration"
-                    type="text"
-                    placeholder="e.g. 24hr 30m"
-                    value={formData.duration}
-                    onChange={(e) => handleInputChange("duration", e.target.value)}
-                    className={getInputClasses("duration")}
-                    aria-invalid={errors.duration ? "true" : "false"}
-                  />
-                  {errors.duration && (
-                    <p className="text-sm text-red-500">{errors.duration}</p>
+                  <div className="flex flex-row gap-2">
+                    <Input
+                      name="time"
+                      type="text"
+                      placeholder="HH:MM"
+                      value={formData.endTime}
+                      onChange={(e) => handleInputChange("endTime", e.target.value)}
+                      className={`${getInputClasses("endTime")} basis-2/3`}
+                      aria-invalid={errors.endTime ? "true" : "false"}
+                    />
+                    <div className="basis-1/3">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                        <div className="relative">
+                          <Button
+                            variant="dropdown"
+                            className={`${getInputClasses("endTime")} flex items-center`}
+                          >
+                            {endTimeOfDay === "" ? <div className="text-[#747474]">AM</div> : endTimeOfDay}
+                          </Button>
+                        </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="max-h-60 overflow-y-auto">
+                          <DropdownMenuLabel>Select a Time</DropdownMenuLabel>
+                          <DropdownMenuRadioGroup
+                            value={endTimeOfDay}
+                            onValueChange={setEndTimeOfDay}
+                          >
+                            {times.map((abbr) => (
+                              <DropdownMenuRadioItem key={abbr} value={abbr}>
+                                {abbr}
+                              </DropdownMenuRadioItem>
+                            ))}
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                  {errors.endTime && (
+                    <p className="text-sm text-red-500">{errors.endTime}</p>
                   )}
                 </div>
               </div>
@@ -868,8 +931,9 @@ export default function CreateEventPage() {
               {/* TABLE AND LOCATION INFORMATION SECTION */}
               <div className="mb-3 flex flex-row justify-between">
                 <h1 className="text-l font-bold font-serif text-primary">Table and Location Information</h1>
-                <div className="self-end">
+                <div className="self-end flex flex-row items-center gap-2">
                   <h2 className="text-xs font-bold font-serif text-primary">Toggle Timed Tables</h2>
+                  <Switch checked={timedTables} onCheckedChange={setTimedTables} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-6" style={{marginBottom: "2rem"}}>

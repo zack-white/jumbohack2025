@@ -12,6 +12,7 @@ export async function POST(request: Request) {
       description,
       scale,
       startTime,
+      endTime,
       duration,
       organizationName,
       firstName,
@@ -23,13 +24,14 @@ export async function POST(request: Request) {
       state,
       zipCode,
       creator,
+      timedTables,
     } = data;
 
     const result = await query(
-      `INSERT INTO event (name, description, date, location, scale, start_time, 
-       duration, organizationName, firstName, lastName, email, phoneNumber, 
-       address, city, state, zipCode, creator) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) 
+      `INSERT INTO event (name, description, date, location, scale, starttime, 
+       endtime, organizationName, firstName, lastName, email, phoneNumber, 
+       address, city, state, zipCode, creator, timedTables) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) 
        RETURNING id`,
       [
         eventName,
@@ -38,7 +40,7 @@ export async function POST(request: Request) {
         pointString,
         scale,
         startTime,
-        duration,
+        endTime,
         organizationName,
         firstName,
         lastName,
@@ -48,7 +50,8 @@ export async function POST(request: Request) {
         city,
         state,
         zipCode,
-        creator
+        creator,
+        timedTables,
       ]
     );
 
