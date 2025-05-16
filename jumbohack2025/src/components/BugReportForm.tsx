@@ -4,11 +4,7 @@ import React from "react";
 import { useState, DragEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
 
-type UploadedFile = {
-    name: string;
-    size: number;
-    type: string;
-  };
+type UploadedFile = File;
 
 export default function BugReportForm() {
     const [selectedReason, setSelectedReason] = useState<string | null>(null);
@@ -20,27 +16,24 @@ export default function BugReportForm() {
 
     const handleFile = (fileList: FileList | null) => {
         if (!fileList || fileList.length === 0) return;
-    
+      
         const uploaded = fileList[0];
         const isValidType = ["image/jpeg", "image/png"].includes(uploaded.type);
         const isValidSize = uploaded.size <= maxSize;
-    
+      
         if (!isValidType) {
           alert("Only JPEG and PNG files are allowed.");
           return;
         }
-    
+      
         if (!isValidSize) {
           alert("File must be less than 50MB.");
           return;
         }
-    
-        setFile({
-          name: uploaded.name,
-          size: uploaded.size,
-          type: uploaded.type,
-        });
-      };
+      
+        setFile(uploaded);
+    };
+      
     
     const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -52,18 +45,20 @@ export default function BugReportForm() {
     };
 
     const handleSubmit = async () => {
+        const formData = new FormData();
+      
+        formData.append("selectedReason", selectedReason || "");
+        formData.append("description", description);
+        formData.append("priority", priority || "");
+        formData.append("additionalInfo", additionalInfo);
+      
+        if (file) {
+            formData.append("file", file);
+        }
+      
         const response = await fetch("/api/bug-report", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            selectedReason,
-            description,
-            priority,
-            additionalInfo,
-            file: file ? { name: file.name } : null, // send only metadata unless attaching
-          }),
+          body: formData,
         });
       
         const data = await response.json();
@@ -73,7 +68,6 @@ export default function BugReportForm() {
           alert("Failed to send: " + data.error);
         }
       };
-      
 
     return (
         <div className="bg-categoryBg p-12 shadow-md mx-auto w-full text-left">
@@ -102,7 +96,7 @@ export default function BugReportForm() {
                         className={`px-6 py-3 font-medium border border-[#2971AC] ${
                             selectedReason === label
                                 ? "bg-[#2971AC] text-white"
-                                : "bg-white text-[#2971AC]"
+                                : "bg-white hover:bg-[#B2DFFF] text-[#2971AC]"
                         }`}
                     >
                         {label}
@@ -123,27 +117,27 @@ export default function BugReportForm() {
             {/* Bug Priority */}
             <p className="text-gray-700 text-lg mt-10">Bug Priority</p>
             <p className="text-gray-500 text-sm mt-2">Choose the priority level of this bug: High/Medium/Low. Priority indicates the impact of the bug on users’ experience or system functionality.</p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mt-4">
                 <button
                     onClick={() => setPriority(priority === "High" ? null : "High")}
-                    className={`px-6 py-3 font-medium mt-4 border ${
-                        priority === "High" ? "bg-[#B01C1C] text-white" : "bg-white text-black"
+                    className={`px-6 py-3 font-medium border ${
+                        priority === "High" ? "bg-[#B01C1C] text-white" : "bg-white hover:bg-[#F4B3B3] text-black"
                     } border-[#B01C1C]`}
                 >
                     High Priority
                 </button>
                 <button
                     onClick={() => setPriority(priority === "Medium" ? null : "Medium")}
-                    className={`px-6 py-3 font-medium mt-4 border ${
-                        priority === "Medium" ? "bg-[#D47720] text-white" : "bg-white text-black"
+                    className={`px-6 py-3 font-medium border ${
+                        priority === "Medium" ? "bg-[#D47720] text-white" : "bg-white hover:bg-[#F8D3A3] text-black"
                     } border-[#D47720]`}
                 >
                     Medium Priority
                 </button>
                 <button
                     onClick={() => setPriority(priority === "Low" ? null : "Low")}
-                    className={`px-6 py-3 font-medium mt-4 border ${
-                        priority === "Low" ? "bg-[#109027] text-white" : "bg-white text-black"
+                    className={`px-6 py-3 font-medium border ${
+                        priority === "Low" ? "bg-[#109027] text-white" : "bg-white hover:bg-[#A7E3B1] text-black"
                     } border-[#109027]`}
                 >
                     Low Priority
