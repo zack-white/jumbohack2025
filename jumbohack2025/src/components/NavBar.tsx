@@ -50,6 +50,13 @@ const NavBar = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-8">
+            {/* Bug Report Button */}
+            <Button variant="ghost" className="inline-block bg-white text-gray-900 hover:underline hover:udnerline-offset-4 transition-all duration-200">
+              <Link href="/report-bug">
+                Report a Bug
+              </Link>
+            </Button>
+
             {isSignedIn && protectedNavItems.map((item) => (
               <Link
                 key={item.label}
@@ -95,6 +102,14 @@ const NavBar = () => {
         isMobileMenuOpen ? "block" : "hidden"
       )}>
         <div className="px-2 pt-2 pb-3 space-y-1">
+
+        <Link
+          href="/report-bug"
+          className="block px-3 py-2 text-white hover:underline hover:underline-offset-4 transition-all duration-200"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          Report a Bug
+        </Link>
 
           {isSignedIn && protectedNavItems.map((item) => (
             <Link
