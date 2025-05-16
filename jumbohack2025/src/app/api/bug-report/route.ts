@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const buffer = file ? Buffer.from(await file.arrayBuffer()) : null;
 
     await sendEmail({
-      to: "daniel.glorioso@tufts.edu",
+      to: "holdenkittelberger@gmail.com",
       subject: "JumboMap Bug Report: " + (selectedReason || "No Reason"),
       html: `
         <h2>New Bug Report Submitted</h2>
