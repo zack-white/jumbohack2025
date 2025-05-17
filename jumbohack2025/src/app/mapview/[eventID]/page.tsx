@@ -440,7 +440,7 @@ export default function MapboxMap() {
           <h1 className="text-xl md:text-2xl font-bold font-serif">{eventName}</h1>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-4">
           <div className="w-full md:w-3/5">
             <select
               value={selectedCategory}
@@ -456,11 +456,11 @@ export default function MapboxMap() {
             </select>
           </div>
 
-          <div className="flex items-center bg-white rounded-full shadow px-4 py-2">
+          <div className="flex items-center bg-categoryBg shadow px-6 py-4 ml-auto">
             <span className="mr-2">Show Labels</span>
             <button
               className={`relative inline-flex h-6 w-11 items-center rounded-full ${
-                showLabels ? "bg-blue-600" : "bg-gray-200"
+                showLabels ? "bg-[#2E73B5]" : "bg-gray-200"
               }`}
               onClick={toggleLabels}
               aria-pressed={showLabels}
