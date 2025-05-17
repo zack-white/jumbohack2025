@@ -30,8 +30,8 @@ interface ClubInfo {
 interface MarkerWithLabel {
   marker: mapboxgl.Marker;
   label?: mapboxgl.Popup;
-  clubName: string; // Add this to store the name for recreating labels
-  lng: number;      // Store coordinates for recreating labels
+  clubName: string;
+  lng: number;
   lat: number;
 }
 
@@ -48,11 +48,11 @@ const PROXIMITY_THRESHOLD = 100; // Pixel distance threshold for label proximity
 export default function MapboxMap() {
   const { eventID } = useParams();
   const [eventName, setEventName] = useState("None");
-  const id = Number(eventID); // Ensure ID is a number
+  const id = Number(eventID);
   
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const markersRef = useRef<MarkerWithLabel[]>([]); // Updated to include labels
+  const markersRef = useRef<MarkerWithLabel[]>([]);
 
   const [long, setLong] = useState(INITIAL_LONG);
   const [lat, setLat] = useState(INITIAL_LAT);
@@ -66,8 +66,9 @@ export default function MapboxMap() {
   const [clubInfo, setClubInfo] = useState<ClubInfo | null>(null);
   const [showClubInfo, setShowClubInfo] = useState(false);
   const [search, setSearch] = useState("");
-  const [showLabels, setShowLabels] = useState(true); // New state for toggle
+  const [showLabels, setShowLabels] = useState(true);
 
+  // Helper to get club by coordinates
   const getClubByCoords = async (lng: number, lat: number) => {
     try {
       const response = await fetch("/api/getClubByCoords", {
@@ -142,11 +143,9 @@ export default function MapboxMap() {
         const markerA = markers[i].marker;
         const markerB = markers[j].marker;
         
-        // Project coordinates to pixel positions
         const posA = map.project(markerA.getLngLat());
         const posB = map.project(markerB.getLngLat());
         
-        // If they're too close, mark both to hide labels
         if (arePointsTooClose(posA, posB)) {
           shouldShowLabel.set(markerA, false);
           shouldShowLabel.set(markerB, false);
@@ -164,24 +163,19 @@ export default function MapboxMap() {
     const map = mapRef.current;
     const currentZoom = map.getZoom();
     
-    // First, remove all existing labels
     markersRef.current.forEach(({ label }) => {
       if (label) label.remove();
     });
     
-    // Only proceed if the toggle is on and zoom is sufficient
     if (!showLabels || currentZoom < LABEL_ZOOM_THRESHOLD) {
       return;
     }
     
-    // Calculate which labels should be visible based on proximity
     const shouldShowLabel = calculateLabelVisibility();
     
-    // Apply visibility rules
     markersRef.current.forEach((markerInfo) => {
       const { marker, clubName, lng, lat } = markerInfo;
       
-      // Create a new popup if we should show the label
       if (shouldShowLabel.get(marker)) {
         const popup = new mapboxgl.Popup({
           closeButton: false,
@@ -193,7 +187,6 @@ export default function MapboxMap() {
           .setHTML(`<div class="club-label">${clubName}</div>`)
           .addTo(map);
         
-        // Update reference in markersRef
         markerInfo.label = popup;
       }
     });
@@ -294,7 +287,6 @@ export default function MapboxMap() {
               .setLngLat([lng, lat])
               .addTo(map);
 
-            // Add click event to marker
             marker.getElement().addEventListener("click", async (event) => {
               event.stopPropagation();
               const { lng, lat } = marker.getLngLat();
@@ -309,7 +301,6 @@ export default function MapboxMap() {
               }
             });
 
-            // Store marker reference with all needed info
             markersRef.current.push({
               marker,
               clubName: club.name,
@@ -330,12 +321,10 @@ export default function MapboxMap() {
           setZoom(map.getZoom());
         });
         
-        // Update labels after map movement ends
         map.on("moveend", () => {
           updateLabelVisibility();
         });
 
-        // Update labels after zoom changes
         map.on("zoomend", () => {
           updateLabelVisibility();
         });
@@ -359,13 +348,11 @@ export default function MapboxMap() {
         club.name.toLowerCase().includes(search.toLowerCase())
       );
 
-  // Update map markers when filtered clubs change
   useEffect(() => {
     if (!mapRef.current || !mapRef.current.loaded()) return;
 
     const map = mapRef.current;
     
-    // Remove existing markers and labels
     markersRef.current.forEach(({ marker, label }) => {
       marker.remove();
       if (label) label.remove();
@@ -374,7 +361,6 @@ export default function MapboxMap() {
 
     // Add markers for each filtered club
     filteredClubs.forEach((club) => {
-      // Determine coordinates
       const lng = club.coordinates ? club.coordinates.x : club.x;
       const lat = club.coordinates ? club.coordinates.y : club.y;
       if (lng == null || lat == null) return; // Skip if no coordinates
@@ -383,7 +369,6 @@ export default function MapboxMap() {
         .setLngLat([lng, lat])
         .addTo(map);
 
-      // Add click event to marker
       marker.getElement().addEventListener("click", async (event) => {
         event.stopPropagation();
         const { lng, lat } = marker.getLngLat();
@@ -398,7 +383,6 @@ export default function MapboxMap() {
         }
       });
 
-      // Store marker with needed info
       markersRef.current.push({
         marker,
         clubName: club.name,
@@ -411,12 +395,10 @@ export default function MapboxMap() {
     updateLabelVisibility();
   }, [filteredClubs]);
 
-  // Update label visibility when showLabels toggle changes
   useEffect(() => {
     updateLabelVisibility();
   }, [showLabels]);
 
-  // Update queue when category is selected
   useEffect(() => {
     if (!mapRef.current) return;
     
