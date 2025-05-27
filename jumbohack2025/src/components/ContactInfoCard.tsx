@@ -11,7 +11,7 @@ interface ContactInfoProps {
   
 export default function ContactInfoCard(contactInfo: ContactInfoProps) {
     return (
-      <div className="bg-[#F7F9FB] h-28 pl-6 pr-6 pt-4 font-inter">
+      <div className="bg-[#F7F9FB] h-28 w-full px-6 pt-4 font-inter">
         <p className="text-base">
           {contactInfo.isEventOrganizer ? (
             <>Event Organizer: </>
