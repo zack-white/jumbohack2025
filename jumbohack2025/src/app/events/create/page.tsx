@@ -555,7 +555,7 @@ export default function CreateEventPage() {
               </div>
 
               {/* DATE / TIME / DURATION with adjusted spacing */}
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* DATE */}
                 <div className="space-y-1">
                   <label className="text-sm text-primary flex items-center">
@@ -742,7 +742,7 @@ export default function CreateEventPage() {
               </div>
 
               {/* REPRESENTATIVE NAME */}
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-1"> 
                   <label className="text-sm text-primary flex items-center">
                     Representative First Name*
@@ -790,7 +790,7 @@ export default function CreateEventPage() {
               </div>
 
               {/* CONTACT INFO */}
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* EMAIL */}
                 <div className="space-y-1"> 
                   <label className="text-sm text-primary flex items-center">
@@ -841,7 +841,7 @@ export default function CreateEventPage() {
 
               {/* LOCATION INFO */}
 
-              {/* ORGANIZATION NAME */}
+              {/* ADDRESS */}
               <div className="space-y-1">
                 <label className="text-sm text-primary flex items-center">
                   Address
@@ -857,7 +857,7 @@ export default function CreateEventPage() {
                   <p className="text-sm text-red-500">{errors.address}</p>
                 )}
               </div>
-              <div className="grid grid-cols-3 gap-6" style={{marginBottom: "2rem"}}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6" style={{marginBottom: "2rem"}}>
                 {/* CITY */}
                 <div className="space-y-1"> 
                   <label className="text-sm text-primary flex items-center">
@@ -929,14 +929,14 @@ export default function CreateEventPage() {
               </div>
               
               {/* TABLE AND LOCATION INFORMATION SECTION */}
-              <div className="mb-3 flex flex-row justify-between">
+              <div className="mb-3 flex flex-col gap-2 sm:flex-row justify-between">
                 <h1 className="text-l font-bold font-serif text-primary">Table and Location Information</h1>
-                <div className="self-end flex flex-row items-center gap-2">
+                <div className="sm:self-end flex flex-row items-center gap-2">
                   <h2 className="text-xs font-bold font-serif text-primary">Toggle Timed Tables</h2>
                   <Switch checked={timedTables} onCheckedChange={setTimedTables} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-6" style={{marginBottom: "2rem"}}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{marginBottom: "2rem"}}>
                 {/* SPREADSHEET */}
                 <div className="space-y-1">
                   <div className="flex items-center gap-3">
