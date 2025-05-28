@@ -82,81 +82,99 @@ export default function EventPage() {
 
   return (
     <>
-      <div className="bg-white md:overflow-hidden mx-auto w-full py-6 px-[10vw] flex flex-col justify-between items-center">
-        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 max-h-[100vh] justify-between">
-            <div className='md:w-1/2'>
-                <h1 className="px-4 text-2xl md:text-3xl font-bold font-serif">{event.name}</h1>
-                <p className="px-4 text-gray-500">
-                    {dayName}, {month} {day} • {event.starttime} - {event.endtime}
-                </p>
-                <ShowMapButton eventID={id} />
+      <div className="bg-white md:overflow-hidden max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 max-h-[100vh] justify-between w-full">
+          <div>
+            <h1 className="px-4 text-2xl md:text-3xl font-bold font-serif">{event.name}</h1>
+            <p className="px-4 text-gray-500">
+                {dayName}, {month} {day} • {event.starttime} - {event.endtime}
+            </p>
+            <ShowMapButton eventID={id} />
 
-                <div className='flex flex-row justify-between pb-2'>
-                    <h1 className="text-xl md:text-2xl font-bold font-serif mb-1 px-4">About this Event</h1>
-                    {/* Show Edit Button if the logged-in user is the creator */}
-                    {userEmail === event.creator && (
-                        <div className="flex justify-center">
-                            <button
-                                className="bg-[#2971AC] text-white px-4 py-2 font-inter md:text-base text-xs font-medium"
-                                onClick={handleEdit}
-                            >
-                                Edit Event
-                            </button>
-                        </div>
-                    )}
+            <div className='flex flex-row justify-between pb-2'>
+              <h1 className="text-xl md:text-2xl font-bold font-serif mb-1 px-4">About this Event</h1>
+              {/* Show Edit Button if the logged-in user is the creator */}
+              {userEmail === event.creator && (
+                <div className="flex justify-center">
+                  <button
+                      className="bg-[#2971AC] text-white px-4 py-2 font-inter md:text-base text-xs font-medium"
+                      onClick={handleEdit}
+                  >
+                      Edit Event
+                  </button>
                 </div>
-                <p className="px-4 text-gray-500">{event.description}</p>
-                <div className="mt-4 pl-4 flex flex-col gap-2">
-                    <h1 className="text-xl md:text-2xl font-bold font-serif">Contact Information</h1>
-                    <ContactInfoCard
-                        isEventOrganizer={true}
-                        organizer={event.organizationname} 
-                        address={event.address} 
-                        phoneNumber={event.phonenumber} 
-                        city={event.city} 
-                        state={event.state} 
-                        zipCode={event.zipcode} 
-                        email={event.email} 
-                    />
-                </div>
+              )}
             </div>
 
-            <div className='md:w-1/2'>
-                <ClubsSearch eventId={id} />
+            <p className="px-4 text-gray-500">{event.description}</p>
+            <div className="mt-4 pl-4 flex flex-col gap-2">
+              <h1 className="text-xl md:text-2xl font-bold font-serif">Contact Information</h1>
+              <ContactInfoCard
+                isEventOrganizer={true}
+                organizer={event.organizationname} 
+                address={event.address} 
+                phoneNumber={event.phonenumber} 
+                city={event.city} 
+                state={event.state} 
+                zipCode={event.zipcode} 
+                email={event.email} 
+              />
             </div>
+          </div>
+          <div className='overflow-hidden'>
+            <ClubsSearch eventId={id} />
+          </div>
         </div>
-        <div className="bg-[#2971AC] w-[100vw] h-50">
-            <div className="flex flex-col py-6 px-[10vw] mx-auto max-w">
-                <Image
-                    src={theme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'}
-                    alt="JumboMap Logo"
-                    width={140}
-                    height={40}
-                    className="h-8 w-auto md:h-12 md:w-auto self-start px-4"
-                />
-                <div className='flex flex-row justify-center gap-6 mt-4 px-4'>
-                    <ContactInfoCard
-                        isEventOrganizer={false}
-                        organizer={"TUPD"} 
-                        address={"419 Boston Ave"} 
-                        phoneNumber={"(617) 627-6911"} 
-                        city={"Medford"} 
-                        state={"MA"} 
-                        zipCode={"02155"} 
-                        email={""} 
-                    />
-                    <ContactInfoCard
-                        isEventOrganizer={false}
-                        organizer={"Tufts Health Services"} 
-                        address={"124 Professors Row"} 
-                        phoneNumber={"(617) 627 3350"} 
-                        city={"Medford"} 
-                        state={"MA"} 
-                        zipCode={"02155"} 
-                        email={""} 
-                    />
-                </div>
+      </div>
+      <div className="bg-[#2971AC] w-[100vw] h-50">
+        <div className="flex flex-col max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 gap-4">
+          <Image
+            src={theme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'}
+            alt="JumboMap Logo"
+            width={140}
+            height={40}
+            className="h-8 w-auto md:h-12 md:w-auto self-start px-4"
+          />
+          <div className='flex flex-col items-center md:flex-row justify-center gap-6 mt-4 px-4'>
+            <div className='w-full md:w-1/2'>
+              <ContactInfoCard
+                isEventOrganizer={false}
+                organizer={"TUPD"} 
+                address={"419 Boston Ave"} 
+                phoneNumber={"(617) 627-6911"} 
+                city={"Medford"} 
+                state={"MA"} 
+                zipCode={"02155"} 
+                email={""} 
+              />
             </div>
+            <div className='w-full md:w-1/2'>
+              <ContactInfoCard
+                isEventOrganizer={false}
+                organizer={"Tufts Health Services"} 
+                address={"124 Professors Row"} 
+                phoneNumber={"(617) 627 3350"} 
+                city={"Medford"} 
+                state={"MA"} 
+                zipCode={"02155"} 
+                email={""} 
+              />
+            </div>
+          </div>
+          <div className='flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6 px-4'>
+            <p className='text-white text-xs'>© 2025 Daniel Glorioso, William Goldman, Hannah Jiang, Holden Kittelberger, Shayne Sidman, Zachary White, Elisa Yu</p>
+            <div className='flex flex-row gap-6'>  
+              <a className='flex justify-center items-center text-center px-6 py-2 text-white text-sm border border-white hover:cursor-pointer'>
+                Report a Bug
+              </a>
+              <div 
+                className='flex flex-row gap-1 items-center px-6 py-2 bg-white text-sm text-[#2971AC] hover:cursor-pointer'
+              >
+                <p className='text-center'>Back to Top</p>
+                <Image src={"/back-to-top.svg"} alt={"Back to top"} width={16} height={16} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>
