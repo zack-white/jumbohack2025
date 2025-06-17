@@ -315,6 +315,10 @@ export default function MapboxMap() {
     initializeMap();
   }, []);
 
+  const handleAddTable = () => {
+    router.push(`/addTable/${id}`)
+  }
+
   const handleSubmit = async () => {
     // setIsLoading(true);
     setStatus('');
@@ -404,6 +408,9 @@ export default function MapboxMap() {
 
           {/* Submit button (moves left when queue is empty) */}
           <div className={`queueAndSubmit flex-shrink-0 ${queue.length > 0 ? 'ml-4' : ''}`}>
+            <button className="h-[6vh] px-6 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={handleAddTable}>
+              + Table
+            </button>
             <button type="submit" className="h-[6vh] px-6 bg-[#2E73B5] text-white" onClick={handleSubmit}>
               Submit
             </button>
