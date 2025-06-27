@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import MapboxMap from "@/app/map/map";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,7 @@ export default function AddTablePage() {
         location: null as { x: number; y: number } | null,
         scale: 0,
     });
+    const [categories, setCategories] = useState<string[]>([]);
 
     const [errors, setErrors] = useState({
       name: "",
@@ -53,33 +54,60 @@ export default function AddTablePage() {
     const handleSubmit = async () => {
 
     }
+
+    if (eventID && categories.length === 0) {
+      (async () => {
+        try {
+          const response = await fetch("/api/getClubs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ eventID }),
+          });
+
+          if (!response.ok) {
+            console.error("Error fetching existing clubs.");
+          }
+
+          const clubs = await response.json();
+          const uniqueCategories = new Set<string>(
+            clubs.map((club: any) => club.category)
+          );
+          setCategories(Array.from(uniqueCategories));
+        } catch (error) {
+          console.error("Error fetching clubs:", error);
+        }
+      })();
+    }
+
     return (
     <div className="bg-[#F7F9FB] md:bg-white m-[3%] overflow-hidden md:flex md:items-center md:justify-center">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Add Table</CardTitle>
+            <CardTitle className="text-2xl font-bold text-titleFont">Add Table</CardTitle>
+            <hr className="my-2" />
         </CardHeader>
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-2">
             {/* Organization Information */}
             <div>
-              <CardTitle className="text-xl font-semibold">Organization Information</CardTitle>
-              <div className="space-y-1">
-                <label className="text-sm text-primary flex items-center">
+              <CardTitle className="text-xl font-semibold text-titleFont">Organization Information</CardTitle>
+              <div className="">
+                <label className="mt-4 text-sm text-primary flex items-center">
                   Organization Name*
                   {errors.name && (
-                      <span className="ml-2 text-xs text-red-500">
-                        (Required)
-                      </span>
+                    <span className="ml-2 text-xs text-red-500">
+                    (Required)
+                    </span>
                   )}
                 </label>
                 <Input
+                  className="mt-2"
                   placeholder="e.g. JumboHack"
                   value={clubData.name}
                   onChange={(e) => setClubData({ ...clubData, name: e.target.value })}
                   required
                 />
-                <label className="text-sm text-primary flex items-center">
+                <label className="mt-4 text-sm text-primary flex items-center">
                   Select Category*
                   {errors.category && (
                       <span className="ml-2 text-xs text-red-500">
@@ -88,26 +116,28 @@ export default function AddTablePage() {
                   )}
                 </label>
                 <select
-                  className="w-full border rounded px-3 py-2 text-sm text-gray-700"
+                  className="mt-2 w-full border rounded px-3 py-2 text-sm text-gray-700"
                   value={clubData.category}
                   onChange={(e) => setClubData({ ...clubData, category: e.target.value })}
                   required
                 >
                   <option value="">Select...</option>
-                  <option value="tech">Tech</option>
-                  <option value="arts">Arts</option>
-                  <option value="business">Business</option>
+                  {categories.map((category, index) => (
+                    <option key={index} value={category}>
+                      {category}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
             {/* Contact Information */}
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <CardTitle className="text-xl font-semibold">Contact Information</CardTitle>
+              <div className="mt-8 items-center gap-2 mb-2">
+                <CardTitle className="text-xl font-semibold text-titleFont">Contact Information</CardTitle>
                 {/* <Tooltip content="Contact person responsible for this table." /> */}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   placeholder="Representative First Name"
                   required
@@ -118,8 +148,8 @@ export default function AddTablePage() {
                   required
                   onChange={(e) => setClubData({ ...clubData, lastName: e.target.value })}
                 />
-              </div>
-              <label className="text-sm text-primary flex items-center">
+              </div> */}
+              <label className="mt-4 text-sm text-primary flex items-center">
                 Email*
                 {errors.contact && (
                     <span className="ml-2 text-xs text-red-500">
@@ -130,8 +160,9 @@ export default function AddTablePage() {
               <Input
                 type="email"
                 placeholder="example@gmail.com"
-                className="mt-4"
-                
+                className="mt-2"
+                required
+                onChange={(e) => setClubData({ ...clubData, contact: e.target.value })}
               />
             </div>
 
