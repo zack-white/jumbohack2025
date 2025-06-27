@@ -3,7 +3,7 @@
 import { use, useState } from "react";
 import MapboxMap from "@/app/map/map";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import AddClubComponent from "@/components/AddClub";
+import EditClubComponent from "@/components/EditClub";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,7 +29,7 @@ export default function AddTablePage() {
     
     return (
         <div>
-            <AddClubComponent eventID={Number(eventID)} />
+            <EditClubComponent eventID={Number(eventID)} />
         </div>
     );
 
