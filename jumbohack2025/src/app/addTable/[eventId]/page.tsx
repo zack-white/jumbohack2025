@@ -124,6 +124,10 @@ export default function AddTablePage() {
       })();
     }
 
+    const handleCancel = () => {
+      router.push(`/placement/${eventID}`);
+    };
+
     return (
     <div className="bg-[#F7F9FB] md:bg-white m-[3%] overflow-hidden md:flex md:items-center md:justify-center">
       <Card>
@@ -215,6 +219,7 @@ export default function AddTablePage() {
             <div className="flex justify-end gap-3 pt-6">
               <Button 
                 type="button" 
+                onClick={handleCancel}
                 variant="outline" 
                 className="h-11 px-6" 
               >
