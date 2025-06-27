@@ -47,13 +47,58 @@ export default function AddTablePage() {
       contact: "",
       start_time: "",
       end_time: "",
-      description: "",
-      location: "",
     });
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    }
+      const newErrors = {
+        name: clubData.name ? "" : "Required",
+        category: clubData.category ? "" : "Required",
+        contact: clubData.contact ? "" : "Required",
+        start_time: "", // not used
+        end_time: "",   // not used
+      };
+
+      setErrors(newErrors);
+
+      const hasErrors = Object.values(newErrors).some((v) => v !== "");
+      if (hasErrors) {
+        toast.error("Please fill in all required fields.");
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/addClub", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: clubData.name,
+            category: clubData.category,
+            contact: clubData.contact,
+            description: "", // not collected from form
+            coordinates: null, // not set yet
+            confirmed: false, // default
+            event_id: eventID,
+          }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          console.error("Server error:", data.error);
+          toast.error("Error adding table.");
+          return;
+        }
+
+        toast.success("Table added successfully!");
+        router.push(`/eventview?id=${eventID}`);
+      } catch (err) {
+        console.error("Error submitting form:", err);
+        toast.error("Network error while adding table.");
+      }
+    };
 
     if (eventID && categories.length === 0) {
       (async () => {
@@ -176,9 +221,10 @@ export default function AddTablePage() {
                 Cancel
               </Button>
               <Button
-                type="submit" 
+                type="submit"
+                // onClick={handleSubmit}
                 className="h-11 px-6 bg-[#2E73B5] hover:bg-[#235d92]"
-              >
+                >
                 Add Table
               </Button>
             </div>
