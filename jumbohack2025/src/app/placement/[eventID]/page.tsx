@@ -169,6 +169,7 @@ export default function MapboxMap() {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
+                      action: 'findByCoords',
                       x: lng,
                       y: lat
                   })
@@ -369,10 +370,28 @@ export default function MapboxMap() {
     }
   }, [selectedCategory, clubs]);
 
+  // Edit club information
+  const handleEditClub = async () => {
+    router.push(`/editTable/${clubInfo?.id}`); // Navigate to edit page with club ID
+  };
+
+  // Move club marker
+  const handleMoveClub = async () => {
+    // Logic to move club marker
+    console.log("Moving club:");
+    // You can implement the move functionality here
+  };
+
   return (
     <div className="wrapper">
       <div ref={mapContainerRef} className="mapContainer"/>
-      {showClubInfo && clubInfo !== undefined && <InfoPopup club={clubInfo} onClose={() => setShowClubInfo(false)} />}
+      {showClubInfo && clubInfo !== undefined && 
+      <InfoPopup 
+        club={clubInfo} 
+        onClose={() => setShowClubInfo(false)} 
+        onEdit={handleEditClub}
+        onMove={handleMoveClub}
+      />}
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-bold mb-4">Unplaced Clubs</h1>
 
