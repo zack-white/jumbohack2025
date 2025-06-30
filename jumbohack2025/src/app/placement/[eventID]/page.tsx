@@ -274,6 +274,7 @@ export default function MapboxMap() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+              action: 'updateCoordinates',
               id: nextClub.id,
               x: lng,
               y: lat,

@@ -84,6 +84,7 @@ export default function EditTablePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const newErrors = {
       name: clubData.name ? "" : "Required",
       category: clubData.category ? "" : "Required",
@@ -100,14 +101,23 @@ export default function EditTablePage() {
       const res = await fetch("/api/updateClub", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...clubData, id: clubID }),
+        body: JSON.stringify({
+          action: "updateDetails",
+          id: clubID,
+          name: clubData.name,
+          category: clubData.category,
+          contact: clubData.contact,
+          description: clubData.description,
+        }),
       });
+
       if (!res.ok) {
         toast.error("Failed to update club.");
         return;
       }
+
       toast.success("Club updated successfully!");
-      router.push(`/placement?id=${eventID}`);
+      router.push(`/placement/${eventID}`);
     } catch (err) {
       console.error(err);
       toast.error("Error updating club.");

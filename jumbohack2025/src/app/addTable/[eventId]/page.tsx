@@ -95,7 +95,7 @@ export default function AddTablePage() {
         }
 
         toast.success("Table added successfully!");
-        router.push(`/placement?id=${eventID}`);
+        router.push(`/placement/${eventID}`);
       } catch (err) {
         console.error("Error submitting form:", err);
         toast.error("Network error while adding table.");
