@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const eventId = body.eventID;
     console.log(eventId)
     const result = await query(
-      'SELECT id, name, category, coordinates FROM clubs WHERE event_id = $1 AND coordinates IS NULL',
+      'SELECT id, name, category, coordinates FROM clubs WHERE event_id = $1',
       [eventId]
     );
     return NextResponse.json(result.rows);
