@@ -378,9 +378,49 @@ export default function MapboxMap() {
 
   // Move club marker
   const handleMoveClub = async () => {
-    // Logic to move club marker
-    console.log("Moving club:");
-    // You can implement the move functionality here
+    
+    if (!clubInfo || !mapRef.current) return;
+
+    // Remove coordinates in backend
+    try {
+      const response = await fetch('/api/updateClub', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'removeCoordinates',
+          id: clubInfo.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove club coordinates');
+      }
+
+      // Update the club in the local state
+      setClubs((prevClubs) =>
+        prevClubs.map((club) =>
+          club.id === clubInfo.id
+            ? { ...club, x: undefined, y: undefined, coordinates: undefined }
+            : club
+        )
+      );
+
+      // Add to front of queue
+      setQueue((prevQueue) => [clubInfo, ...prevQueue]);
+
+      // Close the popup
+      setShowClubInfo(false);
+
+      // Trigger rerender (optional: you could remove and reload markers if you store them)
+      mapRef.current?.fire('load');
+
+      console.log(`Club ${clubInfo.name} moved back to queue.`);
+    } catch (error) {
+      console.error('Error moving club:', error);
+    }
+
   };
 
   return (

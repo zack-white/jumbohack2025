@@ -35,6 +35,14 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Club details updated successfully' });
       }
 
+      case 'removeCoordinates': {
+        await query(
+          'UPDATE clubs SET coordinates = NULL WHERE id = $1', 
+          [body.id]
+        );
+        return NextResponse.json({ message: 'Coordinates removed' });
+    }
+
       default:
         return NextResponse.json({ message: 'Invalid action' }, { status: 400 });
     }
