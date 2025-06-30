@@ -36,7 +36,7 @@ export default function ClubForm({
           <hr className="my-2" />
         </CardHeader>
         <CardContent className="space-y-6">
-          <form onSubmit={onSubmit} className="space-y-2">
+          <form onSubmit={onSubmit} className="">
             <div>
               <CardTitle className="text-xl font-semibold text-titleFont">Organization Information</CardTitle>
               <label className="mt-4 text-sm text-primary flex items-center">
@@ -72,7 +72,19 @@ export default function ClubForm({
                 ))}
               </select>
             </div>
-
+            {mode === "edit" && (
+                <>
+                    <label className="mt-4 text-sm text-primary flex items-center">
+                        Description
+                    </label>
+                    <textarea
+                        className="mt-2 w-full px-3 py-2 text-sm text-gray-700 min-h-[120px]"
+                        placeholder="What is this table or organization about?"
+                        value={clubData.description}
+                        onChange={(e) => setClubData({ ...clubData, description: e.target.value })}
+                    />
+                </>
+            )}
             <div>
               <div className="mt-8 items-center gap-2 mb-2">
                 <CardTitle className="text-xl font-semibold text-titleFont">Contact Information</CardTitle>
