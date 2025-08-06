@@ -302,7 +302,6 @@ export default function CreateEventPage() {
           // Call the excel processing API here
           if (formData.spreadsheet) {
               await processExcel(formData.spreadsheet);
-            // }
           }
           const result = await response.json();
           const eventId = result.eventId + 1;

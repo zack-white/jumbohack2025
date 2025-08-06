@@ -8,12 +8,17 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const timedTable = formData.get('timedTable') as string;
-    const fallbackStartTime = formData.get('startTime') as string;
-    const fallbackEndTime = formData.get('endTime') as string;
+    const fallbackStartTime = formData.get('fallbackStartTime') as string;
+    const fallbackEndTime = formData.get('fallbackEndTime') as string;
 
     if (!file) {
       return NextResponse.json({ message: 'No file uploaded' }, { status: 400 });
     }
+
+    console.log('Received file:', file.name);
+    console.log('Timed Table:', timedTable);
+    console.log('Fallback Start Time:', fallbackStartTime);
+    console.log('Fallback End Time:', fallbackEndTime);
 
     // Get the latest event_id from the database
     const result = await query('SELECT MAX(id) as max_id FROM event', []);
