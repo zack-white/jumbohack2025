@@ -70,12 +70,14 @@ export default function InfoPopup({ club, onClose }: InfoPopupProps) {
       <div className="border-t pt-3">
         <h3 className="text-sm font-semibold text-gray-800 mb-2">Event Times</h3>
         <div className="space-y-1">
-          <p className="text-sm text-gray-700">
-            <span className="font-medium">Start:</span> {formatTime(club.start_time)}
-          </p>
-          <p className="text-sm text-gray-700">
-            <span className="font-medium">End:</span> {formatTime(club.end_time)}
-          </p>
+          <div className="flex gap-4 text-sm text-gray-700">
+            <p>
+              <span className="font-medium">Start:</span> {formatTime(club.start_time)}
+            </p>
+            <p>
+              <span className="font-medium">End:</span> {formatTime(club.end_time)}
+            </p>
+          </div>
         </div>
       </div>
       </motion.div>
