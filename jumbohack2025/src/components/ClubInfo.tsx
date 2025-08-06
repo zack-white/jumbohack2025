@@ -8,6 +8,8 @@ interface Club {
   id: number;
   name: string;
   description: string;
+  start_time: string;
+  end_time: string;
 }
 
 interface InfoPopupProps {
@@ -40,6 +42,8 @@ export default function InfoPopup({ club, onClose }: InfoPopupProps) {
       {/* Club Info */}
       <h2 className="text-lg font-bold">{club.name}</h2>
       <p className="text-gray-600">{club.description}</p>
+      <p className="text-gray-900">{club.start_time}</p>
+      <p className="text-gray-900">{club.end_time}</p>
       </motion.div>
     </div>
   );

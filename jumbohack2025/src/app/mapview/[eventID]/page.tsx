@@ -25,6 +25,8 @@ interface ClubInfo {
   id: number;
   name: string;
   description: string;
+  start_time: string;
+  end_time: string;
 }
 
 mapboxgl.accessToken = "pk.eyJ1Ijoic2FsbW9uLXN1c2hpIiwiYSI6ImNtN2dqYWdrZzA4ZnIyam9qNWx1NnAybjcifQ._YD8GYWPtpZ09AwYHzR2Og";
@@ -210,7 +212,7 @@ export default function MapboxMap() {
             const { lng, lat } = marker.getLngLat();
             const club = await getClubByCoords(lng, lat);
             if (club) {
-              setClubInfo({ id: club.id, name: club.name, description: club.description });
+              setClubInfo({ id: club.id, name: club.name, description: club.description, start_time: club.start_time, end_time: club.end_time });
               setShowClubInfo(true);
             }
           });
@@ -274,6 +276,8 @@ export default function MapboxMap() {
               id: clubData.id,
               name: clubData.name,
               description: clubData.description,
+              start_time: clubData.start_time,
+              end_time: clubData.end_time,
             });
             setShowClubInfo(true);
           }
@@ -339,6 +343,8 @@ export default function MapboxMap() {
                 id: clubData.id,
                 name: clubData.name,
                 description: clubData.description,
+                start_time: clubData.start_time,
+                end_time: clubData.end_time,
               });
               setShowClubInfo(true);
             }
