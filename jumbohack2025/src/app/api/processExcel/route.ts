@@ -8,6 +8,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const timedTable = formData.get('timedTable') as string;
+    const timedTableBool = timedTable === 'true';
     const fallbackStartTime = formData.get('fallbackStartTime') as string;
     const fallbackEndTime = formData.get('fallbackEndTime') as string;
 
@@ -33,7 +34,17 @@ export async function POST(request: Request) {
 
     // Process the data into the desired format
     const clubs = jsonData.slice(1).map((row) => {
-      const [name, category, contact, description, start_time, end_time]: ClubRow = row as ClubRow;
+      const [name, category, contact, description, rawStart, rawEnd]: ClubRow = row as ClubRow;
+
+        // Convert Excel time serials to time strings if numbers, else fallback
+        const start_time = typeof rawStart === 'number'
+          ? excelTimeToTimeString(rawStart)
+          : (timedTable === 'true' && rawStart ? rawStart : fallbackStartTime);
+
+        const end_time = typeof rawEnd === 'number'
+          ? excelTimeToTimeString(rawEnd)
+          : (timedTable === 'true' && rawEnd ? rawEnd : fallbackEndTime);
+
       return {
         name,
         contact,
@@ -42,8 +53,8 @@ export async function POST(request: Request) {
         event_id: nextEventId, // Dynamic event ID
         coordinates: null, // Coordinates are null initially
         confirmed: false, // Not confirmed
-        start_time: timedTable && start_time ? start_time : fallbackStartTime, // Fallback to event times if empty
-        end_time: timedTable && end_time ? end_time : fallbackEndTime, // Fallback to event times if empty
+        start_time: timedTableBool && start_time ? start_time : fallbackStartTime, // Fallback to event times if empty
+        end_time: timedTableBool && end_time ? end_time : fallbackEndTime, // Fallback to event times if empty
       };
     });
 
@@ -78,4 +89,24 @@ export async function POST(request: Request) {
       error: (error as Error).message 
     }, { status: 500 });
   }
+}
+
+function excelTimeToTimeString(excelTime: number): string {
+  // Excel date 0 = 1899-12-31, so base date for Excel serial is 1899-12-30 in JS
+  // fractional part of excelTime is the time portion of the day
+  const secondsInDay = 24 * 60 * 60;
+
+  const fractionalDay = excelTime % 1;
+  const totalSeconds = Math.round(fractionalDay * secondsInDay);
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  // Format to HH:MM:SS (24-hour)
+  return [
+    hours.toString().padStart(2, '0'),
+    minutes.toString().padStart(2, '0'),
+    seconds.toString().padStart(2, '0'),
+  ].join(':');
 }
