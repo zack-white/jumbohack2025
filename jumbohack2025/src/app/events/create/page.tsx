@@ -491,11 +491,12 @@ export default function CreateEventPage() {
               {/* Table and Location Title */}
               <div className="pt-4 mb-3 flex items-center justify-between">
                 <h2 className="text-lg font-bold font-serif text-primary">Table and Location Information</h2>
-                                  {/* Timed Table Toggle */}
+                  {/* Timed Table Toggle */}
                   <div className="flex items-center space-x-4">
                     <span className="text-sm font-serif">Toggle Timed Tables</span>
 
                     <button
+                      type="button" // To prevent form thinking this is a submit
                       onClick={() => setTimedTable(!timedTable)}
                       className={`relative w-16 h-8 flex items-center rounded-full p-1 transition-colors duration-300 ${
                         timedTable ? "bg-blue-600" : "bg-gray-400"
