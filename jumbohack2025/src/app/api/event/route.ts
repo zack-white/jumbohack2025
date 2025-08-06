@@ -17,8 +17,6 @@ export async function POST(request: Request) {
       creator,
     } = data;
 
-    console.log(data);
-
     const result = await query(
       `INSERT INTO event (name, description, date, location, scale, start_time, end_time, creator) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 

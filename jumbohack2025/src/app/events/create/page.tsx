@@ -355,7 +355,6 @@ export default function CreateEventPage() {
       }
 
       const data = await response.json();
-      console.log("Excel processing result:", data);
     } catch (error) {
       console.error("Error processing Excel file:", error);
       toast.error("Error processing Excel file. Please try again.");
@@ -378,7 +377,6 @@ export default function CreateEventPage() {
       }
 
       const data = await response.json();
-      console.log("Excel processing result:", data);
     } catch (error) {
       console.error("Error processing Excel file:", error);
       toast.error("Error processing Excel file. Please try again.");
