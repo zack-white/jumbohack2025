@@ -15,11 +15,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'No file uploaded' }, { status: 400 });
     }
 
-    console.log('Received file:', file.name);
-    console.log('Timed Table:', timedTable);
-    console.log('Fallback Start Time:', fallbackStartTime);
-    console.log('Fallback End Time:', fallbackEndTime);
-
     // Get the latest event_id from the database
     const result = await query('SELECT MAX(id) as max_id FROM event', []);
     const nextEventId = (result.rows[0]?.max_id ?? 0);
