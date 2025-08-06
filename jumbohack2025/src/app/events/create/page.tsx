@@ -14,6 +14,7 @@ import { useAuth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
 import Tooltip from "@/components/tooltip";
+import { time } from "console";
 
 export default function CreateEventPage() {
   const { userId } = useAuth();
@@ -287,7 +288,11 @@ export default function CreateEventPage() {
         success: async (response) => {
           // Call the excel processing API here
           if (formData.spreadsheet) {
-            await processExcel(formData.spreadsheet);
+            if (timedTable) {
+              await processExcelTimed(formData.spreadsheet);
+            } else {
+              await processExcel(formData.spreadsheet);
+            }
           }
           const result = await response.json();
           const eventId = result.eventId + 1;
@@ -322,12 +327,36 @@ export default function CreateEventPage() {
     }
   };
   
+  // Function to process Excel file WITHOUT timed tables
   const processExcel = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
 
     try {
       const response = await fetch("/api/processExcel", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to process Excel file");
+      }
+
+      const data = await response.json();
+      console.log("Excel processing result:", data);
+    } catch (error) {
+      console.error("Error processing Excel file:", error);
+      toast.error("Error processing Excel file. Please try again.");
+    }
+  };
+
+  // Function to process Excel file WITH timed tables
+  const processExcelTimed = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/api/processExcelTimed", {
         method: "POST",
         body: formData,
       });
