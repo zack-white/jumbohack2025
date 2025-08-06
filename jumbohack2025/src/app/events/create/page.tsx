@@ -31,8 +31,8 @@ export default function CreateEventPage() {
   const [formData, setFormData] = useState({
     eventName: "",
     date: "",
-    time: "",
-    duration: "",
+    start_time: "",
+    end_time: "",
     description: "",
     spreadsheet: null as File | null,
     location: null as { x: number; y: number } | null,
@@ -42,8 +42,8 @@ export default function CreateEventPage() {
   const [errors, setErrors] = useState({
     eventName: "",
     date: "",
-    time: "",
-    duration: "",
+    start_time: "",
+    end_time: "",
     description: "",
     spreadsheet: "",
     location: "",
@@ -92,8 +92,8 @@ export default function CreateEventPage() {
     const newErrors = {
       eventName: "",
       date: "",
-      time: "",
-      duration: "",
+      start_time: "",
+      end_time: "",
       description: "",
       spreadsheet: "",
       location: "",
@@ -119,23 +119,32 @@ export default function CreateEventPage() {
       isValid = false;
     }
 
-    // Time validation
-    if (!formData.time.trim()) {
-      newErrors.time = "Time is required";
+    // Start Time validation
+    if (!formData.start_time.trim()) {
+      newErrors.start_time = "Start time is required";
       isValid = false;
-    } else if (!isValidTime(formData.time)) {
-      newErrors.time = "Please use HH:MM AM/PM format";
+    } else if (!isValidTime(formData.start_time)) {
+      newErrors.start_time = "Please use HH:MM AM/PM format";
       isValid = false;
     }
 
-    // Duration validation
-    if (!formData.duration.trim()) {
-      newErrors.duration = "Duration is required";
+    // End Time validation
+    if (!formData.end_time.trim()) {
+      newErrors.end_time = "End time is required";
       isValid = false;
-    } else if (!isValidDuration(formData.duration)) {
-      newErrors.duration = "Use format like '24hr 30m' or '2 hours'";
+    } else if (!isValidTime(formData.end_time)) {
+      newErrors.end_time = "Please use HH:MM AM/PM format";
       isValid = false;
     }
+
+    // // Duration validation
+    // if (!formData.duration.trim()) {
+    //   newErrors.duration = "Duration is required";
+    //   isValid = false;
+    // } else if (!isValidDuration(formData.duration)) {
+    //   newErrors.duration = "Use format like '24hr 30m' or '2 hours'";
+    //   isValid = false;
+    // }
 
     // Description validation
     if (!formData.description.trim()) {
@@ -169,8 +178,8 @@ export default function CreateEventPage() {
     setFormData({
       eventName: "",
       date: "",
-      time: "",
-      duration: "",
+      start_time: "",
+      end_time: "",
       description: "",
       spreadsheet: null,
       location: null,
@@ -179,8 +188,8 @@ export default function CreateEventPage() {
     setErrors({
       eventName: "",
       date: "",
-      time: "",
-      duration: "",
+      start_time: "",
+      end_time: "",
       description: "",
       spreadsheet: "",
       location: "",
@@ -199,13 +208,17 @@ export default function CreateEventPage() {
       setErrors(prev => ({ ...prev, date: "Please use MM/DD/YYYY format" }));
     }
     
-    if (field === 'time' && value && !isValidTime(value)) {
-      setErrors(prev => ({ ...prev, time: "Please use HH:MM AM/PM format" }));
+   if (field === 'start_time' && value && !isValidTime(value)) {
+      setErrors(prev => ({ ...prev, start_time: "Please use HH:MM AM/PM format" }));
+    }
+
+    if (field === 'end_time' && value && !isValidTime(value)) {
+      setErrors(prev => ({ ...prev, end_time: "Please use HH:MM AM/PM format" }));
     }
     
-    if (field === 'duration' && value && !isValidDuration(value)) {
-      setErrors(prev => ({ ...prev, duration: "Use format like '24hr 30m' or '2 hours'" }));
-    }
+    // if (field === 'duration' && value && !isValidDuration(value)) {
+    //   setErrors(prev => ({ ...prev, duration: "Use format like '24hr 30m' or '2 hours'" }));
+    // }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -274,8 +287,8 @@ export default function CreateEventPage() {
         body: JSON.stringify({
           eventName: formData.eventName,
           date: formData.date,
-          startTime: formData.time,
-          duration: formData.duration,
+          startTime: formData.start_time,
+          endTime: formData.end_time,
           description: formData.description,
           location: formData.location,
           scale: formData.scale,
@@ -288,11 +301,8 @@ export default function CreateEventPage() {
         success: async (response) => {
           // Call the excel processing API here
           if (formData.spreadsheet) {
-            if (timedTable) {
-              await processExcelTimed(formData.spreadsheet);
-            } else {
               await processExcel(formData.spreadsheet);
-            }
+            // }
           }
           const result = await response.json();
           const eventId = result.eventId + 1;
@@ -329,13 +339,16 @@ export default function CreateEventPage() {
   
   // Function to process Excel file WITHOUT timed tables
   const processExcel = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
+    const parserData = new FormData();
+    parserData.append("file", file);
+    parserData.append("timedTable", timedTable ? "true" : "false");
+    parserData.append("fallbackStartTime", formData.start_time);
+    parserData.append("fallbackEndTime", formData.end_time);
 
     try {
       const response = await fetch("/api/processExcel", {
         method: "POST",
-        body: formData,
+        body: parserData,
       });
 
       if (!response.ok) {
@@ -442,51 +455,51 @@ export default function CreateEventPage() {
                   )}
                 </div>
 
-                {/* TIME */}
+                {/* START TIME */}
                 <div className="space-y-1">
                   <label className="text-sm text-primary flex items-center">
-                    Time*
-                    {errors.time && (
+                    Start Time*
+                    {errors.start_time && (
                       <span className="ml-2 text-xs text-red-500">
                         (Required)
                       </span>
                     )}
                   </label>
                   <Input
-                    name="time"
+                    name="start_time"
                     type="text"
                     placeholder="HH:MM AM/PM"
-                    value={formData.time}
-                    onChange={(e) => handleInputChange("time", e.target.value)}
-                    className={getInputClasses("time")}
-                    aria-invalid={errors.time ? "true" : "false"}
+                    value={formData.start_time}
+                    onChange={(e) => handleInputChange("start_time", e.target.value)}
+                    className={getInputClasses("start_time")}
+                    aria-invalid={errors.start_time ? "true" : "false"}
                   />
-                  {errors.time && (
-                    <p className="text-sm text-red-500">{errors.time}</p>
+                  {errors.start_time && (
+                    <p className="text-sm text-red-500">{errors.start_time}</p>
                   )}
                 </div>
 
-                {/* DURATION */}
+                {/* END TIME */}
                 <div className="space-y-1">
                   <label className="text-sm text-primary flex items-center">
-                    Duration*
-                    {errors.duration && (
+                    End Time*
+                    {errors.end_time && (
                       <span className="ml-2 text-xs text-red-500">
                         (Required)
                       </span>
                     )}
                   </label>
                   <Input
-                    name="duration"
+                    name="end_time"
                     type="text"
-                    placeholder="e.g. 24hr 30m"
-                    value={formData.duration}
-                    onChange={(e) => handleInputChange("duration", e.target.value)}
-                    className={getInputClasses("duration")}
-                    aria-invalid={errors.duration ? "true" : "false"}
+                    placeholder="HH:MM AM/PM"
+                    value={formData.end_time}
+                    onChange={(e) => handleInputChange("end_time", e.target.value)}
+                    className={getInputClasses("end_time")}
+                    aria-invalid={errors.end_time ? "true" : "false"}
                   />
-                  {errors.duration && (
-                    <p className="text-sm text-red-500">{errors.duration}</p>
+                  {errors.end_time && (
+                    <p className="text-sm text-red-500">{errors.end_time}</p>
                   )}
                 </div>
               </div>
