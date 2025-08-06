@@ -498,7 +498,7 @@ export default function CreateEventPage() {
                     <button
                       type="button" // To prevent form thinking this is a submit
                       onClick={() => setTimedTable(!timedTable)}
-                      className={`relative w-[4rem] h-[1.75rem] flex items-center rounded-full p-1 transition-colors duration-300 ${
+                      className={`relative w-[4rem] h-[1.8rem] flex items-center rounded-full p-1 transition-colors duration-300 ${
                         timedTable ? "bg-[#2E73B5]" : "bg-gray-400"
                       }`}
                     >
