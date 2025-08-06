@@ -36,12 +36,12 @@ export async function POST(request: Request) {
       const [name, category, contact, description, start_time, end_time]: ClubRow = row as ClubRow;
       return {
         name,
-        category,
         contact,
         description: description || '', // Default empty string if undefined
+        category,
+        event_id: nextEventId, // Dynamic event ID
         coordinates: null, // Coordinates are null initially
         confirmed: false, // Not confirmed
-        event_id: nextEventId, // Dynamic event ID
         start_time: timedTable && start_time ? start_time : fallbackStartTime, // Fallback to event times if empty
         end_time: timedTable && end_time ? end_time : fallbackEndTime, // Fallback to event times if empty
       };
@@ -53,8 +53,6 @@ export async function POST(request: Request) {
         'INSERT INTO clubs (name, contact, description, category, event_id, coordinates, confirmed, start_time, end_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
         [
           club.name,
-          club.category,
-          club.event_id,
           club.contact,
           club.description,
           club.category,

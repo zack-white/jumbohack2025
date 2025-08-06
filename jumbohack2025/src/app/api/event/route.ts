@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       description,
       scale,
       startTime,
-      duration,
+      endTime,
       creator,
     } = data;
 
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
         pointString,
         scale,
         startTime,
-        duration,
+        endTime,
         creator
       ]
     );
