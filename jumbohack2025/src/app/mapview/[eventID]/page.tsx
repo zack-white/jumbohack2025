@@ -13,6 +13,8 @@ interface Club {
   name: string;
   category: string;
   description: string;
+  start_time?: string;
+  end_time?: string;
   coordinates?: {
     x: number;
     y: number;
@@ -184,11 +186,15 @@ export default function MapboxMap() {
 
           if (!response.ok) {
             console.error("Error fetching existing clubs.");
+            return [];
           }
 
-          return await response.json();
+          const data = await response.json();
+          console.log("Raw API response from getExistingClubs:", data);
+          return data;
         } catch (error) {
           console.error("Error fetching clubs:", error);
+          return [];
         }
       };
 

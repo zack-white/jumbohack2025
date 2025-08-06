@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const eventId = body.eventID;
     console.log(eventId)
     const result = await query(
-      'SELECT id, name, category, coordinates FROM clubs WHERE event_id = $1 AND coordinates IS NOT NULL',
+      'SELECT id, name, category, coordinates, start_time, end_time FROM clubs WHERE event_id = $1 AND coordinates IS NOT NULL',
       [eventId]
     );
     return NextResponse.json(result.rows);
@@ -15,4 +15,4 @@ export async function POST(request: Request) {
     console.error('Error fetching clubs:', error);
     return NextResponse.json({ message: 'Error fetching clubs' }, { status: 500 });
   }
-}
+};

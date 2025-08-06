@@ -18,6 +18,29 @@ interface InfoPopupProps {
 }
 
 export default function InfoPopup({ club, onClose }: InfoPopupProps) {
+  // Helper function to format time (e.g., "14:30:00" -> "2:30 PM")
+  const formatTime = (timeString: string) => {
+    if (!timeString) return "Not specified";
+    
+    try {
+      // If it's already in a good format, return as is
+      if (timeString.includes("AM") || timeString.includes("PM")) {
+        return timeString;
+      }
+      
+      // Convert "HH:MM:SS" or "HH:MM" to 12-hour format
+      const [hours, minutes] = timeString.split(':');
+      const hour24 = parseInt(hours);
+      const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+      const ampm = hour24 >= 12 ? 'PM' : 'AM';
+      
+      return `${hour12}:${minutes} ${ampm}`;
+    } catch (error) {
+      // If parsing fails, return the original string
+      return timeString;
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 flex items-end justify-center bg-black/50"
@@ -41,9 +64,20 @@ export default function InfoPopup({ club, onClose }: InfoPopupProps) {
 
       {/* Club Info */}
       <h2 className="text-lg font-bold">{club.name}</h2>
-      <p className="text-gray-600">{club.description}</p>
-      <p className="text-gray-900">{club.start_time}</p>
-      <p className="text-gray-900">{club.end_time}</p>
+      <p className="text-gray-600 mb-3">{club.description}</p>
+      
+      {/* Timing Information */}
+      <div className="border-t pt-3">
+        <h3 className="text-sm font-semibold text-gray-800 mb-2">Event Times</h3>
+        <div className="space-y-1">
+          <p className="text-sm text-gray-700">
+            <span className="font-medium">Start:</span> {formatTime(club.start_time)}
+          </p>
+          <p className="text-sm text-gray-700">
+            <span className="font-medium">End:</span> {formatTime(club.end_time)}
+          </p>
+        </div>
+      </div>
       </motion.div>
     </div>
   );

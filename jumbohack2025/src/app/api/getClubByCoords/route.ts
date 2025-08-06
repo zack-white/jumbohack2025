@@ -8,7 +8,7 @@ export async function POST(request: Request) {
 
         // Query database correctly
         const result = await query(
-            "SELECT id, name, description FROM clubs WHERE coordinates ~= point($1, $2)",
+            "SELECT id, name, description, start_time, end_time FROM clubs WHERE coordinates ~= point($1, $2)",
             [x, y]
         );
 
