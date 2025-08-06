@@ -7,6 +7,9 @@ export async function POST(request: Request) {
     // Read the file from the request
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const timedTable = formData.get('timedTable') as string;
+    const fallbackStartTime = formData.get('startTime') as string;
+    const fallbackEndTime = formData.get('endTime') as string;
 
     if (!file) {
       return NextResponse.json({ message: 'No file uploaded' }, { status: 400 });
@@ -26,11 +29,11 @@ export async function POST(request: Request) {
     const jsonData: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
     // Define a type for rows
-    type ClubRow = [string, string, string, string?]; // name, category, contact, description (optional)
+    type ClubRow = [string, string, string, string?, string?, string?]; // name, category, contact, description (optional), start_time (optional), end_time (optional)
 
     // Process the data into the desired format
     const clubs = jsonData.slice(1).map((row) => {
-      const [name, category, contact, description]: ClubRow = row as ClubRow;
+      const [name, category, contact, description, start_time, end_time]: ClubRow = row as ClubRow;
       return {
         name,
         category,
@@ -39,21 +42,27 @@ export async function POST(request: Request) {
         coordinates: null, // Coordinates are null initially
         confirmed: false, // Not confirmed
         event_id: nextEventId, // Dynamic event ID
+        start_time: timedTable && start_time ? start_time : fallbackStartTime, // Fallback to event times if empty
+        end_time: timedTable && end_time ? end_time : fallbackEndTime, // Fallback to event times if empty
       };
     });
 
     // Insert data into the database using the query wrapper
     for (const club of clubs) {
       await query(
-        'INSERT INTO clubs (name, category, contact, description, coordinates, confirmed, event_id) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+        'INSERT INTO clubs (name, contact, description, category, event_id, coordinates, confirmed, start_time, end_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
         [
           club.name,
           club.category,
+          club.event_id,
           club.contact,
           club.description,
+          club.category,
+          club.event_id,
           club.coordinates,
           club.confirmed,
-          club.event_id
+          club.start_time,
+          club.end_time
         ]
       );
     }
