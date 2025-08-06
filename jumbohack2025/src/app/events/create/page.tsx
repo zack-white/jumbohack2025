@@ -26,6 +26,7 @@ export default function CreateEventPage() {
   const { user } = useUser();
   const userEmail = user?.emailAddresses[0];
   const [showMap, setShowMap] = useState(false);
+  const [timedTable, setTimedTable] = useState(false);
   const [formData, setFormData] = useState({
     eventName: "",
     date: "",
@@ -354,10 +355,15 @@ export default function CreateEventPage() {
         <div>
           <div className="mb-3">
             <h1 className="text-2xl font-bold font-serif text-primary">Create Event</h1>
+            <hr className="my-4 border-t border-gray-300" />
           </div>
 
           <div>
             <form onSubmit={handleSubmit} className="space-y-2">
+              {/* Event Title */}
+              <div className="mb-3">
+                <h2 className="text-lg font-bold font-serif text-primary">Event Information</h2>
+              </div>
               {/* EVENT NAME */}
               <div className="space-y-1">
                 <label className="text-sm text-primary flex items-center">
@@ -482,9 +488,45 @@ export default function CreateEventPage() {
                 </p>
               </div>
 
+              {/* Table and Location Title */}
+              <div className="pt-4 mb-3 flex items-center justify-between">
+                <h2 className="text-lg font-bold font-serif text-primary">Table and Location Information</h2>
+                                  {/* Timed Table Toggle */}
+                  <div className="flex items-center space-x-4">
+                    <span className="text-sm font-serif">Toggle Timed Tables</span>
+
+                    <button
+                      onClick={() => setTimedTable(!timedTable)}
+                      className={`relative w-16 h-8 flex items-center rounded-full p-1 transition-colors duration-300 ${
+                        timedTable ? "bg-blue-600" : "bg-gray-400"
+                      }`}
+                    >
+                      <span
+                        className={`absolute left-2 text-xs text-white font-bold transition-all duration-300 ${
+                          timedTable ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
+                        ON
+                      </span>
+                      <span
+                        className={`absolute right-2 text-xs text-white font-bold transition-all duration-300 ${
+                          timedTable ? "opacity-0" : "opacity-100"
+                        }`}
+                      >
+                        OFF
+                      </span>
+                      <span
+                        className={`h-6 w-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                          timedTable ? "translate-x-8" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+              </div>
+
               {/* SPREADSHEET */}
               <div className="space-y-1">
-                <div className="flex items-center gap-3">
+                <div className="flex items-between gap-3">
                   <label className="text-sm text-primary flex items-center">
                     Select Spreadsheet*
                     {errors.spreadsheet && (
