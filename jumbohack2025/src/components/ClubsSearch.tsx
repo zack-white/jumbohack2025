@@ -48,7 +48,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
   }
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white">
+    <div className="max-w-md mx-auto py-4 bg-white">
     {/* Fixed Header */}
         <div className="max-w-md bg-white sticky top-4 z-1 pl-4 pb-4">
             <h2 className="mb-2 text-xl md:text-2xl font-bold font-serif">Who’s Attending?</h2>
@@ -75,7 +75,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
         </div>
 
     {/* Components */}
-        <div className="h-auto max-h-[65vh] overflow-y-auto pl-4 pb-4 mb-4">
+        <div className="h-32 md:h-auto max-h-[65vh] overflow-y-auto pl-4 pb-4 mb-4">
             {/* Clubs List */}
             <div>
                 {filteredClubs.map((club) => (
