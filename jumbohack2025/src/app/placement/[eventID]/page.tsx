@@ -169,6 +169,7 @@ export default function MapboxMap() {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
+                      action: 'findByCoords',
                       x: lng,
                       y: lat
                   })
@@ -273,6 +274,7 @@ export default function MapboxMap() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+              action: 'updateCoordinates',
               id: nextClub.id,
               x: lng,
               y: lat,
@@ -314,6 +316,10 @@ export default function MapboxMap() {
   
     initializeMap();
   }, []);
+
+  const handleAddTable = () => {
+    router.push(`/addTable/${id}`)
+  }
 
   const handleSubmit = async () => {
     // setIsLoading(true);
@@ -365,10 +371,68 @@ export default function MapboxMap() {
     }
   }, [selectedCategory, clubs]);
 
+  // Edit club information
+  const handleEditClub = async () => {
+    router.push(`/editTable/${clubInfo?.id}`); // Navigate to edit page with club ID
+  };
+
+  // Move club marker
+  const handleMoveClub = async () => {
+    
+    if (!clubInfo || !mapRef.current) return;
+
+    // Remove coordinates in backend
+    try {
+      const response = await fetch('/api/updateClub', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'removeCoordinates',
+          id: clubInfo.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove club coordinates');
+      }
+
+      // Update the club in the local state
+      setClubs((prevClubs) =>
+        prevClubs.map((club) =>
+          club.id === clubInfo.id
+            ? { ...club, x: undefined, y: undefined, coordinates: undefined }
+            : club
+        )
+      );
+
+      // Add to front of queue
+      setQueue((prevQueue) => [clubInfo, ...prevQueue]);
+
+      // Close the popup
+      setShowClubInfo(false);
+
+      // Trigger rerender (optional: you could remove and reload markers if you store them)
+      mapRef.current?.fire('load');
+
+      console.log(`Club ${clubInfo.name} moved back to queue.`);
+    } catch (error) {
+      console.error('Error moving club:', error);
+    }
+
+  };
+
   return (
     <div className="wrapper">
       <div ref={mapContainerRef} className="mapContainer"/>
-      {showClubInfo && clubInfo !== undefined && <InfoPopup club={clubInfo} onClose={() => setShowClubInfo(false)} />}
+      {showClubInfo && clubInfo !== undefined && 
+      <InfoPopup 
+        club={clubInfo} 
+        onClose={() => setShowClubInfo(false)} 
+        onEdit={handleEditClub}
+        onMove={handleMoveClub}
+      />}
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-bold mb-4">Unplaced Clubs</h1>
 
@@ -404,6 +468,9 @@ export default function MapboxMap() {
 
           {/* Submit button (moves left when queue is empty) */}
           <div className={`queueAndSubmit flex-shrink-0 ${queue.length > 0 ? 'ml-4' : ''}`}>
+            <button className="h-[6vh] px-6 mr-2 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={handleAddTable}>
+              + Table
+            </button>
             <button type="submit" className="h-[6vh] px-6 bg-[#2E73B5] text-white" onClick={handleSubmit}>
               Submit
             </button>

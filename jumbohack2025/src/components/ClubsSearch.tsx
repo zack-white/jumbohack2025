@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import InfoPopup from "./ClubInfo";
 import { AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface Club {
   id: number;
@@ -14,6 +15,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [search, setSearch] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchClubs() {
@@ -46,6 +48,11 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
   function handlePopup(club: Club) {
     setSelectedClub(club);
   }
+
+  // Edit club information
+  const handleEditClub = (clubId: number) => {
+    router.push(`/editTable/${clubId}`);
+  };
 
   return (
     <div className="max-w-md mx-auto py-4 bg-white">
@@ -91,7 +98,13 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
 
         {/* InfoPopup with slide-up animation */}
             <AnimatePresence>
-                {selectedClub && <InfoPopup club={selectedClub} onClose={() => setSelectedClub(null)} />}
+                {selectedClub && 
+                <InfoPopup 
+                  club={selectedClub} 
+                  onClose={() => setSelectedClub(null)}
+                  onEdit={() => handleEditClub(selectedClub.id)}
+                  onMove={null}
+                />}
             </AnimatePresence>
         </div>
     </div>
