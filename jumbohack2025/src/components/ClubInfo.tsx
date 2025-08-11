@@ -3,73 +3,70 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-// Define the Club interface
+// Data shapes
 interface Club {
   id: number;
   name: string;
   description: string;
-  start_time: string;
-  end_time: string;
+  start_time?: string;
+  end_time?: string;
 }
 
 interface InfoPopupProps {
   club: Club;
   onClose: () => void;
+  onEdit: () => void;
+  onMove: (() => void) | null;
 }
 
-export default function InfoPopup({ club, onClose }: InfoPopupProps) {
-  // Helper function to format time (e.g., "14:30:00" -> "2:30 PM")
-  const formatTime = (timeString: string) => {
+export default function InfoPopup({ club, onClose, onEdit, onMove }: InfoPopupProps) {
+  // "14:30:00" -> "2:30 PM"
+  const formatTime = (timeString?: string) => {
     if (!timeString) return "Not specified";
-    
     try {
-      // If it's already in a good format, return as is
-      if (timeString.includes("AM") || timeString.includes("PM")) {
-        return timeString;
-      }
-      
-      // Convert "HH:MM:SS" or "HH:MM" to 12-hour format
-      const [hours, minutes] = timeString.split(':');
-      const hour24 = parseInt(hours);
-      const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-      const ampm = hour24 >= 12 ? 'PM' : 'AM';
-      
-      return `${hour12}:${minutes} ${ampm}`;
-    } catch (error) {
-      // If parsing fails, return the original string
+      if (timeString.includes("AM") || timeString.includes("PM")) return timeString;
+      const [hh, mm] = timeString.split(":");
+      const h24 = parseInt(hh, 10);
+      const h12 = h24 === 0 ? 12 : h24 > 12 ? h24 - 12 : h24;
+      const ampm = h24 >= 12 ? "PM" : "AM";
+      return `${h12}:${mm} ${ampm}`;
+    } catch {
       return timeString;
     }
   };
 
   return (
-    <div
-      className="fixed inset-0 flex items-end justify-center bg-black/50"
-      onClick={onClose} // Close when clicking outside
-    >
+    <div className="fixed inset-0 flex items-end justify-center bg-black/50" onClick={onClose}>
       <motion.div
-      initial={{ y: "100%", opacity: 0 }} // Start off-screen
-      animate={{ y: 0, opacity: 1 }} // Slide up when opening
-      exit={{ y: "100%", opacity: 0 }} // Slide down when closing
-      transition={{ type: "duration: 0.2", stiffness: 100, damping: 15 }}
-      className="bg-white w-full max-w-md p-4 pb-8 rounded-t-lg shadow-lg relative"
-      onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+        initial={{ y: "100%", opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: "100%", opacity: 0 }}
+        transition={{ type: "tween", duration: 0.2, ease: "easeOut" }}
+        className="bg-white w-full max-w-xl p-4 pb-8 rounded-t-lg shadow-lg relative"
+        onClick={(e) => e.stopPropagation()}
       >
-      {/* Close Button */}
-      <button
-        className="absolute top-2 right-4 text-gray-500"
-        onClick={onClose}
-      >
-        ✕
-      </button>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold">{club.name}</h1>
+          <div className="flex space-x-4">
+            {onMove && (
+              <button className="h-[6vh] px-6 bg-[#2E73B5] text-white" onClick={onMove}>
+                Move
+              </button>
+            )}
+            <button className="h-[6vh] px-6 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={onEdit}>
+              Edit
+            </button>
+            <button className="text-3xl text-gray-500" onClick={onClose}>
+              ✕
+            </button>
+          </div>
+        </div>
 
-      {/* Club Info */}
-      <h2 className="text-lg font-bold">{club.name}</h2>
-      <p className="text-gray-600 mb-3">{club.description}</p>
-      
-      {/* Timing Information */}
-      <div className="border-t pt-3">
-        <h3 className="text-sm font-semibold text-gray-800 mb-2">Event Times</h3>
-        <div className="space-y-1">
+        <p className="text-gray-600 mb-3">{club.description}</p>
+
+        {/* Timing Information */}
+        <div className="border-t pt-3">
+          <h3 className="text-sm font-semibold text-gray-800 mb-2">Event Times</h3>
           <div className="flex gap-4 text-sm text-gray-700">
             <p>
               <span className="font-medium">Start:</span> {formatTime(club.start_time)}
@@ -79,7 +76,6 @@ export default function InfoPopup({ club, onClose }: InfoPopupProps) {
             </p>
           </div>
         </div>
-      </div>
       </motion.div>
     </div>
   );

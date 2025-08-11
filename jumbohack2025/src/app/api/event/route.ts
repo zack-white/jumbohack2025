@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { query } from '../../../lib/query';
 
 export async function POST(request: Request) {
-
   try {
     const data = await request.json();
     const pointString = `(${data.location.x}, ${data.location.y})`;
@@ -14,12 +13,24 @@ export async function POST(request: Request) {
       scale,
       startTime,
       endTime,
+      organizationName,
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      address,
+      city,
+      state,
+      zipCode,
       creator,
+      timedTables,
     } = data;
 
     const result = await query(
-      `INSERT INTO event (name, description, date, location, scale, start_time, end_time, creator) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+      `INSERT INTO event (name, description, date, location, scale, starttime, 
+       endtime, organizationName, firstName, lastName, email, phoneNumber, 
+       address, city, state, zipCode, creator, timedTables) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) 
        RETURNING id`,
       [
         eventName,
@@ -29,7 +40,17 @@ export async function POST(request: Request) {
         scale,
         startTime,
         endTime,
-        creator
+        organizationName,
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        address,
+        city,
+        state,
+        zipCode,
+        creator,
+        timedTables,
       ]
     );
 

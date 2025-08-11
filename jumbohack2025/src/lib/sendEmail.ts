@@ -4,6 +4,12 @@ interface EmailOptions {
   to: string;
   subject: string;
   html: string;
+  attachments?: {
+    filename: string;
+    content: string;
+    encoding: string;
+    contentType: string;
+  }[];
 }
 
 const transporter = nodemailer.createTransport({
@@ -16,12 +22,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendEmail({ to, subject, html }: EmailOptions) {
+export async function sendEmail({ to, subject, html, attachments = [] }: EmailOptions) {
   const mailOptions = {
     from: process.env.SMTP_USER,
-    to,
-    subject,
-    html,
+    to: to,
+    subject: subject,
+    html: html,
+    attachments: attachments || [],
   };
 
   try {
