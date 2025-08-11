@@ -1,26 +1,33 @@
 "use client";
 
-import {  useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import ClubForm from "@/components/ClubForm";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams, redirect } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
-import { useParams } from "next/navigation";
+
+type ClubRecord = {
+  id: number;
+  event_id: number;
+  name: string;
+  category: string;
+  contact: string;
+  description: string;
+  start_time?: string;
+  end_time?: string;
+  coordinates?: { x: number; y: number } | null;
+};
 
 export default function EditTablePage() {
   const { userId } = useAuth();
-
   if (!userId) {
     redirect("/sign-in");
   }
 
-  const params = useParams();
-  const clubID = params.clubID;
-
+  const { clubID } = useParams<{ clubID: string }>();
   const router = useRouter();
-  const [clubData, setClubData] = useState<any>(null);
-  // const [clubData, setClubData] = useState({ category: "test" });
+
+  const [clubData, setClubData] = useState<ClubRecord | null>(null);
   const [eventID, setEventID] = useState<number | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [errors, setErrors] = useState({ name: "", category: "", contact: "" });
@@ -31,16 +38,15 @@ export default function EditTablePage() {
         const res = await fetch("/api/getClubByCoords", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            action: 'findById',
-            id: clubID
+          body: JSON.stringify({
+            action: "findById",
+            id: Number(clubID),
           }),
         });
-        const data = await res.json();
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = (await res.json()) as ClubRecord;
         setClubData(data);
-        // Extract eventID from the fetched club data so it can be used in other functions
         setEventID(data.event_id);
-
       } catch (error) {
         console.error(error);
         toast.error("Error fetching club details.");
@@ -48,9 +54,7 @@ export default function EditTablePage() {
     };
 
     if (clubID) fetchClubData();
-  }, [clubID]); // Ensure eventID is set before fetching categories
-
-  // console.log("Club Data:", clubData);
+  }, [clubID]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -60,9 +64,9 @@ export default function EditTablePage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ eventID }),
         });
-        const clubs = await res.json();
-        const unique = new Set<string>(clubs.map((c: any) => c.category));
-
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const clubs = (await res.json()) as Array<{ category: string }>;
+        const unique = new Set<string>(clubs.map((c) => c.category));
         setCategories(Array.from(unique));
       } catch (error) {
         console.error(error);
@@ -71,10 +75,9 @@ export default function EditTablePage() {
     if (eventID) fetchCategories();
   }, [eventID]);
 
-  // console.log("Categories:", categories);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!clubData) return;
 
     const newErrors = {
       name: clubData.name ? "" : "Required",
@@ -94,7 +97,7 @@ export default function EditTablePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "updateDetails",
-          id: clubID,
+          id: Number(clubID),
           name: clubData.name,
           category: clubData.category,
           contact: clubData.contact,
@@ -121,10 +124,20 @@ export default function EditTablePage() {
 
   if (!clubData) return <div className="p-4">Loading...</div>;
 
+  // Adapter: ensure the setter type matches ClubForm's non-null expectation
+  const setClubDataSafe: React.Dispatch<React.SetStateAction<ClubRecord>> = (updater) => {
+    setClubData((prev) => {
+      if (!prev) return prev; // won't happen because we gate render above
+      return typeof updater === "function"
+        ? (updater as (p: ClubRecord) => ClubRecord)(prev)
+        : updater;
+    });
+  };
+
   return (
     <ClubForm
       clubData={clubData}
-      setClubData={setClubData}
+      setClubData={setClubDataSafe}
       categories={categories}
       errors={errors}
       onSubmit={handleSubmit}

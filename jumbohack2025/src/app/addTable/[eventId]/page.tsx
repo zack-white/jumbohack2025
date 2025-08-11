@@ -105,10 +105,11 @@ export default function AddTablePage() {
             console.error("Error fetching existing clubs.");
           }
 
-          const clubs = await response.json();
+          // const clubs = await response.json();
           const uniqueCategories = new Set<string>(
-            clubs.map((club: any) => club.category)
+            (await response.json() as Array<{ category: string }>).map(c => c.category)
           );
+
           setCategories(Array.from(uniqueCategories));
         } catch (error) {
           console.error("Error fetching clubs:", error);

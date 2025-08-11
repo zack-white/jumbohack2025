@@ -4,11 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import UpcomingEvents from "@/components/UpcomingEvents";
 import QueryProvider from "@/components/QueryProvider";
-import { useTheme } from "next-themes";
+// import { useTheme } from "next-themes";
 import { ArrowUpToLineIcon, Info, Phone } from "lucide-react";
 
 export default function Home() {
-  const { theme } = useTheme();
+  // const { theme } = useTheme();
 
   const scrollToTop = () => {
     window.scrollTo({

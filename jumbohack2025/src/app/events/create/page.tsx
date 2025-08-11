@@ -465,7 +465,11 @@ export default function CreateEventPage() {
         success: async (response) => {
           // Call the excel processing API here
           if (formData.spreadsheet) {
+            if (timedTables) {
+              await processExcelTimed(formData.spreadsheet);
+            } else {
               await processExcel(formData.spreadsheet);
+            }
           }
           const result = await response.json();
           const eventId = result.eventId + 1;
@@ -518,7 +522,7 @@ export default function CreateEventPage() {
         throw new Error("Failed to process Excel file");
       }
 
-      const data = await response.json();
+      await response.json();
     } catch (error) {
       console.error("Error processing Excel file:", error);
       toast.error("Error processing Excel file. Please try again.");
@@ -540,7 +544,7 @@ export default function CreateEventPage() {
         throw new Error("Failed to process Excel file");
       }
 
-      const data = await response.json();
+      await response.json();
     } catch (error) {
       console.error("Error processing Excel file:", error);
       toast.error("Error processing Excel file. Please try again.");

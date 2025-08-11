@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import mapboxgl from "mapbox-gl";
 import InfoPopup from "@/components/ClubInfo";
 import "./mapview.css";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { Club } from "lucide-react";
 
 interface Club {
   id: number;
@@ -41,20 +40,21 @@ interface MarkerWithLabel {
 
 // https://docs.mapbox.com/mapbox-gl-js/example/popup/
 
-mapboxgl.accessToken = "pk.eyJ1Ijoic2FsbW9uLXN1c2hpIiwiYSI6ImNtN2dqYWdrZzA4ZnIyam9qNWx1NnAybjcifQ._YD8GYWPtpZ09AwYHzR2Og";
+mapboxgl.accessToken =
+  "pk.eyJ1Ijoic2FsbW9uLXN1c2hpIiwiYSI6ImNtN2dqYWdrZzA4ZnIyam9qNWx1NnAybjcifQ._YD8GYWPtpZ09AwYHzR2Og";
 
-const INITIAL_LONG = -71.120;
+const INITIAL_LONG = -71.12;
 const INITIAL_LAT = 42.4075;
 const INITIAL_ZOOM = 17.33;
 const LABEL_ZOOM_THRESHOLD = 16; // Only show labels at this zoom level or higher
 const PROXIMITY_THRESHOLD = 100; // Pixel distance threshold for label proximity
 
 export default function MapboxMap() {
-  const { eventID } = useParams();
+  const { eventID } = useParams<{ eventID: string }>();
   const router = useRouter();
   const [eventName, setEventName] = useState("None");
   const id = Number(eventID);
-  
+
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const markersRef = useRef<MarkerWithLabel[]>([]);
@@ -79,10 +79,11 @@ export default function MapboxMap() {
       const response = await fetch("/api/getClubByCoords", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           action: "findByCoords",
-          x: lng, 
-          y: lat }),
+          x: lng,
+          y: lat,
+        }),
       });
 
       if (!response.ok) {
@@ -102,7 +103,7 @@ export default function MapboxMap() {
         const response = await fetch("/api/fetchEvent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: id }),
+          body: JSON.stringify({ id }),
         });
 
         if (!response.ok) {
@@ -120,85 +121,68 @@ export default function MapboxMap() {
       fetchEventName();
     }
   }, [id]);
-
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+      console.debug("map center/zoom", { long, lat, zoom });
+    }
+  }, [long, lat, zoom]);
   // Toggle labels visibility function
   const toggleLabels = () => {
-    setShowLabels(prev => !prev);
+    setShowLabels((prev) => !prev);
   };
 
-  // Calculate if two points are too close to each other
-  const arePointsTooClose = (pointA: mapboxgl.Point, pointB: mapboxgl.Point): boolean => {
-    const distance = Math.sqrt(
-      Math.pow(pointA.x - pointB.x, 2) + Math.pow(pointA.y - pointB.y, 2)
-    );
-    return distance < PROXIMITY_THRESHOLD;
-  };
+  // Update label visibility based on current conditions (memoized)
+  const updateLabelVisibility = useCallback(() => {
+    if (!mapRef.current || !mapRef.current.loaded()) return;
 
-  // Check which markers should have visible labels based on proximity
-  const calculateLabelVisibility = (): Map<mapboxgl.Marker, boolean> => {
-    if (!mapRef.current) return new Map();
-    
     const map = mapRef.current;
-    const markers = markersRef.current;
+    const currentZoom = map.getZoom();
+
+    // Clear existing label popups
+    markersRef.current.forEach(({ label }) => {
+      if (label) label.remove();
+    });
+
+    if (!showLabels || currentZoom < LABEL_ZOOM_THRESHOLD) return;
+
+    // Decide which labels to show based on on-screen proximity
     const shouldShowLabel = new Map<mapboxgl.Marker, boolean>();
-    
-    // Default: all markers should show labels
-    markers.forEach(({ marker }) => shouldShowLabel.set(marker, true));
-    
-    // Check each pair of markers
-    for (let i = 0; i < markers.length; i++) {
-      for (let j = i + 1; j < markers.length; j++) {
-        const markerA = markers[i].marker;
-        const markerB = markers[j].marker;
-        
+    markersRef.current.forEach(({ marker }) => shouldShowLabel.set(marker, true));
+
+    for (let i = 0; i < markersRef.current.length; i++) {
+      for (let j = i + 1; j < markersRef.current.length; j++) {
+        const markerA = markersRef.current[i].marker;
+        const markerB = markersRef.current[j].marker;
+
         const posA = map.project(markerA.getLngLat());
         const posB = map.project(markerB.getLngLat());
-        
-        if (arePointsTooClose(posA, posB)) {
+        const distance = Math.hypot(posA.x - posB.x, posA.y - posB.y);
+
+        if (distance < PROXIMITY_THRESHOLD) {
           shouldShowLabel.set(markerA, false);
           shouldShowLabel.set(markerB, false);
         }
       }
     }
-    
-    return shouldShowLabel;
-  };
 
-  // Update label visibility based on current conditions
-  const updateLabelVisibility = () => {
-    if (!mapRef.current || !mapRef.current.loaded()) return;
-    
-    const map = mapRef.current;
-    const currentZoom = map.getZoom();
-    
-    markersRef.current.forEach(({ label }) => {
-      if (label) label.remove();
-    });
-    
-    if (!showLabels || currentZoom < LABEL_ZOOM_THRESHOLD) {
-      return;
-    }
-    
-    const shouldShowLabel = calculateLabelVisibility();
-    
+    // Add popups for those we chose to show
     markersRef.current.forEach((markerInfo) => {
       const { marker, clubName, lng, lat } = markerInfo;
-      
       if (shouldShowLabel.get(marker)) {
         const popup = new mapboxgl.Popup({
           closeButton: false,
           closeOnClick: false,
           offset: [0, -30],
-          className: 'club-label-popup'
+          className: "club-label-popup",
         })
           .setLngLat([lng, lat])
           .setHTML(`<div class="club-label">${clubName}</div>`)
           .addTo(map);
-        
+
         markerInfo.label = popup;
       }
     });
-  };
+  }, [showLabels]);
 
   // Initialize the map
   useEffect(() => {
@@ -208,11 +192,11 @@ export default function MapboxMap() {
       try {
         // Fetch map location for this event
         const response = await fetch("/api/getEventLocation", {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            eventID: id
-          })
+            eventID: id,
+          }),
         });
 
         if (!response.ok) {
@@ -221,22 +205,24 @@ export default function MapboxMap() {
         }
 
         const data = await response.json();
-        
-        // Use fetched coordinates if available
-        let mapLong = long;
-        let mapLat = lat;
-        let mapZoom = zoom;
-        
+
+        // Use local defaults so this effect doesn't depend on state
+        let mapLong = INITIAL_LONG;
+        let mapLat = INITIAL_LAT;
+        let mapZoom = INITIAL_ZOOM;
+
         if (data.location) {
           mapLong = data.location.x;
           mapLat = data.location.y;
           setLong(mapLong);
           setLat(mapLat);
+          console.log("Map coordinates:", mapLong, mapLat);
         }
-        
+
         if (data.scale) {
           mapZoom = data.scale;
           setZoom(mapZoom);
+          console.log("Map zoom level:", mapZoom);
         }
 
         // Create map
@@ -287,13 +273,11 @@ export default function MapboxMap() {
           // Add markers for each club
           existingClubs.forEach((club) => {
             if (!club.coordinates) return;
-            
+
             const lng = club.coordinates.x;
             const lat = club.coordinates.y;
 
-            const marker = new mapboxgl.Marker()
-              .setLngLat([lng, lat])
-              .addTo(map);
+            const marker = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(map);
 
             marker.getElement().addEventListener("click", async (event) => {
               event.stopPropagation();
@@ -315,10 +299,10 @@ export default function MapboxMap() {
               marker,
               clubName: club.name,
               lng,
-              lat
+              lat,
             });
           });
-          
+
           // Apply initial label visibility
           updateLabelVisibility();
         });
@@ -330,14 +314,9 @@ export default function MapboxMap() {
           setLat(mapCenter.lat);
           setZoom(map.getZoom());
         });
-        
-        map.on("moveend", () => {
-          updateLabelVisibility();
-        });
 
-        map.on("zoomend", () => {
-          updateLabelVisibility();
-        });
+        map.on("moveend", updateLabelVisibility);
+        map.on("zoomend", updateLabelVisibility);
 
         return () => {
           map.remove();
@@ -348,21 +327,25 @@ export default function MapboxMap() {
     };
 
     initializeMap();
-  }, [id]);
+  }, [id, updateLabelVisibility]);
 
   // Compute filtered clubs based on search input and category
-  const filteredClubs = selectedCategory === ""
-    ? clubs.filter((club) => club.name.toLowerCase().includes(search.toLowerCase()))
-    : clubs.filter((club) =>
-        club.category === selectedCategory &&
-        club.name.toLowerCase().includes(search.toLowerCase())
-      );
+  const filteredClubs =
+    selectedCategory === ""
+      ? clubs.filter((club) =>
+          club.name.toLowerCase().includes(search.toLowerCase())
+        )
+      : clubs.filter(
+          (club) =>
+            club.category === selectedCategory &&
+            club.name.toLowerCase().includes(search.toLowerCase())
+        );
 
   useEffect(() => {
     if (!mapRef.current || !mapRef.current.loaded()) return;
 
     const map = mapRef.current;
-    
+
     markersRef.current.forEach(({ marker, label }) => {
       marker.remove();
       if (label) label.remove();
@@ -375,9 +358,7 @@ export default function MapboxMap() {
       const lat = club.coordinates ? club.coordinates.y : club.y;
       if (lng == null || lat == null) return; // Skip if no coordinates
 
-      const marker = new mapboxgl.Marker()
-        .setLngLat([lng, lat])
-        .addTo(map);
+      const marker = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(map);
 
       marker.getElement().addEventListener("click", async (event) => {
         event.stopPropagation();
@@ -389,7 +370,7 @@ export default function MapboxMap() {
             name: clubData.name,
             description: clubData.description,
             start_time: clubData.start_time || "",
-            end_time: clubData.end_time || ""
+            end_time: clubData.end_time || "",
           });
           setShowClubInfo(true);
         }
@@ -399,21 +380,21 @@ export default function MapboxMap() {
         marker,
         clubName: club.name,
         lng,
-        lat
+        lat,
       });
     });
-    
+
     // Refresh label visibility based on current state
     updateLabelVisibility();
-  }, [filteredClubs]);
+  }, [filteredClubs, updateLabelVisibility]);
 
   useEffect(() => {
     updateLabelVisibility();
-  }, [showLabels]);
+  }, [showLabels, updateLabelVisibility]);
 
   useEffect(() => {
     if (!mapRef.current) return;
-    
+
     if (selectedCategory === "") {
       setQueue(clubs);
     } else {
@@ -444,23 +425,27 @@ export default function MapboxMap() {
     <div className="wrapper">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mt-[1%] min-w-[25%] absolute z-10">
-            <input
-                type="text"
-                placeholder="Search attending clubs..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="shadow pl-4 pr-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-[#F7F9FB]"
-            />
+          <input
+            type="text"
+            placeholder="Search attending clubs..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="shadow pl-4 pr-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-[#F7F9FB]"
+          />
         </div>
       </div>
       <div ref={mapContainerRef} className="mapContainer" />
 
       {showClubInfo && clubInfo && (
-        <InfoPopup 
-          club={clubInfo} 
-          onClose={() => setShowClubInfo(false)} 
-          onEdit={() => {handleEditClub()}} 
-          onMove={() => {handleMoveClub()}} 
+        <InfoPopup
+          club={clubInfo}
+          onClose={() => setShowClubInfo(false)}
+          onEdit={() => {
+            handleEditClub();
+          }}
+          onMove={() => {
+            handleMoveClub();
+          }}
         />
       )}
 
@@ -504,20 +489,20 @@ export default function MapboxMap() {
             </button>
           </div>
         </div>
-        
+
         {/* Queue */}
         <div className="mb-4">
-           <ul className="flex flex-row overflow-auto">
-             {queue.map((club) => (
-               <li
-                 key={club.id}
-                 className="p-4 mr-2 border-b bg-categoryBg min-w-[8vw] truncate text-center"
-               >
-                 {club.name}
-               </li>
-             ))}
-           </ul>
-         </div>
+          <ul className="flex flex-row overflow-auto">
+            {queue.map((club) => (
+              <li
+                key={club.id}
+                className="p-4 mr-2 border-b bg-categoryBg min-w-[8vw] truncate text-center"
+              >
+                {club.name}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
