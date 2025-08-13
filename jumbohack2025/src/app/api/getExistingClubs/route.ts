@@ -1,18 +1,33 @@
-import { NextResponse } from 'next/server';
-import { query } from '../../../lib/query'; 
+// app/api/getExistingClubs/route.ts
+import { NextResponse, NextRequest } from "next/server";
+import { query } from "@/lib/query";
 
-export async function POST(request: Request) {
+// If your query() uses node 'pg', keep Node runtime:
+export const runtime = "nodejs";            // <-- IMPORTANT for 'pg' pools
+export const dynamic = "force-dynamic";     // avoid caching, just in case
+
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    const eventId = body.eventID;
-    console.log(eventId)
-    const result = await query(
-      'SELECT id, name, category, coordinates, start_time, end_time FROM clubs WHERE event_id = $1 AND coordinates IS NOT NULL',
-      [eventId]
-    );
+    const { eventID } = await req.json();
+    if (!eventID) {
+      return NextResponse.json({ message: "Missing eventID" }, { status: 400 });
+    }
+
+    const sql = `
+      SELECT id, name, category, coordinates, start_time, end_time
+      FROM clubs
+      WHERE event_id = $1 AND coordinates IS NOT NULL
+    `;
+
+    const result = await query(sql, [eventID]);
     return NextResponse.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching clubs:', error);
-    return NextResponse.json({ message: 'Error fetching clubs' }, { status: 500 });
+  } catch (err: any) {
+    console.error("Error fetching clubs:", err);
+    // In dev, return the actual error so you can see it:
+    const msg =
+      process.env.NODE_ENV === "development" && err?.message
+        ? err.message
+        : "Error fetching clubs";
+    return NextResponse.json({ message: msg }, { status: 500 });
   }
-};
+}

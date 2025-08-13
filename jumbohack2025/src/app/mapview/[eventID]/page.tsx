@@ -236,23 +236,25 @@ export default function MapboxMap() {
 
         // Get existing clubs
         const getExistingClubs = async () => {
-          try {
-            const response = await fetch("/api/getExistingClubs", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ eventID: id }),
-            });
+        try {
+          const res = await fetch("/api/getExistingClubs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ eventID: id }), // ensure `id` is defined
+          });
 
-            if (!response.ok) {
-              console.error("Error fetching existing clubs.");
-            }
-
-            return await response.json();
-          } catch (error) {
-            console.error("Error fetching clubs:", error);
-            return [];
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`GET_EXISTING_CLUBS failed: ${res.status} ${res.statusText} – ${text}`);
           }
-        };
+
+          return await res.json();
+        } catch (err) {
+          console.error(err);
+          return [];
+        }
+      };
+
 
         // When map loads, setup markers
         map.on("load", async () => {
