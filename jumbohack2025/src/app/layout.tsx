@@ -24,19 +24,18 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-//     children,
-// }: Readonly<{
-//     children: React.ReactNode;
-// }>) 
-{
+    children,
+}: Readonly<{
+    children: React.ReactNode;
+}>) {
   return (
     <ClerkProvider>
       <html lang="en">
         <body
           className={`${inter.variable} ${ibmPlexSerif.variable} antialiased`}
         >
-          {/* <NavBar />
-          {children} */}
+          <NavBar />
+          {children}
         </body>
       </html>
     </ClerkProvider>

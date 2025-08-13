@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import MapboxMap from "@/app/map/map";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,20 +21,18 @@ import { toast } from "sonner";
 
 import { useUser } from "@clerk/nextjs";
 import { useAuth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 
 import Tooltip from "@/components/tooltip";
 
 export default function CreateEventPage() {
+  const { userId } = useAuth();
+  
+  if (!userId) {
+    redirect("/sign-in");
+  }
 
   const router = useRouter();
-  const { isLoaded, isSignedIn } = useAuth();
-
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      router.replace("/sign-in");
-    }
-}, [isLoaded, isSignedIn, router]);
-
   const usStates = [
     "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
     "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",

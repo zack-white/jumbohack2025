@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import ClubForm from "@/components/ClubForm";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, redirect } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
 
@@ -19,15 +19,13 @@ type ClubRecord = {
 };
 
 export default function EditTablePage() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const router = useRouter();
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-        router.replace("/sign-in");
-      }
-    }, [isLoaded, isSignedIn, router]);
+  const { userId } = useAuth();
+  if (!userId) {
+    redirect("/sign-in");
+  }
 
   const { clubID } = useParams<{ clubID: string }>();
+  const router = useRouter();
 
   const [clubData, setClubData] = useState<ClubRecord | null>(null);
   const [eventID, setEventID] = useState<number | null>(null);
