@@ -21,13 +21,14 @@ export async function POST(req: NextRequest) {
 
     const result = await query(sql, [eventID]);
     return NextResponse.json(result.rows);
-  } catch (err: any) {
-    console.error("Error fetching clubs:", err);
-    // In dev, return the actual error so you can see it:
-    const msg =
-      process.env.NODE_ENV === "development" && err?.message
-        ? err.message
-        : "Error fetching clubs";
-    return NextResponse.json({ message: msg }, { status: 500 });
-  }
+  } catch (err: unknown) {
+  console.error("Error fetching clubs:", err);
+
+  const msg =
+    process.env.NODE_ENV === "development" && err instanceof Error
+      ? err.message
+      : "Error fetching clubs";
+
+  return NextResponse.json({ message: msg }, { status: 500 });
+}
 }
