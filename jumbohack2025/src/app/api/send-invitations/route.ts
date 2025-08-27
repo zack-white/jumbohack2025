@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   try {
     // Get clubs with the provided event_id
     const result = await query(
-      'SELECT contact FROM clubs WHERE event_id = $1 AND confirmed = false AND description IS NULL AND coordinates IS NOT NULL',
+      'SELECT contact FROM clubs WHERE event_id = $1 AND confirmed = false AND description = \'\' AND coordinates IS NOT NULL',
       [event_id]
     );
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
     if (clubs.length === 0) {
       return NextResponse.json(
-        { message: 'No clubs found for the provided event ID' },
+        { message: `No clubs found for the provided event ID: ${event_id}` },
       );
     }
 
