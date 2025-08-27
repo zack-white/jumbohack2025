@@ -85,7 +85,7 @@ const NavBar = () => {
             <Button
               variant="ghost"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-white"
+              className="text-white hover:bg-white/20 hover:text-gray-200 p-2 rounded transition-colors duration-200"
             >
               {isMobileMenuOpen ? (
                 <X className="h-6 w-6" />
