@@ -353,8 +353,7 @@ export default function MapboxMap() {
   };
 
   const handleClose = () => {
-    // Close the modal
-    router.push('/');
+    router.push(`/eventview?id=${id}`);
   };
 
   // Update queue when category is selected
