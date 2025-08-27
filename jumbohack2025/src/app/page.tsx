@@ -146,7 +146,7 @@ export default function Home() {
               
               <div className="flex flex-col md:flex-row justify-between items-center mt-6 gap-4 md:gap-0">
                 <p className="text-xs md:text-sm text-gray-500 font-inter">
-                  © 2025 Elisa Yu, Hannah Jiang, Holden Kittelberger, Shayne Sidman,
+                  © 2025 Led by Holden Kittelberger and created by Elisa Yu, Hannah Jiang, Shayne Sidman,
                   William Goldman, Zachary White
                 </p>
                 <button 

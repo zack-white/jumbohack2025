@@ -411,18 +411,6 @@ export default function MapboxMap() {
     }
   }, [selectedCategory, clubs]);
 
-  // Edit club information
-  const handleEditClub = async () => {
-    router.push(`/editTable/${clubInfo?.id}`); // Navigate to edit page with club ID
-  };
-
-  // Move club marker
-  const handleMoveClub = async () => {
-    // Logic to move club marker
-    console.log("Moving club:");
-    // You can implement the move functionality here
-  };
-
   return (
     <div className="wrapper">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -432,7 +420,7 @@ export default function MapboxMap() {
             placeholder="Search attending clubs..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="shadow pl-4 pr-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-[#F7F9FB]"
+            className="shadow pl-4 pr-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-[#F7F9FB] mt-2"
           />
         </div>
       </div>
@@ -442,12 +430,8 @@ export default function MapboxMap() {
         <InfoPopup
           club={clubInfo}
           onClose={() => setShowClubInfo(false)}
-          onEdit={() => {
-            handleEditClub();
-          }}
-          onMove={() => {
-            handleMoveClub();
-          }}
+          onEdit={null}
+          onMove={null}
         />
       )}
 
@@ -472,7 +456,7 @@ export default function MapboxMap() {
             </select>
           </div>
 
-          <div className="flex items-center bg-categoryBg shadow px-6 py-4 ml-auto">
+            <div className="flex items-center bg-categoryBg shadow px-6 py-4 ml-auto mt-4 md:mt-0">
             <span className="mr-2">Show Labels</span>
             <button
               className={`relative inline-flex h-6 w-11 items-center rounded-full ${
@@ -494,11 +478,22 @@ export default function MapboxMap() {
 
         {/* Queue */}
         <div className="mb-4">
-          <ul className="flex flex-row overflow-auto">
+          <ul
+            className="
+              flex flex-col md:flex-row
+              overflow-y-auto md:overflow-x-auto
+              max-h-100 md:max-h-none
+            "
+          >
             {queue.map((club) => (
               <li
                 key={club.id}
-                className="p-4 mr-2 border-b bg-categoryBg min-w-[8vw] truncate text-center"
+                className="
+                  p-4 mb-2 md:mr-2
+                  bg-categoryBg
+                  w-full md:min-w-[40vw]
+                  truncate text-center
+                "
               >
                 {club.name}
               </li>

@@ -70,6 +70,14 @@ export default function EventPage() {
     router.push(`/placement/${id}`);
   };
 
+  const formatTime = (time: string): string => {
+    const [hourStr, minuteStr] = time.split(':')
+    let hour = parseInt(hourStr, 10)
+    const period = hour >= 12 ? 'PM' : 'AM'
+    hour = hour % 12 || 12
+    return `${hour}:${minuteStr} ${period}`
+  }
+
   if (loading) return <p>Loading event...</p>;
   if (!event) return <p>No event found</p>;
 
@@ -82,12 +90,12 @@ export default function EventPage() {
 
   return (
     <>
-      <div className="bg-white md:overflow-hidden max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div className="bg-white md:overflow-hidden max-w-7xl mx-auto py-6 px-6 flex flex-col items-center justify-center">
         <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 max-h-[100vh] justify-between w-full">
           <div>
             <h1 className="px-4 text-2xl md:text-3xl font-bold font-serif">{event.name}</h1>
             <p className="px-4 text-gray-500">
-                {dayName}, {month} {day} • {event.starttime} - {event.endtime}
+                {dayName}, {month} {day} • {formatTime(event.start_time)} - {formatTime(event.end_time)}
             </p>
             <ShowMapButton eventID={id} />
 
@@ -162,7 +170,8 @@ export default function EventPage() {
             </div>
           </div>
           <div className='flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6 px-4'>
-            <p className='text-white text-xs'>© 2025 Daniel Glorioso, William Goldman, Hannah Jiang, Holden Kittelberger, Shayne Sidman, Zachary White, Elisa Yu</p>
+            <p className='text-white text-xs'>© 2025 Led by Holden Kittelberger and created by Elisa Yu, Hannah Jiang, Shayne Sidman,
+                  William Goldman, Zachary White</p>
             <div className='flex flex-row gap-6'>  
               <a className='flex justify-center items-center text-center px-6 py-2 text-white text-sm border border-white hover:cursor-pointer'>
                 Report a Bug

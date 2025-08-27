@@ -321,7 +321,7 @@ export default function MapboxMap() {
     router.push(`/addTable/${id}`)
   }
 
-  const handleSubmit = async () => {
+  const handleSave = async () => {
     // setIsLoading(true);
     setStatus('');
 
@@ -329,14 +329,14 @@ export default function MapboxMap() {
       const response = await fetch('/api/send-invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({event_id: 1} ),
+        body: JSON.stringify({ event_id: parseInt(id, 10) }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       console.log(data);
       setStatus(data.message);
@@ -348,13 +348,15 @@ export default function MapboxMap() {
         setStatus('Error sending invitations. Please check the console for details.');
       }
     }
+  };
 
+  const handleSubmit = async () => {
+    await handleSave();
     handleClose();
   };
 
   const handleClose = () => {
-    // Close the modal
-    router.push('/');
+    router.push(`/eventview?id=${id}`);
   };
 
   // Update queue when category is selected
@@ -434,7 +436,10 @@ export default function MapboxMap() {
         onMove={handleMoveClub}
       />}
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold mb-4">Unplaced Clubs</h1>
+        <h1 className="text-2xl font-bold mb-4 flex items-center">
+          Unplaced Clubs
+          <span className="ml-2 text-blue-500">(Editing Placement)</span>
+        </h1>
 
         {/* Category Dropdown */}
         <div className="mb-4 w-3/5 bg-categoryBg">
@@ -470,6 +475,13 @@ export default function MapboxMap() {
           <div className={`queueAndSubmit flex-shrink-0 ${queue.length > 0 ? 'ml-4' : ''}`}>
             <button className="h-[6vh] px-6 mr-2 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={handleAddTable}>
               + Table
+            </button>
+            <button
+              type="button"
+              className="h-[6vh] px-6 mr-2 border border-[#2E73B5] bg-white text-[#2E73B5]"
+              onClick={handleSave}
+            >
+              Save
             </button>
             <button type="submit" className="h-[6vh] px-6 bg-[#2E73B5] text-white" onClick={handleSubmit}>
               Submit
