@@ -436,7 +436,10 @@ export default function MapboxMap() {
         onMove={handleMoveClub}
       />}
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold mb-4">Unplaced Clubs</h1>
+        <h1 className="text-2xl font-bold mb-4 flex items-center">
+          Unplaced Clubs
+          <span className="ml-2 text-blue-500">(Editing Placement)</span>
+        </h1>
 
         {/* Category Dropdown */}
         <div className="mb-4 w-3/5 bg-categoryBg">
