@@ -58,16 +58,23 @@ export default function InfoPopup({ club, onClose, onEdit, onMove }: InfoPopupPr
                 Edit
               </button>
             )}
-            <button className="text-3xl text-gray-500" onClick={onClose}>
+            <button
+              onClick={onClose}
+              className="text-3xl text-gray-500 transition-colors duration-200 hover:text-gray-700 active:text-gray-900 active:scale-95"
+            >
               ✕
             </button>
           </div>
         </div>
 
-        <p className="text-gray-600 mb-3">{club.description}</p>
+        <p className="text-gray-600 mb-3">
+          {club.description.toLowerCase().startsWith("pending")
+            ? "pending..."
+            : club.description}
+        </p>
 
         {/* Timing Information */}
-        <div className="border-t pt-3">
+        <div className="border-t pt-3 mb-10">
           <h3 className="text-sm font-semibold text-gray-800 mb-2">Event Times</h3>
           <div className="flex gap-4 text-sm text-gray-700">
             <p>
