@@ -102,7 +102,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
                 <InfoPopup 
                   club={selectedClub} 
                   onClose={() => setSelectedClub(null)}
-                  onEdit={() => handleEditClub(selectedClub.id)}
+                  onEdit={null}
                   onMove={null}
                 />}
             </AnimatePresence>

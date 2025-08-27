@@ -91,8 +91,8 @@ export default function EventPage() {
   return (
     <>
       <div className="bg-white md:overflow-hidden max-w-7xl mx-auto py-6 px-6 flex flex-col items-center justify-center">
-        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 max-h-[100vh] justify-between w-full">
-          <div>
+        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 max-h-[120vh] justify-between w-full">
+          <div className="md:flex-1 md:min-w-0">
             <h1 className="px-4 text-2xl md:text-3xl font-bold font-serif">{event.name}</h1>
             <p className="px-4 text-gray-500">
                 {dayName}, {month} {day} • {formatTime(event.start_time)} - {formatTime(event.end_time)}
@@ -129,7 +129,7 @@ export default function EventPage() {
               />
             </div>
           </div>
-          <div className='overflow-hidden'>
+          <div className='overflow-hidden md:basis-[40%] md:min-w-[40%] md:shrink-0'>
             <ClubsSearch eventId={id} />
           </div>
         </div>
