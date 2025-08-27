@@ -44,6 +44,10 @@ export default function BugReportForm() {
     handleFile(e.target.files);
     };
 
+    const handleCancel = () => {
+        window.location.href = "/";
+    };
+
     const handleSubmit = async () => {
         const formData = new FormData();
       
@@ -214,7 +218,10 @@ export default function BugReportForm() {
 
             {/* Submit */}
             <div className="flex justify-end mt-6">
-                <button className="bg-white text-slate-900 px-6 py-3 font-medium border border-[#2971AC] mr-3">
+                <button
+                    onClick={handleCancel}
+                    className="bg-white text-slate-900 px-6 py-3 font-medium border border-[#2971AC] mr-3"
+                >
                     Cancel
                 </button>
                 <button 
