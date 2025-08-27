@@ -411,18 +411,6 @@ export default function MapboxMap() {
     }
   }, [selectedCategory, clubs]);
 
-  // Edit club information
-  const handleEditClub = async () => {
-    router.push(`/editTable/${clubInfo?.id}`); // Navigate to edit page with club ID
-  };
-
-  // Move club marker
-  const handleMoveClub = async () => {
-    // Logic to move club marker
-    console.log("Moving club:");
-    // You can implement the move functionality here
-  };
-
   return (
     <div className="wrapper">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -442,12 +430,8 @@ export default function MapboxMap() {
         <InfoPopup
           club={clubInfo}
           onClose={() => setShowClubInfo(false)}
-          onEdit={() => {
-            handleEditClub();
-          }}
-          onMove={() => {
-            handleMoveClub();
-          }}
+          onEdit={null}
+          onMove={null}
         />
       )}
 

@@ -15,7 +15,7 @@ interface Club {
 interface InfoPopupProps {
   club: Club;
   onClose: () => void;
-  onEdit: () => void;
+  onEdit: (() => void) | null;
   onMove: (() => void) | null;
 }
 
@@ -53,9 +53,11 @@ export default function InfoPopup({ club, onClose, onEdit, onMove }: InfoPopupPr
                 Move
               </button>
             )}
-            <button className="h-[6vh] px-6 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={onEdit}>
-              Edit
-            </button>
+            {onEdit && (
+              <button className="h-[6vh] px-6 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={onEdit}>
+                Edit
+              </button>
+            )}
             <button className="text-3xl text-gray-500" onClick={onClose}>
               ✕
             </button>
