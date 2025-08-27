@@ -90,6 +90,7 @@ export default function CreateEventPage() {
     spreadsheet: "",
     location: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   // Helper function to validate date format (MM/DD/YYYY)
   const isValidDate = (dateStr: string) => {
@@ -432,6 +433,8 @@ export default function CreateEventPage() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
       const promise = fetch("/api/event", {
         method: "POST",
@@ -562,12 +565,8 @@ export default function CreateEventPage() {
         <div>
           <div className="mb-3">
             <h1 className="text-2xl font-bold font-serif text-primary">Create Event</h1>
-            <hr className="my-4 border-t border-gray-300" />
           </div>
           <hr style={{ width: "100%", borderTop: "1px solid #ccc", marginBottom: "1rem"}} />
-          <div className="mb-3">
-            <h1 className="text-l font-bold font-serif text-primary">Event Information</h1>
-          </div>
           <div>
             <form onSubmit={handleSubmit} className="space-y-2">
               {/* Event Title */}
@@ -575,7 +574,7 @@ export default function CreateEventPage() {
                 <h2 className="text-lg font-bold font-serif text-primary">Event Information</h2>
               </div>
               {/* EVENT NAME */}
-              <div className="space-y-1">
+              <div className="space-y-1 mt-3">
                 <label className="text-sm text-primary flex items-center">
                   Event Name*
                   {errors.eventName && (
@@ -600,7 +599,7 @@ export default function CreateEventPage() {
               {/* DATE / TIME / DURATION with adjusted spacing */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* DATE */}
-                <div className="space-y-1">
+                <div className="space-y-1 mt-3">
                   <label className="text-sm text-primary flex items-center">
                     Date*
                     {errors.date && (
@@ -624,7 +623,7 @@ export default function CreateEventPage() {
                 </div>
 
                 {/* START TIME */}
-                <div className="space-y-1">
+                <div className="space-y-1  mt-3">
                   <label className="text-sm text-primary flex items-center">
                     Start Time*
                     {errors.startTime && (
@@ -677,7 +676,7 @@ export default function CreateEventPage() {
                 </div>
 
                 {/* END TIME */}
-                <div className="space-y-1">
+                <div className="space-y-1 mt-3 mb-3">
                   <label className="text-sm text-primary flex items-center">
                     End Time*
                     {errors.endTime && (
@@ -758,87 +757,11 @@ export default function CreateEventPage() {
 
               {/* Table and Location Title */}
               <div className="pt-4 mb-3 flex items-center justify-between">
-                <h2 className="text-lg font-bold font-serif text-primary">Table and Location Information</h2>
-                  {/* Timed Table Toggle */}
-                  <div className="flex items-center space-x-3">
-                    <span className="text-sm font-serif font-medium">Toggle Timed Tables</span>
-
-                    <button
-                      type="button" // To prevent form thinking this is a submit
-                      onClick={() => setTimedTables(!timedTables)}
-                      className={`relative w-[4rem] h-[1.8rem] flex items-center rounded-full p-1 transition-colors duration-300 ${
-                        timedTables ? "bg-[#2E73B5]" : "bg-gray-400"
-                      }`}
-                    >
-                      <span
-                        className={`absolute left-2 text-xs text-white font-bold transition-all duration-300 ${
-                          timedTables ? "opacity-100" : "opacity-0"
-                        }`}
-                      >
-                        ON
-                      </span>
-                      <span
-                        className={`absolute right-2 text-xs text-white font-bold transition-all duration-300 ${
-                          timedTables ? "opacity-0" : "opacity-100"
-                        }`}
-                      >
-                        OFF
-                      </span>
-                      <span
-                        className={`h-6 w-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
-                          timedTables ? "translate-x-8" : "translate-x-0"
-                        }`}
-                      />
-                    </button>
-                  </div>
-              </div>
-
-              {/* SPREADSHEET */}
-              <div className="space-y-1">
-                <div className="flex items-between gap-3">
-                  <label className="text-sm text-primary flex items-center">
-                    Select Spreadsheet*
-                    {errors.spreadsheet && (
-                      <span className="ml-2 text-xs text-red-500">
-                        (Required)
-                      </span>
-                    )}
-                  </label>
-                  <Tooltip />
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    name="spreadsheet"
-                    type="text"
-                    placeholder="Choose a spreadsheet file (.xlsx)"
-                    value={formData.spreadsheet ? formData.spreadsheet.name : ""}
-                    readOnly
-                    className={`flex-grow h-11 ${errors.spreadsheet ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`}
-                    aria-invalid={errors.spreadsheet ? "true" : "false"}
-                  />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="h-11 px-6 bg-[#2E73B5] text-[#fff] hover:bg-[#235d92]"
-                    onClick={() => document.getElementById("file-upload")?.click()}
-                  >
-                    Upload
-                  </Button>
-                  <input
-                    id="file-upload"
-                    type="file"
-                    className="hidden"
-                    accept=".xlsx,.xls"
-                    onChange={handleFileUpload}
-                  />
-                </div>
-                {errors.spreadsheet && (
-                  <p className="text-sm text-red-500">{errors.spreadsheet}</p>
-                )}
+                <h2 className="text-lg font-bold font-serif text-primary">Contact Information</h2>
               </div>
               
               {/* ORGANIZATION NAME */}
-              <div className="space-y-1">
+              <div className="space-y-1 mt-3">
                 <label className="text-sm text-primary flex items-center">
                   Organization Name*
                   {errors.organizationName && (
@@ -862,7 +785,7 @@ export default function CreateEventPage() {
 
               {/* REPRESENTATIVE NAME */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1"> 
+                <div className="space-y-1 mt-3"> 
                   <label className="text-sm text-primary flex items-center">
                     Representative First Name*
                     {errors.firstName && (
@@ -884,7 +807,7 @@ export default function CreateEventPage() {
                     <p className="text-sm text-red-500">{errors.firstName}</p>
                   )}
                 </div>
-                <div className="space-y-1"> 
+                <div className="space-y-1 mt-3"> 
                   <label className="text-sm text-primary flex items-center">
                     Representative Last Name*
                     {errors.lastName && (
@@ -911,7 +834,7 @@ export default function CreateEventPage() {
               {/* CONTACT INFO */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* EMAIL */}
-                <div className="space-y-1"> 
+                <div className="space-y-1 mt-3"> 
                   <label className="text-sm text-primary flex items-center">
                     Email*
                     {errors.email && (
@@ -934,7 +857,7 @@ export default function CreateEventPage() {
                   )}
                 </div>
                 {/* PHONE NUMBER */}
-                <div className="space-y-1"> 
+                <div className="space-y-1 mt-3 mb-3"> 
                   <label className="text-sm text-primary flex items-center">
                     Phone Number*
                     {errors.phoneNumber && (
@@ -961,7 +884,7 @@ export default function CreateEventPage() {
               {/* LOCATION INFO */}
 
               {/* ADDRESS */}
-              <div className="space-y-1">
+              <div className="space-y-1 mt-3">
                 <label className="text-sm text-primary flex items-center">
                   Address
                 </label>
@@ -978,7 +901,7 @@ export default function CreateEventPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6" style={{marginBottom: "2rem"}}>
                 {/* CITY */}
-                <div className="space-y-1"> 
+                <div className="space-y-1 mt-3"> 
                   <label className="text-sm text-primary flex items-center">
                     City
                   </label>
@@ -996,7 +919,7 @@ export default function CreateEventPage() {
                   )}
                 </div>
                 {/* STATE */}
-                <div className="space-y-1"> 
+                <div className="space-y-1 mt-3"> 
                   <label className="text-sm text-primary flex items-center">
                     State
                   </label>
@@ -1028,7 +951,7 @@ export default function CreateEventPage() {
                   )}
                 </div>
                 {/* ZIP CODE */}
-                <div className="space-y-1"> 
+                <div className="space-y-1 mt-3"> 
                   <label className="text-sm text-primary flex items-center">
                     ZIP Code
                   </label>
@@ -1049,15 +972,46 @@ export default function CreateEventPage() {
               
               {/* TABLE AND LOCATION INFORMATION SECTION */}
               <div className="mb-3 flex flex-col gap-2 sm:flex-row justify-between">
-                <h1 className="text-l font-bold font-serif text-primary">Table and Location Information</h1>
+                <h2 className="font-bold font-serif">Table and Location Information</h2>
+                
                 <div className="sm:self-end flex flex-row items-center gap-2">
-                  <h2 className="text-xs font-bold font-serif text-primary">Toggle Timed Tables</h2>
-                  <Switch checked={timedTables} onCheckedChange={setTimedTables} />
+                  {/* Timed Table Toggle */}
+                  <div className="flex items-center space-x-3">
+                    <span className="text-xs font-serif font-medium">Toggle Timed Tables</span>
+
+                    <button
+                      type="button" // To prevent form thinking this is a submit
+                      onClick={() => setTimedTables(!timedTables)}
+                      className={`relative w-[4rem] h-[1.8rem] flex items-center rounded-full p-1 transition-colors duration-300 ${
+                        timedTables ? "bg-[#2E73B5]" : "bg-gray-400"
+                      }`}
+                    >
+                      <span
+                        className={`absolute left-2 text-xs text-white font-bold transition-all duration-300 ${
+                          timedTables ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
+                        ON
+                      </span>
+                      <span
+                        className={`absolute right-2 text-xs text-white font-bold transition-all duration-300 ${
+                          timedTables ? "opacity-0" : "opacity-100"
+                        }`}
+                      >
+                        OFF
+                      </span>
+                      <span
+                        className={`h-6 w-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                          timedTables ? "translate-x-8" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{marginBottom: "2rem"}}>
                 {/* SPREADSHEET */}
-                <div className="space-y-1">
+                <div className="space-y-1 mt-3">
                   <div className="flex items-center gap-3">
                     <label className="text-sm text-primary flex items-center">
                       Select Spreadsheet*
@@ -1103,7 +1057,7 @@ export default function CreateEventPage() {
                 </div>
 
                 {/* LOCATION */}
-                <div className="space-y-1 relative">
+                <div className="space-y-1 mt-3 relative">
                   <label className="text-sm text-primary flex items-center">
                     Location*
                     {errors.location && (
@@ -1125,7 +1079,7 @@ export default function CreateEventPage() {
                       className={`flex-grow h-11 ${errors.location ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`}
                       aria-invalid={errors.location ? "true" : "false"}
                     />
-                    <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                       <Button
                         type="button"
                         variant="secondary"
@@ -1154,12 +1108,18 @@ export default function CreateEventPage() {
                 >
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
-                  className="h-11 px-6 bg-[#2E73B5] hover:bg-[#235d92]"
-                >
-                  Create Event
-                </Button>
+                <div className="flex flex-col items-start">
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="h-11 px-6 bg-[#2E73B5] hover:bg-[#235d92]"
+                  >
+                    Create Event
+                  </Button>
+                  {isLoading && (
+                    <p className="text-sm text-gray-500 mt-1">Loading...</p>
+                  )}
+                </div>
               </div>
             </form>
           </div>
