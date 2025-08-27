@@ -70,6 +70,14 @@ export default function EventPage() {
     router.push(`/placement/${id}`);
   };
 
+  const formatTime = (time: string): string => {
+    const [hourStr, minuteStr] = time.split(':')
+    let hour = parseInt(hourStr, 10)
+    const period = hour >= 12 ? 'PM' : 'AM'
+    hour = hour % 12 || 12
+    return `${hour}:${minuteStr} ${period}`
+  }
+
   if (loading) return <p>Loading event...</p>;
   if (!event) return <p>No event found</p>;
 
@@ -87,7 +95,7 @@ export default function EventPage() {
           <div>
             <h1 className="px-4 text-2xl md:text-3xl font-bold font-serif">{event.name}</h1>
             <p className="px-4 text-gray-500">
-                {dayName}, {month} {day} • {event.starttime} - {event.endtime}
+                {dayName}, {month} {day} • {formatTime(event.start_time)} - {formatTime(event.end_time)}
             </p>
             <ShowMapButton eventID={id} />
 
