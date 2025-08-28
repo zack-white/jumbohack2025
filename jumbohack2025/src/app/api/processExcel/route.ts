@@ -11,6 +11,9 @@ export async function POST(request: Request) {
     const timedTableBool = timedTable === 'true';
     const fallbackStartTime = formData.get('fallbackStartTime') as string;
     const fallbackEndTime = formData.get('fallbackEndTime') as string;
+    const emailingEnabled = formData.get('emailingEnabled') === 'true';
+
+    console.log('Processing Excel with emailingEnabled:', emailingEnabled);
 
     if (!file) {
       return NextResponse.json({ message: 'No file uploaded' }, { status: 400 });
@@ -29,47 +32,90 @@ export async function POST(request: Request) {
     const sheet = workbook.Sheets[sheetName];
     const jsonData: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-    // Define a type for rows
-    type ClubRow = [string, string, string, string?, string?, string?]; // name, category, contact, description (optional), start_time (optional), end_time (optional)
+    // Define different types based on emailing enabled
+    type ClubRowWithEmail = [string, string, string, string?]; // name, category, contact, description (optional when emailing enabled)
+    type ClubRowWithoutEmail = [string, string, string?, string?]; // name, category, contact (optional), description (required when emailing disabled)
 
     // Process the data into the desired format
-    const clubs = jsonData.slice(1).map((row) => {
-      const [name, category, contact, description, rawStart, rawEnd]: ClubRow = row as ClubRow;
+    const clubs = jsonData.slice(1).map((row, index) => {
+      if (emailingEnabled) {
+        // When emailing is enabled: name, category, contact (required), description (optional)
+        const [name, category, contact, description]: ClubRowWithEmail = row as ClubRowWithEmail;
+        
+        if (!name || !category || !contact) {
+          throw new Error(`Row ${index + 2}: Name, category, and contact are required when emailing is enabled`);
+        }
+        
+        return {
+          name,
+          category,
+          contact,
+          description: description || '', // Optional, will be filled via email workflow
+          coordinates: null,
+          confirmed: false,
+          event_id: nextEventId,
+          start_time: timedTableBool ? fallbackStartTime : fallbackStartTime,
+          end_time: timedTableBool ? fallbackEndTime : fallbackEndTime,
+        };
+      } else {
+        // When emailing is disabled: name, category, contact (optional), description (required)
+        const [name, category, contactOrDescription, description]: ClubRowWithoutEmail = row as ClubRowWithoutEmail;
+        
+        if (!name || !category) {
+          throw new Error(`Row ${index + 2}: Name and category are required`);
+        }
 
-        // Convert Excel time serials to time strings if numbers, else fallback
-        const start_time = typeof rawStart === 'number'
-          ? excelTimeToTimeString(rawStart)
-          : (timedTable === 'true' && rawStart ? rawStart : fallbackStartTime);
+        // Determine if third column is contact (email format) or description
+        const isThirdColumnEmail = contactOrDescription && 
+          typeof contactOrDescription === 'string' && 
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactOrDescription);
 
-        const end_time = typeof rawEnd === 'number'
-          ? excelTimeToTimeString(rawEnd)
-          : (timedTable === 'true' && rawEnd ? rawEnd : fallbackEndTime);
+        let contact: string | null = null;
+        let finalDescription: string;
 
-      return {
-        name,
-        contact,
-        description: description || '', // Default empty string if undefined
-        category,
-        event_id: nextEventId, // Dynamic event ID
-        coordinates: null, // Coordinates are null initially
-        confirmed: false, // Not confirmed
-        start_time: timedTableBool && start_time ? start_time : fallbackStartTime, // Fallback to event times if empty
-        end_time: timedTableBool && end_time ? end_time : fallbackEndTime, // Fallback to event times if empty
-      };
+        if (isThirdColumnEmail) {
+          // Third column is email, fourth column should be description
+          contact = contactOrDescription;
+          if (!description) {
+            throw new Error(`Row ${index + 2}: Description is required when emailing is disabled`);
+          }
+          finalDescription = description;
+        } else {
+          // Third column is description, no contact provided
+          if (!contactOrDescription) {
+            throw new Error(`Row ${index + 2}: Description is required when emailing is disabled`);
+          }
+          finalDescription = contactOrDescription;
+        }
+
+        return {
+          name,
+          category,
+          contact: contact || '', // Empty string if no contact provided
+          description: finalDescription,
+          coordinates: null,
+          confirmed: true, // Auto-confirmed when emailing is disabled
+          event_id: nextEventId,
+          start_time: timedTableBool ? fallbackStartTime : fallbackStartTime,
+          end_time: timedTableBool ? fallbackEndTime : fallbackEndTime,
+        };
+      }
     });
+
+    console.log('Processed clubs:', clubs.length);
 
     // Insert data into the database using the query wrapper
     for (const club of clubs) {
       await query(
-        'INSERT INTO clubs (name, contact, description, category, event_id, coordinates, confirmed, start_time, end_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+        'INSERT INTO clubs (name, category, contact, description, coordinates, confirmed, event_id, start_time, end_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
         [
           club.name,
+          club.category,
           club.contact,
           club.description,
-          club.category,
-          club.event_id,
           club.coordinates,
           club.confirmed,
+          club.event_id,
           club.start_time,
           club.end_time
         ]
@@ -80,7 +126,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       message: 'Data uploaded successfully', 
       clubs,
-      eventId: nextEventId 
+      eventId: nextEventId,
+      emailingEnabled
     });
   } catch (error) {
     console.error('Error processing file:', error);
@@ -89,24 +136,4 @@ export async function POST(request: Request) {
       error: (error as Error).message 
     }, { status: 500 });
   }
-}
-
-function excelTimeToTimeString(excelTime: number): string {
-  // Excel date 0 = 1899-12-31, so base date for Excel serial is 1899-12-30 in JS
-  // fractional part of excelTime is the time portion of the day
-  const secondsInDay = 24 * 60 * 60;
-
-  const fractionalDay = excelTime % 1;
-  const totalSeconds = Math.round(fractionalDay * secondsInDay);
-
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  // Format to HH:MM:SS (24-hour)
-  return [
-    hours.toString().padStart(2, '0'),
-    minutes.toString().padStart(2, '0'),
-    seconds.toString().padStart(2, '0'),
-  ].join(':');
 }

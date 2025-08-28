@@ -48,6 +48,7 @@ export default function CreateEventPage() {
   const [startTimeOfDay, setStartTimeOfDay] = useState("");
   const [endTimeOfDay, setEndTimeOfDay] = useState("");
   const [timedTables, setTimedTables] = useState(false);
+  const [emailingEnabled, setEmailingEnabled] = useState(true); // New state for email toggle
   const [formData, setFormData] = useState({
     eventName: "",
     date: "",
@@ -64,6 +65,7 @@ export default function CreateEventPage() {
     state: "",
     zipCode: "",
     timedTables: false,
+    emailingEnabled: true, // New field
     eventImage: null as File | null,
     spreadsheet: null as File | null,
     location: null as { x: number; y: number } | null,
@@ -211,15 +213,6 @@ export default function CreateEventPage() {
       isValid = false;
     }
 
-    // // Duration validation
-    // if (!formData.duration.trim()) {
-    //   newErrors.duration = "Duration is required";
-    //   isValid = false;
-    // } else if (!isValidDuration(formData.duration)) {
-    //   newErrors.duration = "Use format like '24hr 30m' or '2 hours'";
-    //   isValid = false;
-    // }
-
     // Description validation
     if (!formData.description.trim()) {
       newErrors.description = "Description is required";
@@ -316,6 +309,7 @@ export default function CreateEventPage() {
       state: "",
       zipCode: "",
       timedTables: false,
+      emailingEnabled: true,
       eventImage: null,
       spreadsheet: null,
       location: null,
@@ -459,7 +453,8 @@ export default function CreateEventPage() {
           location: formData.location,
           scale: formData.scale,
           creator: userEmail?.emailAddress,
-          timedTables: timedTables
+          timedTables: timedTables,
+          emailingEnabled: emailingEnabled, // Include the new field
         }),
       });
 
@@ -471,7 +466,7 @@ export default function CreateEventPage() {
             if (timedTables) {
               await processExcelTimed(formData.spreadsheet);
             } else {
-              await processExcel(formData.spreadsheet);
+              await processExcel(formData.spreadsheet, emailingEnabled);
             }
           }
           const result = await response.json();
@@ -508,12 +503,13 @@ export default function CreateEventPage() {
   };
   
   // Function to process Excel file WITHOUT timed tables
-  const processExcel = async (file: File) => {
+  const processExcel = async (file: File, emailingEnabled: boolean) => {
     const parserData = new FormData();
     parserData.append("file", file);
     parserData.append("timedTable", timedTables ? "true" : "false");
     parserData.append("fallbackStartTime", formData.startTime);
     parserData.append("fallbackEndTime", formData.endTime);
+    parserData.append("emailingEnabled", emailingEnabled.toString()); // Pass the email setting
 
     try {
       const response = await fetch("/api/processExcel", {
@@ -974,7 +970,55 @@ export default function CreateEventPage() {
               <div className="mb-3 flex flex-col gap-2 sm:flex-row justify-between">
                 <h2 className="font-bold font-serif">Table and Location Information</h2>
                 
-                <div className="sm:self-end flex flex-row items-center gap-2">
+                <div className="sm:self-end flex flex-row items-center gap-4">
+                  {/* Email Organizations Toggle */}
+                  <div className="flex items-center space-x-3">
+                    <span className="text-xs font-serif font-medium">Email Organizations</span>
+                    <div className="relative group">
+                      {/* Question mark tooltip */}
+                      <span className="cursor-pointer text-blue-500 rounded-full border border-blue-500 w-5 h-5 flex items-center justify-center text-xs">
+                        ?
+                      </span>
+                      <div className="opacity-0 invisible group-hover:visible group-hover:opacity-100 transition-opacity duration-300 
+                              absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white text-xs rounded py-2 px-3 pointer-events-none z-10 w-80">
+                        <p className="text-center">
+                          When enabled, organizations will be emailed to confirm attendance and provide their own descriptions. 
+                          When disabled, contact information becomes optional and descriptions must be included in the spreadsheet.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmailingEnabled(!emailingEnabled);
+                        setFormData(prev => ({ ...prev, emailingEnabled: !emailingEnabled }));
+                      }}
+                      className={`relative w-[4rem] h-[1.8rem] flex items-center rounded-full p-1 transition-colors duration-300 ${
+                        emailingEnabled ? "bg-[#2E73B5]" : "bg-gray-400"
+                      }`}
+                    >
+                      <span
+                        className={`absolute left-2 text-xs text-white font-bold transition-all duration-300 ${
+                          emailingEnabled ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
+                        ON
+                      </span>
+                      <span
+                        className={`absolute right-2 text-xs text-white font-bold transition-all duration-300 ${
+                          emailingEnabled ? "opacity-0" : "opacity-100"
+                        }`}
+                      >
+                        OFF
+                      </span>
+                      <span
+                        className={`h-6 w-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                          emailingEnabled ? "translate-x-8" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
                   {/* Timed Table Toggle */}
                   <div className="flex items-center space-x-3">
                     <span className="text-xs font-serif font-medium">Toggle Timed Tables</span>
@@ -1021,7 +1065,7 @@ export default function CreateEventPage() {
                         </span>
                       )}
                     </label>
-                    <Tooltip />
+                    <Tooltip emailingEnabled={emailingEnabled} />
                   </div>
                   <div className="flex gap-2 relative">
                     <Input
@@ -1095,8 +1139,6 @@ export default function CreateEventPage() {
                   )}
                 </div>
               </div>
-
-              {/* UPLOAD EVENT IMAGE WILL GO HERE */}
 
               {/* ACTION BUTTONS */}
               <div className="flex justify-end gap-3 pt-6">

@@ -26,6 +26,7 @@ export async function POST(request: Request) {
       zipCode,
       creator,
       timedTables,
+      emailingEnabled, // Just in case we want this at some point
     } = data;
 
     const result = await query(
