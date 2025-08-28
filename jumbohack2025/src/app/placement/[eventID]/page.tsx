@@ -33,7 +33,7 @@ export default function MapboxMap() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // For now this really only loads the proper map going from rhe create event to
+  // For now this really only loads the proper map going from the create event to
   // the placement page -- later should fix
   const paramLong = searchParams.get('x') ? parseFloat(searchParams.get('x') || '') : INITIAL_LONG;
   const paramLat = searchParams.get('y') ? parseFloat(searchParams.get('y') || '') : INITIAL_LAT;
@@ -58,9 +58,11 @@ export default function MapboxMap() {
   const [clubInfo, setClubInfo] = useState<Club>();
   const [showClubInfo, setShowClubInfo] = useState(false);
 
-  // consts for sending emails
+  // Enhanced state for email sending
   const [status, setStatus] = useState('');
-  // const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [emailResults, setEmailResults] = useState<any>(null);
+
   // On page render, create map and fetch all old clubs w/ for given event.
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -322,37 +324,55 @@ export default function MapboxMap() {
   }
 
   const handleSave = async () => {
-    // setIsLoading(true);
-    setStatus('');
+    setIsLoading(true);
+    setStatus('Sending invitations...');
+    setEmailResults(null);
 
     try {
+      console.log('Sending invitations for event:', id);
+      
       const response = await fetch('/api/send-invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event_id: parseInt(id, 10) }),
+        body: JSON.stringify({ event_id: parseInt(id as string, 10) }),
       });
 
+      const data = await response.json();
+      console.log('Response data:', data);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log(data);
-      setStatus(data.message);
-    } catch (error) {
-      console.error('Error:', error);
-      if (error instanceof Error) {
-        setStatus(error.message);
+      setEmailResults(data);
+      
+      if (data.summary) {
+        setStatus(
+          `Invitations processed: ${data.summary.successful} sent successfully, ${data.summary.failed} failed`
+        );
       } else {
-        setStatus('Error sending invitations. Please check the console for details.');
+        setStatus(data.message || 'Invitations sent successfully!');
       }
+    } catch (error) {
+      console.error('Error sending invitations:', error);
+      setStatus(
+        error instanceof Error 
+          ? `Error: ${error.message}` 
+          : 'Error sending invitations. Please check the console for details.'
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSubmit = async () => {
     await handleSave();
-    handleClose();
+    // Only navigate if there were no errors
+    if (!status.includes('Error')) {
+      setTimeout(() => {
+        handleClose();
+      }, 2000); // Give user time to see the success message
+    }
   };
 
   const handleClose = () => {
@@ -456,6 +476,7 @@ export default function MapboxMap() {
             ))}
           </select>
         </div>
+        
         {/* Queue */}
         <div className="flex flex-row overflow-auto items-center gap-[1vw]">
           {/* Queue container (conditionally hidden when empty) */}
@@ -480,21 +501,44 @@ export default function MapboxMap() {
               type="button"
               className="h-[6vh] px-6 mr-2 border border-[#2E73B5] bg-white text-[#2E73B5]"
               onClick={handleSave}
+              disabled={isLoading}
             >
-              Save
+              {isLoading ? "Sending..." : "Save"}
             </button>
-            <button type="submit" className="h-[6vh] px-6 bg-[#2E73B5] text-white" onClick={handleSubmit}>
-              Submit
+            <button 
+              type="submit" 
+              className="h-[6vh] px-6 bg-[#2E73B5] text-white" 
+              onClick={handleSubmit}
+              disabled={isLoading}
+            >
+              {isLoading ? "Processing..." : "Submit"}
             </button>
           </div>
         </div>
       </div>
+      
+      {/* Enhanced status display */}
       {status && (
-        <p className={`mt-4 text-center ${
-          status.includes('Error') ? 'text-red-600' : 'text-green-600'
-        }`}>
-          {status}
-        </p>
+        <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className={`p-4 rounded-lg border ${
+            status.includes('Error') 
+              ? 'bg-red-50 border-red-200 text-red-800' 
+              : 'bg-green-50 border-green-200 text-green-800'
+          }`}>
+            <p className="font-medium">{status}</p>
+            
+            {/* Show detailed results if available */}
+            {emailResults && emailResults.summary && (
+              <div className="mt-2 text-sm">
+                <p>Total emails processed: {emailResults.summary.total}</p>
+                <p>Successfully sent: {emailResults.summary.successful}</p>
+                {emailResults.summary.failed > 0 && (
+                  <p>Failed to send: {emailResults.summary.failed}</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
