@@ -1135,24 +1135,27 @@ export default function CreateEventPage() {
               </div>
               
               {/* TABLE AND LOCATION INFORMATION SECTION */}
-              <div className="mb-3 flex flex-col gap-2 sm:flex-row justify-between">
+              <div className="mb-3 flex flex-col gap-4">
                 <h2 className="font-bold font-serif">Table and Location Information</h2>
                 
-                <div className="sm:self-end flex flex-row items-center gap-4">
+                {/* Mobile-first toggle section */}
+                <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-6 sm:justify-end">
                   {/* Email Organizations Toggle */}
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xs font-serif font-medium">Email Organizations</span>
-                    <div className="relative group">
-                      {/* Question mark tooltip */}
-                      <span className="cursor-pointer text-blue-500 rounded-full border border-blue-500 w-5 h-5 flex items-center justify-center text-xs">
-                        ?
-                      </span>
-                      <div className="opacity-0 invisible group-hover:visible group-hover:opacity-100 transition-opacity duration-300 
-                              absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white text-xs rounded py-2 px-3 pointer-events-none z-10 w-80">
-                        <p className="text-center">
-                          When enabled, organizations will be emailed to confirm attendance and provide their own descriptions. 
-                          When disabled, contact information becomes optional and descriptions must be included in the spreadsheet.
-                        </p>
+                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 sm:items-center">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm font-serif font-medium">Email Organizations</span>
+                      <div className="relative group">
+                        {/* Question mark tooltip */}
+                        <span className="cursor-pointer text-blue-500 rounded-full border border-blue-500 w-5 h-5 flex items-center justify-center text-xs">
+                          ?
+                        </span>
+                        <div className="opacity-0 invisible group-hover:visible group-hover:opacity-100 transition-opacity duration-300 
+                                absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white text-xs rounded py-2 px-3 pointer-events-none z-10 w-72 sm:w-80">
+                          <p className="text-center">
+                            When enabled, organizations will be emailed to confirm attendance and provide their own descriptions. 
+                            When disabled, contact information becomes optional and descriptions must be included in the spreadsheet.
+                          </p>
+                        </div>
                       </div>
                     </div>
                     <button
@@ -1164,9 +1167,9 @@ export default function CreateEventPage() {
                         // Re-validate spreadsheet with new setting
                         await revalidateSpreadsheet(newEmailingEnabled);
                       }}
-                      className={`relative w-[4rem] h-[1.8rem] flex items-center rounded-full p-1 transition-colors duration-300 ${
+                      className={`relative w-16 h-7 flex items-center rounded-full p-1 transition-colors duration-300 ${
                         emailingEnabled ? "bg-[#2E73B5]" : "bg-gray-400"
-                      }`}
+                      } sm:w-[4rem] sm:h-[1.8rem]`}
                     >
                       <span
                         className={`absolute left-2 text-xs text-white font-bold transition-all duration-300 ${
@@ -1183,23 +1186,22 @@ export default function CreateEventPage() {
                         OFF
                       </span>
                       <span
-                        className={`h-6 w-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                        className={`h-5 w-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
                           emailingEnabled ? "translate-x-8" : "translate-x-0"
-                        }`}
+                        } sm:h-6 sm:w-6`}
                       />
                     </button>
                   </div>
 
-                  {/* Timed Table Toggle */}
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xs font-serif font-medium">Toggle Timed Tables</span>
-
+                  {/* Timed Tables Toggle */}
+                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 sm:items-center">
+                    <span className="text-sm font-serif font-medium">Timed Tables</span>
                     <button
                       type="button" // To prevent form thinking this is a submit
                       onClick={() => setTimedTables(!timedTables)}
-                      className={`relative w-[4rem] h-[1.8rem] flex items-center rounded-full p-1 transition-colors duration-300 ${
+                      className={`relative w-16 h-7 flex items-center rounded-full p-1 transition-colors duration-300 ${
                         timedTables ? "bg-[#2E73B5]" : "bg-gray-400"
-                      }`}
+                      } sm:w-[4rem] sm:h-[1.8rem]`}
                     >
                       <span
                         className={`absolute left-2 text-xs text-white font-bold transition-all duration-300 ${
@@ -1216,15 +1218,16 @@ export default function CreateEventPage() {
                         OFF
                       </span>
                       <span
-                        className={`h-6 w-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                        className={`h-5 w-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
                           timedTables ? "translate-x-8" : "translate-x-0"
-                        }`}
+                        } sm:h-6 sm:w-6`}
                       />
                     </button>
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{marginBottom: "2rem"}}>
+              
+              <div className="grid grid-cols-1 gap-6" style={{marginBottom: "2rem"}}>
                 {/* SPREADSHEET */}
                 <div className="space-y-1 mt-3">
                   <div className="flex items-center gap-3">
@@ -1306,7 +1309,7 @@ export default function CreateEventPage() {
                       <Button
                         type="button"
                         variant="secondary"
-                        className="h-7 px-3 bg-[#2E73B5] text-xs text-[#fff] hover:bg-[#235d92]"
+                        className="h-7 px-3 bg-[#2E73B5] text-xs text-[#fff] hover:bg-[#235d92] whitespace-nowrap"
                         onClick={() => setShowMap(true)}
                       >
                         Choose Location
