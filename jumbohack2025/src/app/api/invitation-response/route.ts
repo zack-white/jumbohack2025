@@ -67,6 +67,15 @@ export async function GET(request: Request) {
       );
     }
 
+    // Get the event name for email customization
+    const eventResult = await query(
+      'SELECT name FROM event WHERE id = $1',
+      [user.event_id]
+    );
+    
+    const eventName = eventResult.rows[0]?.name || 'the event';
+    console.log('Event name:', eventName);
+
     // Handle declined response
     if (response === 'no') {
       console.log(`User declined invitation: ${user.contact}`);
@@ -82,13 +91,14 @@ export async function GET(request: Request) {
         try {
           await sendEmail({
             to: process.env.ADMIN_EMAIL,
-            subject: 'Event Invitation Declined',
+            subject: `${eventName} Invitation Declined`,
             html: `
               <div style="font-family: Arial, sans-serif;">
                 <h3>Invitation Declined</h3>
+                <p><strong>Event:</strong> ${eventName}</p>
                 <p><strong>Organization:</strong> ${user.name}</p>
                 <p><strong>Contact:</strong> ${user.contact}</p>
-                <p>This organization has declined the invitation to participate in the event.</p>
+                <p>This organization has declined the invitation to participate in the ${eventName}.</p>
               </div>
             `
           });
@@ -101,12 +111,12 @@ export async function GET(request: Request) {
       try {
         await sendEmail({
           to: user.contact,
-          subject: 'Invitation Response Confirmed',
+          subject: `${eventName} Response Confirmed`,
           html: `
             <div style="font-family: Arial, sans-serif;">
               <h3>Response Confirmed</h3>
               <p>Hello ${user.name},</p>
-              <p>We have received your response declining the invitation to participate in the event.</p>
+              <p>We have received your response declining the invitation to participate in the <strong>${eventName}</strong>.</p>
               <p>Thank you for letting us know.</p>
             </div>
           `

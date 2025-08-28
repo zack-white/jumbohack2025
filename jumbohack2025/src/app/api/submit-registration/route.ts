@@ -25,6 +25,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Invalid or expired token' }, { status: 400 });
     }
 
+    // Get the event name
+    const eventResult = await query(
+      'SELECT name FROM event WHERE id = $1',
+      [club.event_id]
+    );
+    
+    const eventName = eventResult.rows[0]?.name || 'the event';
+    console.log('Event name:', eventName);
+
     // Update the database with the bio
     await query(
       'UPDATE clubs SET description = $1 WHERE id = $2',
@@ -38,10 +47,10 @@ export async function POST(request: Request) {
       try {
         await sendEmail({
           to: process.env.ADMIN_EMAIL,
-          subject: 'Event Registration Complete',
+          subject: `${eventName} Registration Complete`,
           html: `
             <div style="font-family: Arial, sans-serif;">
-              <h3>New Registration Completed</h3>
+              <h3>${eventName} Registration Completed</h3>
               <p><strong>Organization:</strong> ${club.name}</p>
               <p><strong>Contact:</strong> ${club.contact}</p>
               <p><strong>Category:</strong> ${club.category || 'Not specified'}</p>
@@ -62,16 +71,16 @@ export async function POST(request: Request) {
     try {
       await sendEmail({
         to: club.contact,
-        subject: 'Registration Confirmed',
+        subject: `${eventName} Registration Confirmed`,
         html: `
           <div style="font-family: Arial, sans-serif;">
             <h3>Your registration is complete!</h3>
             <p>Hello ${club.name},</p>
-            <p>Thank you for completing your registration. We have received the following information:</p>
+            <p>Thank you for completing your registration for the <strong>${eventName}</strong>. We have received the following information:</p>
             <div style="background-color: #f5f5f5; padding: 10px; margin: 10px 0; border-left: 3px solid #2E73B5;">
               ${bio.replace(/\n/g, '<br>')}
             </div>
-            <p>We look forward to seeing you at the event!</p>
+            <p>We look forward to seeing you at the ${eventName}!</p>
           </div>
         `
       });

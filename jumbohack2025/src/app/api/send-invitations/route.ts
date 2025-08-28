@@ -15,6 +15,15 @@ export async function POST(request: Request) {
   try {
     console.log('Fetching clubs for event_id:', event_id);
     
+    // First, get the event name
+    const eventResult = await query(
+      'SELECT name FROM event WHERE id = $1',
+      [event_id]
+    );
+    
+    const eventName = eventResult.rows[0]?.name || 'the event';
+    console.log('Event name:', eventName);
+    
     // Get clubs with the provided event_id that have coordinates but no confirmation
     const result = await query(
       'SELECT contact, name FROM clubs WHERE event_id = $1 AND confirmed = false AND description = \'\' AND coordinates IS NOT NULL',
@@ -59,12 +68,12 @@ export async function POST(request: Request) {
 
         await sendEmail({
           to: email,
-          subject: `Event Invitation - ${clubName}`,
+          subject: `${eventName} Invitation - ${clubName}`,
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #2E73B5;">Event Invitation</h2>
+              <h2 style="color: #2E73B5;">${eventName} Invitation</h2>
               <p>Hello ${clubName},</p>
-              <p>You have been invited to participate in an upcoming event. Please confirm your attendance:</p>
+              <p>You have been invited to participate in the <strong>${eventName}</strong>. Please confirm your attendance:</p>
               <div style="text-align: center; margin: 30px 0;">
                 <a href="${yesLink}" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; margin-right: 10px; border-radius: 4px; display: inline-block;">✓ Yes, I'll Attend</a>
                 <a href="${noLink}" style="background-color: #f44336; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">✗ No, I Can't Attend</a>
