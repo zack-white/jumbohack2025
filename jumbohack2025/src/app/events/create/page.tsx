@@ -192,12 +192,66 @@ export default function CreateEventPage() {
       const headers = jsonData[0] as string[];
       const columns = headers.filter(header => header && header.toString().trim() !== '');
       
-      const formatError = validateSpreadsheetFormat(columns, emailingEnabled);
+      // More sophisticated validation that checks actual data
+      if (emailingEnabled) {
+        // When emailing enabled: need name, category, contact columns with data
+        const formatError = validateSpreadsheetFormat(columns, emailingEnabled);
+        if (formatError) {
+          return { error: formatError, columns };
+        }
+        
+        // Also check if contact column has data in the rows
+        if (jsonData.length > 1) {
+          const sampleRows = jsonData.slice(1, Math.min(4, jsonData.length)); // Check first 3 data rows
+          const contactColumnIndex = headers.findIndex(h => 
+            h && h.toLowerCase().includes('contact')
+          );
+          
+          if (contactColumnIndex >= 0) {
+            const hasEmptyContacts = sampleRows.some(row => {
+              const contactValue = (row as string[])[contactColumnIndex];
+              return !contactValue || contactValue.toString().trim() === '';
+            });
+            
+            if (hasEmptyContacts) {
+              return { 
+                error: "Contact information is required for all organizations when emailing is enabled. Some rows have empty contact fields.", 
+                columns 
+              };
+            }
+          }
+        }
+      } else {
+        // When emailing disabled: need name, category, description
+        const formatError = validateSpreadsheetFormat(columns, emailingEnabled);
+        if (formatError) {
+          return { error: formatError, columns };
+        }
+        
+        // Check if description column has data
+        if (jsonData.length > 1) {
+          const sampleRows = jsonData.slice(1, Math.min(4, jsonData.length));
+          const descriptionColumnIndex = headers.findIndex(h => 
+            h && h.toLowerCase().includes('description')
+          );
+          
+          if (descriptionColumnIndex >= 0) {
+            const hasEmptyDescriptions = sampleRows.some(row => {
+              const descValue = (row as string[])[descriptionColumnIndex];
+              return !descValue || descValue.toString().trim() === '';
+            });
+            
+            if (hasEmptyDescriptions) {
+              return { 
+                error: "Descriptions are required for all organizations when emailing is disabled. Some rows have empty description fields.", 
+                columns 
+              };
+            }
+          }
+        }
+      }
       
-      return {
-        error: formatError,
-        columns: columns
-      };
+      return { error: null, columns };
     } catch (error) {
       return { 
         error: "Unable to read spreadsheet file. Please ensure it's a valid .xlsx or .xls file.", 

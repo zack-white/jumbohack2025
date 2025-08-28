@@ -69,40 +69,53 @@ export async function POST(request: Request) {
           end_time: timedTableBool ? fallbackEndTime : fallbackEndTime,
         };
       } else {
-        // When emailing is disabled: name, category, contact (optional), description (required)
-        const [name, category, contactOrDescription, description]: ClubRowWithoutEmail = row as ClubRowWithoutEmail;
+        // When emailing is disabled: flexible parsing based on column count
+        const rowArray = row as string[];
+        const name = rowArray[0];
+        const category = rowArray[1];
+        
+        let contact = '';
+        let finalDescription = '';
         
         if (!name || !category) {
           throw new Error(`Row ${index + 2}: Name and category are required`);
         }
-
-        // Determine if third column is contact (email format) or description
-        const isThirdColumnEmail = contactOrDescription && 
-          typeof contactOrDescription === 'string' && 
-          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactOrDescription);
-
-        let contact: string | null = null;
-        let finalDescription: string;
-
-        if (isThirdColumnEmail) {
-          // Third column is email, fourth column should be description
-          contact = contactOrDescription;
-          if (!description) {
+        
+        if (rowArray.length >= 4) {
+          // 4 columns: name, category, contact, description
+          contact = rowArray[2] || ''; // Contact can be empty when emailing disabled
+          finalDescription = rowArray[3] || '';
+          
+          if (!finalDescription) {
             throw new Error(`Row ${index + 2}: Description is required when emailing is disabled`);
           }
-          finalDescription = description;
+        } else if (rowArray.length >= 3) {
+          // 3 columns: could be name, category, contact OR name, category, description
+          const thirdColumn = rowArray[2] || '';
+          
+          // Check if third column looks like an email
+          const isEmail = thirdColumn && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(thirdColumn);
+          
+          if (isEmail) {
+            // Third column is contact, but no description column - this is invalid for emailing disabled
+            throw new Error(`Row ${index + 2}: Description is required when emailing is disabled. Found contact but no description column.`);
+          } else {
+            // Third column is description, no contact
+            contact = '';
+            finalDescription = thirdColumn;
+            
+            if (!finalDescription) {
+              throw new Error(`Row ${index + 2}: Description is required when emailing is disabled`);
+            }
+          }
         } else {
-          // Third column is description, no contact provided
-          if (!contactOrDescription) {
-            throw new Error(`Row ${index + 2}: Description is required when emailing is disabled`);
-          }
-          finalDescription = contactOrDescription;
+          throw new Error(`Row ${index + 2}: Not enough columns. Expected at least 3 columns when emailing is disabled.`);
         }
 
         return {
           name,
           category,
-          contact: contact || '', // Empty string if no contact provided
+          contact, // Can be empty when emailing is disabled
           description: finalDescription,
           coordinates: null,
           confirmed: true, // Auto-confirmed when emailing is disabled
