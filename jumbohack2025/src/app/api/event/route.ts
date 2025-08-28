@@ -4,6 +4,8 @@ import { query } from '../../../lib/query';
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+    console.log('Received event data:', data);
+    
     const pointString = `(${data.location.x}, ${data.location.y})`;
 
     const {
@@ -13,7 +15,7 @@ export async function POST(request: Request) {
       scale,
       startTime,
       endTime,
-      // organizationName,
+      organizationName,
       firstName,
       lastName,
       email,
@@ -24,11 +26,12 @@ export async function POST(request: Request) {
       zipCode,
       creator,
       timedTables,
+      emailingEnabled, // Just in case we want this at some point
     } = data;
 
     const result = await query(
       `INSERT INTO event (name, description, date, location, scale, start_time, 
-       end_time, organizationname, firstname, lastname, email, phoneNumber, 
+       end_time, organizationname, firstname, lastname, email, phonenumber, 
        address, city, state, zipcode, creator, timedtables) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) 
        RETURNING id`,
@@ -40,7 +43,7 @@ export async function POST(request: Request) {
         scale,
         startTime,
         endTime,
-        organizationname,
+        organizationName,
         firstName,
         lastName,
         email,
@@ -54,14 +57,27 @@ export async function POST(request: Request) {
       ]
     );
 
+    console.log('Event created successfully with ID:', result.rows[0].id);
+
     return NextResponse.json({ 
       success: true, 
       eventId: result.rows[0].id - 1
     });
   } catch (error) {
     console.error('Error creating event:', error);
+    
+    // More detailed error logging
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    
     return NextResponse.json(
-      { success: false, message: 'Error creating event' }, 
+      { 
+        success: false, 
+        message: 'Error creating event',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }, 
       { status: 500 }
     );
   }

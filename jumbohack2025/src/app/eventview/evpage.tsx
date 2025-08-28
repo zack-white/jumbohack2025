@@ -12,8 +12,8 @@ interface Event {
   address: string;
   city: string;
   email: string;
-  endtime: string;
-  starttime: string;
+  end_time: string;
+  start_time: string;
   firstname: string;
   lastname: string;
   location: object;
