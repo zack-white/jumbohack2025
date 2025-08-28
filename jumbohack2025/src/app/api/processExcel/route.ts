@@ -3,6 +3,8 @@ import * as XLSX from 'xlsx';
 import { query } from '../../../lib/query';
 
 export async function POST(request: Request) {
+  let emailingEnabled = true; // Default value, will be overridden
+  
   try {
     // Read the file from the request
     const formData = await request.formData();
@@ -11,17 +13,26 @@ export async function POST(request: Request) {
     const timedTableBool = timedTable === 'true';
     const fallbackStartTime = formData.get('fallbackStartTime') as string;
     const fallbackEndTime = formData.get('fallbackEndTime') as string;
-    const emailingEnabled = formData.get('emailingEnabled') === 'true';
+    emailingEnabled = formData.get('emailingEnabled') === 'true';
+    const validateOnly = formData.get('validateOnly') === 'true'; // New flag
+    const providedEventId = formData.get('eventId'); // Event ID for actual insertion
 
-    console.log('Processing Excel with emailingEnabled:', emailingEnabled);
+    console.log('Processing Excel with emailingEnabled:', emailingEnabled, 'validateOnly:', validateOnly);
 
     if (!file) {
       return NextResponse.json({ message: 'No file uploaded' }, { status: 400 });
     }
 
-    // Get the latest event_id from the database
-    const result = await query('SELECT MAX(id) as max_id FROM event', []);
-    const nextEventId = (result.rows[0]?.max_id ?? 0);
+    // Get the event ID - either provided or get the latest
+    let eventId: number;
+    if (validateOnly) {
+      eventId = 999999; // Dummy ID for validation
+    } else if (providedEventId) {
+      eventId = parseInt(providedEventId.toString(), 10);
+    } else {
+      const result = await query('SELECT MAX(id) as max_id FROM event', []);
+      eventId = (result.rows[0]?.max_id ?? 0);
+    }
 
     // Convert the file to a buffer
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -53,7 +64,7 @@ export async function POST(request: Request) {
           description: description || '', // Optional, will be filled via email workflow
           coordinates: null,
           confirmed: false,
-          event_id: nextEventId,
+          event_id: eventId,
           start_time: timedTableBool ? fallbackStartTime : fallbackStartTime,
           end_time: timedTableBool ? fallbackEndTime : fallbackEndTime,
         };
@@ -95,7 +106,7 @@ export async function POST(request: Request) {
           description: finalDescription,
           coordinates: null,
           confirmed: true, // Auto-confirmed when emailing is disabled
-          event_id: nextEventId,
+          event_id: eventId,
           start_time: timedTableBool ? fallbackStartTime : fallbackStartTime,
           end_time: timedTableBool ? fallbackEndTime : fallbackEndTime,
         };
@@ -103,6 +114,15 @@ export async function POST(request: Request) {
     });
 
     console.log('Processed clubs:', clubs.length);
+
+    // If validateOnly is true, just return success without inserting data
+    if (validateOnly) {
+      return NextResponse.json({ 
+        message: 'Spreadsheet validation successful', 
+        clubCount: clubs.length,
+        emailingEnabled
+      });
+    }
 
     // Insert data into the database using the query wrapper
     for (const club of clubs) {
@@ -126,14 +146,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       message: 'Data uploaded successfully', 
       clubs,
-      eventId: nextEventId,
+      eventId: eventId,
       emailingEnabled
     });
   } catch (error) {
     console.error('Error processing file:', error);
+    
+    // Provide more user-friendly error messages
+    let errorMessage = 'Error processing file';
+    if (error instanceof Error) {
+      if (error.message.includes('Row ') && error.message.includes('required')) {
+        errorMessage = error.message; // Keep detailed row-level errors
+      } else {
+        errorMessage = `File processing error: ${error.message}`;
+      }
+    }
+    
     return NextResponse.json({ 
-      message: 'Error processing file', 
-      error: (error as Error).message 
+      message: errorMessage,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      suggestions: emailingEnabled 
+        ? 'Ensure your spreadsheet has Name, Category, and Contact columns with valid data.'
+        : 'Ensure your spreadsheet has Name, Category, and Description columns. Contact column is optional.'
     }, { status: 500 });
   }
 }

@@ -18,6 +18,7 @@ import { ChevronDown } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import * as XLSX from 'xlsx'; // Add XLSX import for client-side validation
 
 import { useUser } from "@clerk/nextjs";
 import { useAuth } from "@clerk/nextjs";
@@ -90,9 +91,11 @@ export default function CreateEventPage() {
     timedTables: "",
     eventImage: "",
     spreadsheet: "",
+    spreadsheetFormat: "", // New error for spreadsheet format
     location: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [spreadsheetColumns, setSpreadsheetColumns] = useState<string[]>([]); // Track detected columns
 
   // Helper function to validate date format (MM/DD/YYYY)
   const isValidDate = (dateStr: string) => {
@@ -144,6 +147,65 @@ export default function CreateEventPage() {
     return zipRegex.test(zip);
   }
 
+  // Helper function to validate spreadsheet format
+  const validateSpreadsheetFormat = (columns: string[], emailingEnabled: boolean) => {
+    const normalizedColumns = columns.map(col => col.toLowerCase().trim());
+    
+    if (emailingEnabled) {
+      // When emailing is enabled: Name, Category, Contact are required
+      const requiredColumns = ['name', 'category', 'contact'];
+      const missingColumns = requiredColumns.filter(required => 
+        !normalizedColumns.some(col => col.includes(required))
+      );
+      
+      if (missingColumns.length > 0) {
+        return `Missing required columns: ${missingColumns.map(col => col.charAt(0).toUpperCase() + col.slice(1)).join(', ')}. Required: Name, Category, Contact.`;
+      }
+    } else {
+      // When emailing is disabled: Name, Category, Description are required
+      const requiredColumns = ['name', 'category', 'description'];
+      const missingColumns = requiredColumns.filter(required => 
+        !normalizedColumns.some(col => col.includes(required))
+      );
+      
+      if (missingColumns.length > 0) {
+        return `Missing required columns: ${missingColumns.map(col => col.charAt(0).toUpperCase() + col.slice(1)).join(', ')}. Required: Name, Category, Description. Contact is optional.`;
+      }
+    }
+    
+    return null; // No errors
+  };
+
+  // Helper function to read and validate Excel file
+  const validateExcelFile = async (file: File, emailingEnabled: boolean) => {
+    try {
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const jsonData: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      
+      if (jsonData.length === 0) {
+        return { error: "Spreadsheet appears to be empty", columns: [] };
+      }
+      
+      const headers = jsonData[0] as string[];
+      const columns = headers.filter(header => header && header.toString().trim() !== '');
+      
+      const formatError = validateSpreadsheetFormat(columns, emailingEnabled);
+      
+      return {
+        error: formatError,
+        columns: columns
+      };
+    } catch (error) {
+      return { 
+        error: "Unable to read spreadsheet file. Please ensure it's a valid .xlsx or .xls file.", 
+        columns: [] 
+      };
+    }
+  };
+
   // Helper function to validate file type
   const isValidSpreadsheet = (file: File | null) => {
     if (!file) return false;
@@ -172,6 +234,7 @@ export default function CreateEventPage() {
       timedTables: "",
       eventImage: "",
       spreadsheet: "",
+      spreadsheetFormat: "", // Include the new error field
       location: "",
     };
 
@@ -280,6 +343,10 @@ export default function CreateEventPage() {
     } else if (!isValidSpreadsheet(formData.spreadsheet)) {
       newErrors.spreadsheet = "Only .xlsx or .xls files are allowed";
       isValid = false;
+    } else if (errors.spreadsheetFormat) {
+      // If there's a format error from file validation, block submission
+      newErrors.spreadsheetFormat = errors.spreadsheetFormat;
+      isValid = false;
     }
 
     // Location validation
@@ -290,6 +357,20 @@ export default function CreateEventPage() {
 
     setErrors(newErrors);
     return isValid;
+  };
+
+  // Function to re-validate spreadsheet when email toggle changes
+  const revalidateSpreadsheet = async (newEmailingEnabled: boolean) => {
+    if (formData.spreadsheet && spreadsheetColumns.length > 0) {
+      const formatError = validateSpreadsheetFormat(spreadsheetColumns, newEmailingEnabled);
+      
+      if (formatError) {
+        setErrors(prev => ({ ...prev, spreadsheetFormat: formatError }));
+      } else {
+        setErrors(prev => ({ ...prev, spreadsheetFormat: "" }));
+        toast.success("Spreadsheet format is valid for current settings!");
+      }
+    }
   };
 
   const resetForm = () => {
@@ -333,8 +414,10 @@ export default function CreateEventPage() {
       timedTables: "",
       eventImage: "",
       spreadsheet: "",
+      spreadsheetFormat: "", // Include the new error field
       location: "",
     });
+    setSpreadsheetColumns([]); // Clear detected columns
   };
 
   const handleInputChange = (
@@ -370,15 +453,30 @@ export default function CreateEventPage() {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setFormData(prev => ({ ...prev, spreadsheet: file }));
       
+      // Clear previous errors
+      setErrors(prev => ({ ...prev, spreadsheet: "", spreadsheetFormat: "" }));
+      
       if (!isValidSpreadsheet(file)) {
         setErrors(prev => ({ ...prev, spreadsheet: "Only .xlsx or .xls files are allowed" }));
+        setSpreadsheetColumns([]);
+        return;
+      }
+
+      // Validate spreadsheet format
+      const validation = await validateExcelFile(file, emailingEnabled);
+      setSpreadsheetColumns(validation.columns);
+      
+      if (validation.error) {
+        setErrors(prev => ({ ...prev, spreadsheetFormat: validation.error }));
       } else {
-        setErrors(prev => ({ ...prev, spreadsheet: "" }));
+        // Clear any previous format errors
+        setErrors(prev => ({ ...prev, spreadsheetFormat: "" }));
+        toast.success("Spreadsheet format validated successfully!");
       }
     }
   };
@@ -430,7 +528,45 @@ export default function CreateEventPage() {
     setIsLoading(true);
 
     try {
-      const promise = fetch("/api/event", {
+      // FIRST: Process and validate the Excel file before creating the event
+      if (formData.spreadsheet) {
+        console.log("Processing Excel file before creating event...");
+        
+        const excelFormData = new FormData();
+        excelFormData.append("file", formData.spreadsheet);
+        excelFormData.append("timedTable", timedTables ? "true" : "false");
+        excelFormData.append("fallbackStartTime", formData.startTime + " " + startTimeOfDay);
+        excelFormData.append("fallbackEndTime", formData.endTime + " " + endTimeOfDay);
+        excelFormData.append("emailingEnabled", emailingEnabled.toString());
+        excelFormData.append("validateOnly", "true"); // Add flag to only validate, not insert
+
+        const excelResponse = await fetch("/api/processExcel", {
+          method: "POST",
+          body: excelFormData,
+        });
+
+        if (!excelResponse.ok) {
+          const excelError = await excelResponse.json();
+          console.error("Excel validation failed:", excelError);
+          
+          // Show specific error message from Excel processing
+          toast.error(excelError.message || "Spreadsheet validation failed");
+          
+          // Set the spreadsheet format error to show on the form
+          setErrors(prev => ({ 
+            ...prev, 
+            spreadsheetFormat: excelError.message || "Spreadsheet format is invalid"
+          }));
+          
+          setIsLoading(false); // Reset loading state on error
+          return; // Stop here - don't create event
+        }
+
+        console.log("Excel file validated successfully");
+      }
+
+      // SECOND: Create the event only after Excel validation passes
+      const eventResponse = await fetch("/api/event", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -454,38 +590,59 @@ export default function CreateEventPage() {
           scale: formData.scale,
           creator: userEmail?.emailAddress,
           timedTables: timedTables,
-          emailingEnabled: emailingEnabled, // Include the new field
+          emailingEnabled: emailingEnabled,
         }),
       });
 
-      toast.promise(promise, {
-        loading: "Creating event...",
-        success: async (response) => {
-          // Call the excel processing API here
-          if (formData.spreadsheet) {
-            if (timedTables) {
-              await processExcelTimed(formData.spreadsheet);
-            } else {
-              await processExcel(formData.spreadsheet, emailingEnabled);
-            }
-          }
-          const result = await response.json();
-          const eventId = result.eventId + 1;
-          const locationParam = formData.location ? 
-          `?x=${formData.location.x}&y=${formData.location.y}&scale=${formData.scale}` : '';
-          resetForm();
-          
-          router.push(`/placement/${eventId}${locationParam}`);
-          return "Event created successfully!";
-        },
-        error: (error) => {
-          console.error("Error creating event:", error);
-          return "Failed to create event. Please try again.";
-        },
-      });
+      if (!eventResponse.ok) {
+        throw new Error("Failed to create event");
+      }
+
+      const eventResult = await eventResponse.json();
+      const eventId = eventResult.eventId + 1;
+
+      console.log("Event created successfully with ID:", eventId);
+
+      // THIRD: Now process Excel file for real (insert data)
+      if (formData.spreadsheet) {
+        const finalExcelFormData = new FormData();
+        finalExcelFormData.append("file", formData.spreadsheet);
+        finalExcelFormData.append("timedTable", timedTables ? "true" : "false");
+        finalExcelFormData.append("fallbackStartTime", formData.startTime + " " + startTimeOfDay);
+        finalExcelFormData.append("fallbackEndTime", formData.endTime + " " + endTimeOfDay);
+        finalExcelFormData.append("emailingEnabled", emailingEnabled.toString());
+        finalExcelFormData.append("eventId", eventId.toString()); // Pass the actual event ID
+
+        const finalExcelResponse = await fetch("/api/processExcel", {
+          method: "POST",
+          body: finalExcelFormData,
+        });
+
+        if (!finalExcelResponse.ok) {
+          // This shouldn't happen since we validated earlier, but handle it
+          console.error("Excel processing failed after event creation");
+          toast.error("Event created but spreadsheet processing failed. Please contact support.");
+          setIsLoading(false);
+          return;
+        }
+
+        console.log("Excel file processed and data inserted successfully");
+      }
+
+      // SUCCESS: Everything worked
+      toast.success("Event and spreadsheet processed successfully!");
+      
+      const locationParam = formData.location ? 
+        `?x=${formData.location.x}&y=${formData.location.y}&scale=${formData.scale}` : '';
+      
+      resetForm();
+      setIsLoading(false);
+      router.push(`/placement/${eventId}${locationParam}`);
+
     } catch (error) {
-      console.error("Error creating event:", error);
-      toast.error("Error creating event. Please try again.");
+      console.error("Error in form submission:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create event. Please try again.");
+      setIsLoading(false);
     }
   };
 
@@ -501,58 +658,15 @@ export default function CreateEventPage() {
       router.push("/");
     }
   };
-  
-  // Function to process Excel file WITHOUT timed tables
-  const processExcel = async (file: File, emailingEnabled: boolean) => {
-    const parserData = new FormData();
-    parserData.append("file", file);
-    parserData.append("timedTable", timedTables ? "true" : "false");
-    parserData.append("fallbackStartTime", formData.startTime);
-    parserData.append("fallbackEndTime", formData.endTime);
-    parserData.append("emailingEnabled", emailingEnabled.toString()); // Pass the email setting
-
-    try {
-      const response = await fetch("/api/processExcel", {
-        method: "POST",
-        body: parserData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to process Excel file");
-      }
-
-      await response.json();
-    } catch (error) {
-      console.error("Error processing Excel file:", error);
-      toast.error("Error processing Excel file. Please try again.");
-    }
-  };
-
-  // Function to process Excel file WITH timed tables
-  const processExcelTimed = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch("/api/processExcelTimed", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to process Excel file");
-      }
-
-      await response.json();
-    } catch (error) {
-      console.error("Error processing Excel file:", error);
-      toast.error("Error processing Excel file. Please try again.");
-    }
-  };
 
   // Helper function to get input classes based on error state
   const getInputClasses = (field: keyof typeof errors) => {
     return `${errors[field] ? "border-red-500 focus:ring-red-500" : "border-gray-200"} h-11`;
+  };
+
+  // Helper function for spreadsheet input classes (checks both spreadsheet and format errors)
+  const getSpreadsheetInputClasses = () => {
+    return `flex-grow h-11 ${(errors.spreadsheet || errors.spreadsheetFormat) ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`;
   };
 
   return (
@@ -989,9 +1103,12 @@ export default function CreateEventPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => {
-                        setEmailingEnabled(!emailingEnabled);
-                        setFormData(prev => ({ ...prev, emailingEnabled: !emailingEnabled }));
+                      onClick={async () => {
+                        const newEmailingEnabled = !emailingEnabled;
+                        setEmailingEnabled(newEmailingEnabled);
+                        setFormData(prev => ({ ...prev, emailingEnabled: newEmailingEnabled }));
+                        // Re-validate spreadsheet with new setting
+                        await revalidateSpreadsheet(newEmailingEnabled);
                       }}
                       className={`relative w-[4rem] h-[1.8rem] flex items-center rounded-full p-1 transition-colors duration-300 ${
                         emailingEnabled ? "bg-[#2E73B5]" : "bg-gray-400"
@@ -1074,8 +1191,8 @@ export default function CreateEventPage() {
                       placeholder="Choose a spreadsheet file (.xlsx)"
                       value={formData.spreadsheet ? formData.spreadsheet.name : ""}
                       readOnly
-                      className={`flex-grow h-11 ${errors.spreadsheet ? "border-red-500 focus:ring-red-500" : "border-gray-200"}`}
-                      aria-invalid={errors.spreadsheet ? "true" : "false"}
+                      className={getSpreadsheetInputClasses()}
+                      aria-invalid={(errors.spreadsheet || errors.spreadsheetFormat) ? "true" : "false"}
                     />
                     <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                       <Button
@@ -1097,6 +1214,14 @@ export default function CreateEventPage() {
                   </div>
                   {errors.spreadsheet && (
                     <p className="text-sm text-red-500">{errors.spreadsheet}</p>
+                  )}
+                  {errors.spreadsheetFormat && (
+                    <p className="text-sm text-red-500">{errors.spreadsheetFormat}</p>
+                  )}
+                  {!errors.spreadsheet && !errors.spreadsheetFormat && formData.spreadsheet && spreadsheetColumns.length > 0 && (
+                    <p className="text-sm text-green-600">
+                      ✓ Detected columns: {spreadsheetColumns.join(', ')}
+                    </p>
                   )}
                 </div>
 
