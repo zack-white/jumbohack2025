@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     
     // Get clubs with the provided event_id that have coordinates but no confirmation
     const result = await query(
-      'SELECT contact, name FROM clubs WHERE event_id = $1 AND confirmed = false AND description = \'\' AND coordinates IS NOT NULL',
+      'SELECT contact, name FROM clubs WHERE event_id = $1 AND confirmed = false AND (description = \'\' OR description IS NULL) AND coordinates IS NOT NULL AND contact != \'\'',
       [event_id]
     );
 
@@ -40,20 +40,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const emails = clubs.map(club => club.contact);
-    console.log('Sending emails to:', emails);
+    console.log('Sending invitations to clubs:', clubs.map(club => ({ name: club.name, contact: club.contact })));
 
-    const results = await Promise.all(emails.map(async (email, index) => {
+    // Process each club individually (not grouping by email)
+    const results = await Promise.all(clubs.map(async (club) => {
       try {
-        const clubName = clubs[index].name;
-        const token = Buffer.from(Date.now().toString() + email + Math.random().toString()).toString('hex');
+        const { contact: email, name: clubName } = club;
+        const token = Buffer.from(Date.now().toString() + email + clubName + Math.random().toString()).toString('hex');
 
         console.log(`Processing club: ${clubName}, email: ${email}`);
 
         // Store the token temporarily in description for secure email response handling
+        // Include club name in the search to handle multiple clubs with same email
         await query(
-          'UPDATE clubs SET description = $1 WHERE contact = $2 AND event_id = $3',
-          [`pending_${token}`, email, event_id]
+          'UPDATE clubs SET description = $1 WHERE contact = $2 AND event_id = $3 AND name = $4',
+          [`pending_${token}`, email, event_id, clubName]
         );
 
         // Verify environment variables
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
         const yesLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invitation-response?token=${token}&response=yes`;
         const noLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invitation-response?token=${token}&response=no`;
 
-        console.log(`Sending email to ${email}`);
+        console.log(`Sending email to ${email} for club ${clubName}`);
 
         await sendEmail({
           to: email,
@@ -83,11 +84,11 @@ export async function POST(request: Request) {
           `
         });
 
-        console.log(`Email sent successfully to ${email}`);
+        console.log(`Email sent successfully to ${email} for club ${clubName}`);
         return { email, clubName, status: 'sent' };
       } catch (emailError) {
-        console.error(`Failed to send email to ${email}:`, emailError);
-        return { email, status: 'failed', error: emailError.message };
+        console.error(`Failed to send email for club ${club.name}:`, emailError);
+        return { email: club.contact, clubName: club.name, status: 'failed', error: emailError.message };
       }
     }));
 
