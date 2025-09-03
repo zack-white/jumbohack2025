@@ -22,8 +22,7 @@ interface Club {
   y?: number;
 }
 
-mapboxgl.accessToken =
-  "pk.eyJ1Ijoic2FsbW9uLXN1c2hpIiwiYSI6ImNtN2dqYWdrZzA4ZnIyam9qNWx1NnAybjcifQ._YD8GYWPtpZ09AwYHzR2Og";
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_KEY;
 
 const INITIAL_LONG = -71.120;
 const INITIAL_LAT = 42.4075;
@@ -54,6 +53,7 @@ export default function MapboxMap() {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [queue, setQueue] = useState<Club[]>([]);
+  const [selectedClub, setSelectedClub] = useState<Club | null>(null);
 
   // Placement mode on map
   const [placementMode, setPlacementMode] = useState(true);
@@ -132,19 +132,19 @@ export default function MapboxMap() {
       const map = new mapboxgl.Map({
         container: mapContainerRef.current!,
         style: "mapbox://styles/mapbox/dark-v11",
-        center: [mapLong, mapLat], // Use direct variables, not state
-        zoom: mapZoom, // Use direct variable, not state
+        center: [mapLong, mapLat],
+        zoom: mapZoom,
       });
       mapRef.current = map;
 
-      // Make cursor a crosshair
+      // Make cursor a crosshair once map is mounted
       if (placementMode) {
         mapRef.current.getCanvas().style.cursor = 'crosshair';
       } else {
         mapRef.current.getCanvas().style.cursor = '';
       }
   
-      // Function to fetch all existing clubs to add to map
+      // Fetch all existing clubs to add to map
       const getExistingClubs = async () => {
         try {
             console.log("Fetching existing clubs for event ID:", id);
@@ -198,7 +198,7 @@ export default function MapboxMap() {
   
       map.on("load", async () => {
         const existingClubs = await getExistingClubs();
-        existingClubs.forEach((club:Club) => {
+        existingClubs.forEach((club: Club) => {
             if (!club.coordinates) return; 
   
             const marker = new mapboxgl.Marker()
@@ -315,40 +315,41 @@ export default function MapboxMap() {
 
   // Assign coordinates to the next club in the queue
   const handlePlaceClub = async (lng: number, lat: number) => {
+    if (!selectedClub || queue.length === 0) return;
+  
+    // Send update request
+    fetch('/api/updateClub', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'updateCoordinates',
+        id: selectedClub.id,
+        x: lng,
+        y: lat,
+      })
+    }).then((response) => {
+      if (response.ok) {
+        // Update the club in the main clubs array
+        setClubs((prevClubs) =>
+          prevClubs.map((club) =>
+            club.id === selectedClub.id ? { ...selectedClub, x: lng, y: lat } : club
+          )
+        );
+      } else {
+        console.error('Failed to update club coordinates');
+      }
+    }).catch((error) => {
+      console.error('Error updating club:', error);
+    });
+  
+    // Remove the selected club from queue and select the next one
     setQueue((prevQueue) => {
-      if (prevQueue.length === 0) return prevQueue; // No clubs left to place; means markers with no associated club could be place but not saved
-  
-      const nextClub = prevQueue[0];
-  
-      // Send update request
-      fetch('/api/updateClub', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'updateCoordinates',
-          id: nextClub.id,
-          x: lng,
-          y: lat,
-        })
-      }).then((response) => {
-        if (response.ok) {
-          // Update the club in the main clubs array
-          setClubs((prevClubs) =>
-            prevClubs.map((club) =>
-              club.id === nextClub.id ? { ...nextClub, x: lng, y: lat } : club
-            )
-          );
-        } else {
-          console.error('Failed to update club coordinates');
-        }
-      }).catch((error) => {
-        console.error('Error updating club:', error);
-      });
-  
-      // Remove the first club from the queue and return the updated state
-      return prevQueue.slice(1);
+      const newQueue = prevQueue.filter((club) => club.id !== selectedClub.id);
+      // Set the new selected club to be the first in the updated queue
+      setSelectedClub(newQueue.length > 0 ? newQueue[0] : null);
+      return newQueue;
     });
   };
 
@@ -405,6 +406,7 @@ export default function MapboxMap() {
           (club.y === undefined || club.y === null)
       );
       setQueue(filteredClubs);
+      if (filteredClubs.length > 0) setSelectedClub(filteredClubs[0]);
     }
   }, [selectedCategory, clubs]);
 
@@ -505,11 +507,19 @@ export default function MapboxMap() {
           {queue.length > 0 && (
             <div className="flex-grow min-w-0">
               <ul className="flex flex-row overflow-x-auto no-scrollbar">
-                {queue.map((club) => (
-                  <li key={club.id} className="p-4 mr-2 border-b bg-categoryBg min-w-[8vw] h-[6vh] truncate text-center">
-                    {club.name}
-                  </li>
-                ))}
+              {queue.map((club) => (
+                <li 
+                  key={club.id} 
+                  className={`p-4 mr-2 border-b min-w-[8vw] h-[6vh] truncate text-center cursor-pointer ${
+                    club.id === selectedClub?.id 
+                      ? 'bg-[#2E73B5] text-white' 
+                      : 'bg-categoryBg hover:bg-gray-200'
+                  }`}
+                  onClick={() => setSelectedClub(club)}
+                >
+                  {club.name}
+                </li>
+              ))}
               </ul>
             </div>
           )}
