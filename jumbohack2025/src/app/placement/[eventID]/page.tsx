@@ -49,14 +49,15 @@ export default function MapboxMap() {
   const [zoom, setZoom] = useState(paramZoom);
 
   // Keep track of clubs to add to map
-  const [clubs, setClubs] = useState<Club[]>([]);
+  const [unplacedClubs, setUnplacedClubs] = useState<Club[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [queue, setQueue] = useState<Club[]>([]);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
 
-  // Placement mode on map
+  // Placement mode and moving mode on map
   const [placementMode, setPlacementMode] = useState(true);
+  const [movingClub, setMovingClub] = useState<Club | null>(null);
 
   // Track club to show popup for
   const [clubInfo, setClubInfo] = useState<Club>();
@@ -229,7 +230,7 @@ export default function MapboxMap() {
           const eventIDFromParams = id;
           console.log("Fetching clubs for event ID:", eventIDFromParams);
           
-          const response = await fetch("/api/getClubs", {
+          const response = await fetch("/api/getUnplacedClubs", {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -244,7 +245,7 @@ export default function MapboxMap() {
   
           const data = await response.json();
           console.log("Fetched clubs:", data);
-          setClubs(data);
+          setUnplacedClubs(data);
           
           // Extract unique categories
           const uniqueCategories: string[] = Array.from(new Set<string>(data.map((club: Club) => club.category))) as string[];
@@ -300,7 +301,7 @@ export default function MapboxMap() {
       mapRef.current.off("click", handleMapClick);
     }
   };
-  }, [queue, placementMode]);
+  }, [queue, placementMode, selectedClub]);
 
   // Updating cursor between view and placement mode
   useEffect(() => {
@@ -316,6 +317,8 @@ export default function MapboxMap() {
   // Assign coordinates to the next club in the queue
   const handlePlaceClub = async (lng: number, lat: number) => {
     if (!selectedClub || queue.length === 0) return;
+
+    console.log(selectedClub.name)
   
     // Send update request
     fetch('/api/updateClub', {
@@ -330,14 +333,7 @@ export default function MapboxMap() {
         y: lat,
       })
     }).then((response) => {
-      if (response.ok) {
-        // Update the club in the main clubs array
-        setClubs((prevClubs) =>
-          prevClubs.map((club) =>
-            club.id === selectedClub.id ? { ...selectedClub, x: lng, y: lat } : club
-          )
-        );
-      } else {
+      if (!response.ok) {
         console.error('Failed to update club coordinates');
       }
     }).catch((error) => {
@@ -399,16 +395,19 @@ export default function MapboxMap() {
   useEffect(() => {
     if (selectedCategory) {
       // Filter clubs by category AND ensure they don't have coordinates
-      const filteredClubs = clubs.filter(
+      const filteredClubs = unplacedClubs.filter(
         (club) => 
           club.category === selectedCategory && 
           (club.x === undefined || club.x === null) && 
           (club.y === undefined || club.y === null)
       );
       setQueue(filteredClubs);
-      if (filteredClubs.length > 0) setSelectedClub(filteredClubs[0]);
+
+      // Set selected club to club being moved if one exists; otherwise set to first in list; otherwise null
+      if (movingClub) setSelectedClub(movingClub);
+      else if (filteredClubs.length > 0) setSelectedClub(filteredClubs[0]);
     }
-  }, [selectedCategory, clubs]);
+  }, [selectedCategory, unplacedClubs]);
 
   // Edit club information
   const handleEditClub = async () => {
@@ -417,8 +416,11 @@ export default function MapboxMap() {
 
   // Move club marker
   const handleMoveClub = async () => {
-    
     if (!clubInfo || !mapRef.current) return;
+
+    setMovingClub(clubInfo);
+
+    console.log(clubInfo)
 
     // Remove coordinates in backend
     try {
@@ -437,23 +439,20 @@ export default function MapboxMap() {
         throw new Error('Failed to remove club coordinates');
       }
 
-      // Update the club in the local state
-      setClubs((prevClubs) =>
-        prevClubs.map((club) =>
-          club.id === clubInfo.id
-            ? { ...club, x: undefined, y: undefined, coordinates: undefined }
-            : club
-        )
-      );
+      // Add club being moved back to unplaced clubs queue
+      setUnplacedClubs((prevClubs) => [clubInfo, ...prevClubs])
 
-      // Add to front of queue
-      setQueue((prevQueue) => [clubInfo, ...prevQueue]);
+      // Reset category which adds moving club back to queue
+      setSelectedCategory(clubInfo.category);
 
       // Close the popup
       setShowClubInfo(false);
 
       // Trigger rerender (optional: you could remove and reload markers if you store them)
       mapRef.current?.fire('load');
+      
+      // Reset club to no longer be moving; needed for determining which club to select when rendering queue 
+      setMovingClub(clubInfo);
 
       console.log(`Club ${clubInfo.name} moved back to queue.`);
     } catch (error) {
@@ -474,12 +473,13 @@ export default function MapboxMap() {
         </div>
       </div>
       {showClubInfo && clubInfo !== undefined && 
-      <InfoPopup 
-        club={clubInfo} 
-        onClose={() => setShowClubInfo(false)} 
-        onEdit={handleEditClub}
-        onMove={handleMoveClub}
-      />}
+        <InfoPopup 
+          club={clubInfo} 
+          onClose={() => setShowClubInfo(false)} 
+          onEdit={handleEditClub}
+          onMove={handleMoveClub}
+        />
+      }
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-bold mb-4 flex items-center">
           Unplaced Clubs
