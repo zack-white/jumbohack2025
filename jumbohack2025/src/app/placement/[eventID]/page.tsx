@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useRouter } from 'next/navigation';
 import mapboxgl from "mapbox-gl";
 import InfoPopup from "@/components/ClubInfo";
+import { Switch } from "@/components/ui/switch"; 
 import "./placement.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -215,7 +216,6 @@ export default function MapboxMap() {
             });
         });
       });
-    
   
       async function fetchClubs() {
         try {
@@ -445,7 +445,15 @@ export default function MapboxMap() {
 
   return (
     <div className="wrapper">
-      <div ref={mapContainerRef} className="mapContainer"/>
+      <div ref={mapContainerRef} className="mapContainer relative">
+        <div className="absolute bottom-2 left-2 bg-white px-3 py-2 z-10 flex gap-2">
+          <Switch 
+            checked={placementMode}
+            onCheckedChange={setPlacementMode}
+          />
+          <p>Placement Mode</p>
+        </div>
+      </div>
       {showClubInfo && clubInfo !== undefined && 
       <InfoPopup 
         club={clubInfo} 
