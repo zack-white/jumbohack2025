@@ -136,6 +136,13 @@ export default function MapboxMap() {
         zoom: mapZoom, // Use direct variable, not state
       });
       mapRef.current = map;
+
+      // Make cursor a crosshair
+      if (placementMode) {
+        mapRef.current.getCanvas().style.cursor = 'crosshair';
+      } else {
+        mapRef.current.getCanvas().style.cursor = '';
+      }
   
       // Function to fetch all existing clubs to add to map
       const getExistingClubs = async () => {
@@ -288,13 +295,23 @@ export default function MapboxMap() {
 
   mapRef.current.on("click", handleMapClick);
 
-  // Cleanup: remove the event listener when dependencies change
   return () => {
     if (mapRef.current) {
       mapRef.current.off("click", handleMapClick);
     }
   };
   }, [queue, placementMode]);
+
+  // Updating cursor between view and placement mode
+  useEffect(() => {
+    if (!mapRef.current) return;
+    
+    if (placementMode) {
+      mapRef.current.getCanvas().style.cursor = 'crosshair';
+    } else {
+      mapRef.current.getCanvas().style.cursor = '';
+    }
+  }, [placementMode]);
 
   // Assign coordinates to the next club in the queue
   const handlePlaceClub = async (lng: number, lat: number) => {
@@ -451,7 +468,7 @@ export default function MapboxMap() {
             checked={placementMode}
             onCheckedChange={setPlacementMode}
           />
-          <p>Placement Mode</p>
+          <p>{placementMode ? "Placement Mode" : "View Mode"}</p>
         </div>
       </div>
       {showClubInfo && clubInfo !== undefined && 
