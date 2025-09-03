@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       scale,
       startTime,
       endTime,
-      // organizationName,
+      organizationname,
       firstName,
       lastName,
       email,

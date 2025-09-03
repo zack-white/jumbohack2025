@@ -33,7 +33,7 @@ export default function MapboxMap() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // For now this really only loads the proper map going from rhe create event to
+  // For now this really only loads the proper map going from the create event to
   // the placement page -- later should fix
   const paramLong = searchParams.get('x') ? parseFloat(searchParams.get('x') || '') : INITIAL_LONG;
   const paramLat = searchParams.get('y') ? parseFloat(searchParams.get('y') || '') : INITIAL_LAT;
@@ -53,6 +53,9 @@ export default function MapboxMap() {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [queue, setQueue] = useState<Club[]>([]);
+
+  // Placement mode on map
+  const [placementMode, setPlacementMode] = useState(true);
 
   // Track club to show popup for
   const [clubInfo, setClubInfo] = useState<Club>();
@@ -260,62 +263,77 @@ export default function MapboxMap() {
         setZoom(mapZoom);
       });
   
-      // Assign coordinates to the next club in the queue
-      const handlePlaceClub = async (lng: number, lat: number) => {
-        setQueue((prevQueue) => {
-          if (prevQueue.length === 0) return prevQueue; // No clubs left to place; means markers with no associated club could be place but not saved
-      
-          const nextClub = prevQueue[0];
-      
-          // Send update request
-          fetch('/api/updateClub', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              action: 'updateCoordinates',
-              id: nextClub.id,
-              x: lng,
-              y: lat,
-            })
-          }).then((response) => {
-            if (response.ok) {
-              // Update the club in the main clubs array
-              setClubs((prevClubs) =>
-                prevClubs.map((club) =>
-                  club.id === nextClub.id ? { ...nextClub, x: lng, y: lat } : club
-                )
-              );
-            } else {
-              console.error('Failed to update club coordinates');
-            }
-          }).catch((error) => {
-            console.error('Error updating club:', error);
-          });
-      
-          // Remove the first club from the queue and return the updated state
-          return prevQueue.slice(1);
-        });
-      };
-      
-      // Listener for map click to add a marker
-      map.on("click", async (e) => {
-        const { lng, lat } = e.lngLat; // Get the clicked coordinates
-        new mapboxgl.Marker() 
-          .setLngLat([lng, lat])
-          .addTo(map);
-  
-        // Pop front element off the queue for given category
-        await handlePlaceClub(lng, lat);
-      });
-  
       // Cleanup on unmount
       return () => map.remove();
     };
   
     initializeMap();
   }, []);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    const handleMapClick = async (e: mapboxgl.MapMouseEvent) => {
+      if (!placementMode || queue.length === 0) {
+        return;
+      }
+      
+      const { lng, lat } = e.lngLat;
+      new mapboxgl.Marker() 
+        .setLngLat([lng, lat])
+        .addTo(mapRef.current!);
+
+      await handlePlaceClub(lng, lat);
+    };
+
+  mapRef.current.on("click", handleMapClick);
+
+  // Cleanup: remove the event listener when dependencies change
+  return () => {
+    if (mapRef.current) {
+      mapRef.current.off("click", handleMapClick);
+    }
+  };
+  }, [queue, placementMode]);
+
+  // Assign coordinates to the next club in the queue
+  const handlePlaceClub = async (lng: number, lat: number) => {
+    setQueue((prevQueue) => {
+      if (prevQueue.length === 0) return prevQueue; // No clubs left to place; means markers with no associated club could be place but not saved
+  
+      const nextClub = prevQueue[0];
+  
+      // Send update request
+      fetch('/api/updateClub', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'updateCoordinates',
+          id: nextClub.id,
+          x: lng,
+          y: lat,
+        })
+      }).then((response) => {
+        if (response.ok) {
+          // Update the club in the main clubs array
+          setClubs((prevClubs) =>
+            prevClubs.map((club) =>
+              club.id === nextClub.id ? { ...nextClub, x: lng, y: lat } : club
+            )
+          );
+        } else {
+          console.error('Failed to update club coordinates');
+        }
+      }).catch((error) => {
+        console.error('Error updating club:', error);
+      });
+  
+      // Remove the first club from the queue and return the updated state
+      return prevQueue.slice(1);
+    });
+  };
 
   const handleAddTable = () => {
     router.push(`/addTable/${id}`)
