@@ -8,7 +8,6 @@ import InfoPopup from "@/components/ClubInfo";
 import { Switch } from "@/components/ui/switch"; 
 import "./placement.css";
 import "mapbox-gl/dist/mapbox-gl.css";
-import mapboxgl from "mapbox-gl";
 
 interface Club {
   id: number;
@@ -150,31 +149,6 @@ export default function MapboxMap() {
         mapRef.current.getCanvas().style.cursor = '';
       }
   
-      // EXECUTED ON LOAD
-  
-      // Fetch a club by clicking on their table (specified by coords)
-      const getClubByCoords = async (lng: number, lat: number) => {
-          try {
-              const response = await fetch("/api/getClubByCoords", {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                      action: 'findByCoords',
-                      x: lng,
-                      y: lat
-                  })
-              });
-  
-              if (!response.ok) {
-                  console.log("Error fetching existing clubs.");
-              }
-  
-              return await response.json();;
-          } catch(error) {
-              console.error("Error" + error);
-          }
-      }
-  
       map.on("load", async () => {
         const existingClubs = await getExistingClubs();
         existingClubs.forEach((club: Club) => {
@@ -187,22 +161,7 @@ export default function MapboxMap() {
             // Track the marker
             markersRef.current.push(marker);
   
-            marker.getElement().addEventListener("click", async (event) => {
-                event.stopPropagation();
-  
-                const { lng, lat } = marker.getLngLat();
-                const fetchedClub = await getClubByCoords(lng, lat);
-  
-                if (fetchedClub) {
-                    setClubInfo({
-                        id: fetchedClub.id,
-                        name: fetchedClub.name,
-                        description: fetchedClub.description,
-                        category: fetchedClub.category,
-                    });
-                    setShowClubInfo(true);
-                }
-            });
+            marker.getElement().addEventListener("click", createMarkerClickHandler(marker));
         });
       });
   
@@ -275,6 +234,8 @@ export default function MapboxMap() {
       // Track the new marker
       markersRef.current.push(marker);
 
+      marker.getElement().addEventListener("click", createMarkerClickHandler(marker));
+
       await handlePlaceClub(lng, lat);
     };
 
@@ -298,62 +259,119 @@ export default function MapboxMap() {
     }
   }, [placementMode]);
 
-  // Fetch all existing clubs to add to map
-      const getExistingClubs = async () => {
-        try {
-            console.log("Fetching existing clubs for event ID:", id);
-            
-            const response = await fetch("/api/getExistingClubs", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  eventID: id
-                })
+  const createMarkerClickHandler = (marker: mapboxgl.Marker) => {
+    return async (event: Event) => {
+      event.stopPropagation();
+  
+      const { lng, lat } = marker.getLngLat();
+      
+      try {
+        const response = await fetch("/api/getClubByCoords", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'findByCoords',
+            x: lng,
+            y: lat
+          })
+        });
+  
+        if (response.ok) {
+          const fetchedClub = await response.json();
+          
+          if (fetchedClub) {
+            setClubInfo({
+              id: fetchedClub.id,
+              name: fetchedClub.name,
+              description: fetchedClub.description,
+              category: fetchedClub.category,
             });
-    
-            if (!response.ok) {
-                console.error("Error fetching existing clubs:", response.status);
-                return [];
-            }
-    
-            const data = await response.json();
-            console.log("Existing clubs data:", data);
-            return data;
-        } catch(error) {
-            console.error("Error fetching existing clubs:", error);
+            setShowClubInfo(true);
+          }
+        }
+      } catch(error) {
+        console.error("Error fetching club:", error);
+      }
+    };
+  };
+
+  // Fetch a club by clicking on their table (specified by coords)
+  const getClubByCoords = async (lng: number, lat: number) => {
+    try {
+        const response = await fetch("/api/getClubByCoords", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'findByCoords',
+                x: lng,
+                y: lat
+            })
+        });
+
+        if (!response.ok) {
+            console.log("Error fetching existing clubs.");
+        }
+
+        return await response.json();;
+    } catch(error) {
+        console.error("Error" + error);
+    }
+  }
+
+  // Fetch all existing clubs to add to map
+  const getExistingClubs = async () => {
+    try {
+        console.log("Fetching existing clubs for event ID:", id);
+        
+        const response = await fetch("/api/getExistingClubs", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              eventID: id
+            })
+        });
+
+        if (!response.ok) {
+            console.error("Error fetching existing clubs:", response.status);
             return [];
         }
-      }
 
-      const refreshMarkers = async () => {
-        if (!mapRef.current) return;
-      
-        // Remove all existing markers
-        markersRef.current.forEach(marker => marker.remove());
-        markersRef.current = [];
-      
-        // Reload existing clubs and recreate markers
-        const existingClubs = await getExistingClubs();
-        existingClubs.forEach((club: Club) => {
-          if (!club.coordinates) return;
-      
-          const marker = new mapboxgl.Marker()
-            .setLngLat([club.coordinates.x, club.coordinates.y])
-            .addTo(mapRef.current!);
-      
-          markersRef.current.push(marker);
-      
-          marker.getElement().addEventListener("click", async (event) => {
-            // ... your existing click handler
-          });
-        });
-      };
+        const data = await response.json();
+        console.log("Existing clubs data:", data);
+        return data;
+    } catch(error) {
+        console.error("Error fetching existing clubs:", error);
+        return [];
+    }
+  }
+
+  const refreshMarkers = async () => {
+    if (!mapRef.current) return;
+  
+    // Remove all existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+  
+    // Reload existing clubs and recreate markers
+    const existingClubs = await getExistingClubs();
+    existingClubs.forEach((club: Club) => {
+      if (!club.coordinates) return;
+  
+      const marker = new mapboxgl.Marker()
+        .setLngLat([club.coordinates.x, club.coordinates.y])
+        .addTo(mapRef.current!);
+  
+      markersRef.current.push(marker);
+  
+      marker.getElement().addEventListener("click", async (event) => {
+        // ... your existing click handler
+      });
+    });
+  };
 
   // Assign coordinates to the next club in the queue
   const handlePlaceClub = async (lng: number, lat: number) => {
     if (!selectedClub || queue.length === 0) return;
-
-    console.log(selectedClub.name)
   
     // Send update request
     fetch('/api/updateClub', {
