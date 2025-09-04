@@ -8,6 +8,7 @@ import InfoPopup from "@/components/ClubInfo";
 import { Switch } from "@/components/ui/switch"; 
 import "./placement.css";
 import "mapbox-gl/dist/mapbox-gl.css";
+import mapboxgl from "mapbox-gl";
 
 interface Club {
   id: number;
@@ -65,6 +66,10 @@ export default function MapboxMap() {
 
   // consts for sending emails
   const [status, setStatus] = useState('');
+
+  // Track markers on the map; needed for refreshing the map
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
+
   // const [isLoading, setIsLoading] = useState(false);
   // On page render, create map and fetch all old clubs w/ for given event.
   useEffect(() => {
@@ -145,33 +150,6 @@ export default function MapboxMap() {
         mapRef.current.getCanvas().style.cursor = '';
       }
   
-      // Fetch all existing clubs to add to map
-      const getExistingClubs = async () => {
-        try {
-            console.log("Fetching existing clubs for event ID:", id);
-            
-            const response = await fetch("/api/getExistingClubs", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  eventID: id
-                })
-            });
-    
-            if (!response.ok) {
-                console.error("Error fetching existing clubs:", response.status);
-                return [];
-            }
-    
-            const data = await response.json();
-            console.log("Existing clubs data:", data);
-            return data;
-        } catch(error) {
-            console.error("Error fetching existing clubs:", error);
-            return [];
-        }
-      }
-  
       // EXECUTED ON LOAD
   
       // Fetch a club by clicking on their table (specified by coords)
@@ -205,6 +183,9 @@ export default function MapboxMap() {
             const marker = new mapboxgl.Marker()
                 .setLngLat([club.coordinates.x, club.coordinates.y])
                 .addTo(map);
+            
+            // Track the marker
+            markersRef.current.push(marker);
   
             marker.getElement().addEventListener("click", async (event) => {
                 event.stopPropagation();
@@ -287,9 +268,12 @@ export default function MapboxMap() {
       }
       
       const { lng, lat } = e.lngLat;
-      new mapboxgl.Marker() 
+      const marker = new mapboxgl.Marker() 
         .setLngLat([lng, lat])
         .addTo(mapRef.current!);
+      
+      // Track the new marker
+      markersRef.current.push(marker);
 
       await handlePlaceClub(lng, lat);
     };
@@ -313,6 +297,57 @@ export default function MapboxMap() {
       mapRef.current.getCanvas().style.cursor = '';
     }
   }, [placementMode]);
+
+  // Fetch all existing clubs to add to map
+      const getExistingClubs = async () => {
+        try {
+            console.log("Fetching existing clubs for event ID:", id);
+            
+            const response = await fetch("/api/getExistingClubs", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  eventID: id
+                })
+            });
+    
+            if (!response.ok) {
+                console.error("Error fetching existing clubs:", response.status);
+                return [];
+            }
+    
+            const data = await response.json();
+            console.log("Existing clubs data:", data);
+            return data;
+        } catch(error) {
+            console.error("Error fetching existing clubs:", error);
+            return [];
+        }
+      }
+
+      const refreshMarkers = async () => {
+        if (!mapRef.current) return;
+      
+        // Remove all existing markers
+        markersRef.current.forEach(marker => marker.remove());
+        markersRef.current = [];
+      
+        // Reload existing clubs and recreate markers
+        const existingClubs = await getExistingClubs();
+        existingClubs.forEach((club: Club) => {
+          if (!club.coordinates) return;
+      
+          const marker = new mapboxgl.Marker()
+            .setLngLat([club.coordinates.x, club.coordinates.y])
+            .addTo(mapRef.current!);
+      
+          markersRef.current.push(marker);
+      
+          marker.getElement().addEventListener("click", async (event) => {
+            // ... your existing click handler
+          });
+        });
+      };
 
   // Assign coordinates to the next club in the queue
   const handlePlaceClub = async (lng: number, lat: number) => {
@@ -448,8 +483,7 @@ export default function MapboxMap() {
       // Close the popup
       setShowClubInfo(false);
 
-      // Trigger rerender (optional: you could remove and reload markers if you store them)
-      mapRef.current?.fire('load');
+      await refreshMarkers();
       
       // Reset club to no longer be moving; needed for determining which club to select when rendering queue 
       setMovingClub(clubInfo);
@@ -458,7 +492,6 @@ export default function MapboxMap() {
     } catch (error) {
       console.error('Error moving club:', error);
     }
-
   };
 
   return (
