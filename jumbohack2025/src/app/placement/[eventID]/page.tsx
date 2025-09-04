@@ -74,178 +74,19 @@ export default function MapboxMap() {
   useEffect(() => {
     if (!mapContainerRef.current) return;
   
-    const initializeMap = async () => {
-      const updateMap = async () => {
-        try {
-          console.log("Fetching map location for this event:", id);
-          
-          const response = await fetch("/api/getEventLocation", {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                eventID: id
-              })
-          });
-  
-          if (!response.ok) {
-              console.error("Error fetching map location:", response.status);
-              return;
-          }
-  
-          const data = await response.json();
-  
-          if (data.location) {
-            setLong(data.location.x);
-            setLat(data.location.y);
-            console.log("UPDATED MAP POSITION")
-          }
-          if (data.scale) {
-            setZoom(data.scale);
-          }
-  
-          return data;
-        } catch(error) {
-          console.error("Error fetching map location:", error);
-          return [];
-        }
-      };
-  
-      // Get updated coordinates first
-      const locationData = await updateMap();
-      
-      // Use the fetched coordinates directly instead of using state
-      let mapLong = long;
-      let mapLat = lat;
-      let mapZoom = zoom;
-      
-      if (locationData && locationData.location) {
-        mapLong = locationData.location.x;
-        mapLat = locationData.location.y;
-        console.log("UPDATED MAP POSITION to:", mapLong, mapLat);
-        
-        // Also update state for other components that might need it
-        setLong(mapLong);
-        setLat(mapLat);
-      }
-      
-      if (locationData && locationData.scale) {
-        mapZoom = locationData.scale;
-        setZoom(mapZoom);
-      }
-
-      // Create map with directly fetched coordinates
-      const map = new mapboxgl.Map({
-        container: mapContainerRef.current!,
-        style: "mapbox://styles/mapbox/dark-v11",
-        center: [mapLong, mapLat],
-        zoom: mapZoom,
-      });
-      mapRef.current = map;
-
-      // Make cursor a crosshair once map is mounted
-      if (placementMode) {
-        mapRef.current.getCanvas().style.cursor = 'crosshair';
-      } else {
-        mapRef.current.getCanvas().style.cursor = '';
-      }
-  
-      map.on("load", async () => {
-        const existingClubs = await getExistingClubs();
-        existingClubs.forEach((club: Club) => {
-            if (!club.coordinates) return; 
-  
-            const marker = new mapboxgl.Marker()
-                .setLngLat([club.coordinates.x, club.coordinates.y])
-                .addTo(map);
-            
-            // Track the marker
-            markersRef.current.push(marker);
-  
-            marker.getElement().addEventListener("click", createMarkerClickHandler(marker));
-        });
-      });
-  
-      async function fetchClubs() {
-        try {
-          const eventIDFromParams = id;
-          console.log("Fetching clubs for event ID:", eventIDFromParams);
-          
-          const response = await fetch("/api/getUnplacedClubs", {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                eventID: eventIDFromParams
-              })
-          });
-  
-          if (!response.ok) {
-              console.error("Error fetching clubs:", response.status);
-              return;
-          }
-  
-          const data = await response.json();
-          console.log("Fetched clubs:", data);
-          setUnplacedClubs(data);
-          
-          // Extract unique categories
-          const uniqueCategories: string[] = Array.from(new Set<string>(data.map((club: Club) => club.category))) as string[];
-          setCategories(uniqueCategories);
-  
-        } catch(error) {
-          console.error("Error fetching clubs:", error);
-        }
-      };
-    
-      // Fetch clubs on page load
-      setTimeout(() => {
-        fetchClubs();
-      }, 500);
-  
-      mapRef.current.on("move", () => {
-        // Get the current center coordinates and zoom level from the map
-        const mapCenter = map.getCenter();
-        const mapZoom = map.getZoom();
-  
-        setLong(mapCenter.lng);
-        setLat(mapCenter.lat);
-        setZoom(mapZoom);
-      });
-  
-      // Cleanup on unmount
-      return () => map.remove();
-    };
-  
     initializeMap();
   }, []);
 
   useEffect(() => {
     if (!mapRef.current) return;
 
-    const handleMapClick = async (e: mapboxgl.MapMouseEvent) => {
-      if (!placementMode || queue.length === 0) {
-        return;
+    mapRef.current.on("click", handleMapClick);
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.off("click", handleMapClick);
       }
-      
-      const { lng, lat } = e.lngLat;
-      const marker = new mapboxgl.Marker() 
-        .setLngLat([lng, lat])
-        .addTo(mapRef.current!);
-      
-      // Track the new marker
-      markersRef.current.push(marker);
-
-      marker.getElement().addEventListener("click", createMarkerClickHandler(marker));
-
-      await handlePlaceClub(lng, lat);
     };
-
-  mapRef.current.on("click", handleMapClick);
-
-  return () => {
-    if (mapRef.current) {
-      mapRef.current.off("click", handleMapClick);
-    }
-  };
   }, [queue, placementMode, selectedClub]);
 
   // Updating cursor between view and placement mode
@@ -258,6 +99,187 @@ export default function MapboxMap() {
       mapRef.current.getCanvas().style.cursor = '';
     }
   }, [placementMode]);
+
+  // Update queue when category is selected
+  useEffect(() => {
+    if (selectedCategory) {
+      // Filter clubs by category AND ensure they don't have coordinates
+      const filteredClubs = unplacedClubs.filter(
+        (club) => 
+          club.category === selectedCategory && 
+          (club.x === undefined || club.x === null) && 
+          (club.y === undefined || club.y === null)
+      );
+      setQueue(filteredClubs);
+
+      // Set selected club to club being moved if one exists; otherwise set to first in list; otherwise null
+      if (movingClub) setSelectedClub(movingClub);
+      else if (filteredClubs.length > 0) setSelectedClub(filteredClubs[0]);
+    }
+  }, [selectedCategory, unplacedClubs]);
+
+
+  /* ------------FUNCTION DECLARATIONS------------ */
+
+  const initializeMap = async () => {
+    const updateMap = async () => {
+      try {
+        console.log("Fetching map location for this event:", id);
+        
+        const response = await fetch("/api/getEventLocation", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              eventID: id
+            })
+        });
+
+        if (!response.ok) {
+            console.error("Error fetching map location:", response.status);
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.location) {
+          setLong(data.location.x);
+          setLat(data.location.y);
+          console.log("UPDATED MAP POSITION")
+        }
+        if (data.scale) {
+          setZoom(data.scale);
+        }
+
+        return data;
+      } catch(error) {
+        console.error("Error fetching map location:", error);
+        return [];
+      }
+    };
+
+    // Get updated coordinates first
+    const locationData = await updateMap();
+    
+    // Use the fetched coordinates directly instead of using state
+    let mapLong = long;
+    let mapLat = lat;
+    let mapZoom = zoom;
+    
+    if (locationData && locationData.location) {
+      mapLong = locationData.location.x;
+      mapLat = locationData.location.y;
+      console.log("UPDATED MAP POSITION to:", mapLong, mapLat);
+      
+      // Also update state for other components that might need it
+      setLong(mapLong);
+      setLat(mapLat);
+    }
+    
+    if (locationData && locationData.scale) {
+      mapZoom = locationData.scale;
+      setZoom(mapZoom);
+    }
+
+    // Create map with directly fetched coordinates
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current!,
+      style: "mapbox://styles/mapbox/dark-v11",
+      center: [mapLong, mapLat],
+      zoom: mapZoom,
+    });
+    mapRef.current = map;
+
+    // Make cursor a crosshair once map is mounted
+    if (placementMode) {
+      mapRef.current.getCanvas().style.cursor = 'crosshair';
+    } else {
+      mapRef.current.getCanvas().style.cursor = '';
+    }
+
+    map.on("load", async () => {
+      const existingClubs = await getExistingClubs();
+      existingClubs.forEach((club: Club) => {
+          if (!club.coordinates) return; 
+
+          const marker = new mapboxgl.Marker()
+              .setLngLat([club.coordinates.x, club.coordinates.y])
+              .addTo(map);
+          
+          // Track the marker
+          markersRef.current.push(marker);
+
+          marker.getElement().addEventListener("click", createMarkerClickHandler(marker));
+      });
+    });
+  
+    // Fetch clubs on page load
+    setTimeout(() => {
+      fetchClubs();
+    }, 500);
+
+    mapRef.current.on("move", () => {
+      // Get the current center coordinates and zoom level from the map
+      const mapCenter = map.getCenter();
+      const mapZoom = map.getZoom();
+
+      setLong(mapCenter.lng);
+      setLat(mapCenter.lat);
+      setZoom(mapZoom);
+    });
+
+    // Cleanup on unmount
+    return () => map.remove();
+  };
+
+  async function fetchClubs() {
+    try {
+      const eventIDFromParams = id;
+      console.log("Fetching clubs for event ID:", eventIDFromParams);
+      
+      const response = await fetch("/api/getUnplacedClubs", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            eventID: eventIDFromParams
+          })
+      });
+
+      if (!response.ok) {
+          console.error("Error fetching clubs:", response.status);
+          return;
+      }
+
+      const data = await response.json();
+      console.log("Fetched clubs:", data);
+      setUnplacedClubs(data);
+      
+      // Extract unique categories
+      const uniqueCategories: string[] = Array.from(new Set<string>(data.map((club: Club) => club.category))) as string[];
+      setCategories(uniqueCategories);
+
+    } catch(error) {
+      console.error("Error fetching clubs:", error);
+    }
+  };
+
+  const handleMapClick = async (e: mapboxgl.MapMouseEvent) => {
+    if (!placementMode || queue.length === 0) {
+      return;
+    }
+    
+    const { lng, lat } = e.lngLat;
+    const marker = new mapboxgl.Marker() 
+      .setLngLat([lng, lat])
+      .addTo(mapRef.current!);
+    
+    // Track the new marker
+    markersRef.current.push(marker);
+
+    // Create an event listener for club on map
+    marker.getElement().addEventListener("click", createMarkerClickHandler(marker));
+
+    await handlePlaceClub(lng, lat);
+  };
 
   const createMarkerClickHandler = (marker: mapboxgl.Marker) => {
     return async (event: Event) => {
@@ -294,29 +316,6 @@ export default function MapboxMap() {
       }
     };
   };
-
-  // Fetch a club by clicking on their table (specified by coords)
-  const getClubByCoords = async (lng: number, lat: number) => {
-    try {
-        const response = await fetch("/api/getClubByCoords", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'findByCoords',
-                x: lng,
-                y: lat
-            })
-        });
-
-        if (!response.ok) {
-            console.log("Error fetching existing clubs.");
-        }
-
-        return await response.json();;
-    } catch(error) {
-        console.error("Error" + error);
-    }
-  }
 
   // Fetch all existing clubs to add to map
   const getExistingClubs = async () => {
@@ -443,24 +442,6 @@ export default function MapboxMap() {
   const handleClose = () => {
     router.push(`/eventview?id=${id}`);
   };
-
-  // Update queue when category is selected
-  useEffect(() => {
-    if (selectedCategory) {
-      // Filter clubs by category AND ensure they don't have coordinates
-      const filteredClubs = unplacedClubs.filter(
-        (club) => 
-          club.category === selectedCategory && 
-          (club.x === undefined || club.x === null) && 
-          (club.y === undefined || club.y === null)
-      );
-      setQueue(filteredClubs);
-
-      // Set selected club to club being moved if one exists; otherwise set to first in list; otherwise null
-      if (movingClub) setSelectedClub(movingClub);
-      else if (filteredClubs.length > 0) setSelectedClub(filteredClubs[0]);
-    }
-  }, [selectedCategory, unplacedClubs]);
 
   // Edit club information
   const handleEditClub = async () => {
