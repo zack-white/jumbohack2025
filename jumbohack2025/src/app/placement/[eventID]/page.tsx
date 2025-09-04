@@ -512,26 +512,44 @@ export default function MapboxMap() {
           onMove={handleMoveClub}
         />
       }
-      <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold mb-4 flex items-center">
+      <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-4">
+        <h1 className="text-2xl font-bold flex items-center">
           Unplaced Clubs
           <span className="ml-2 text-blue-500">(Editing Placement)</span>
         </h1>
 
         {/* Category Dropdown */}
-        <div className="mb-4 w-3/5 bg-categoryBg">
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full p-3 border rounded bg-categoryBg"
-          >
-            <option>Select a category</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-row gap-4">
+          <div className="w-3/5 bg-categoryBg border">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full h-full px-6 py-4 bg-categoryBg"
+            >
+              <option>Select a category</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+          {/* Submit button (moves left when queue is empty) */}
+          <div className={"flex gap-2 queueAndSubmit"}>
+            <button className="px-6 py-4 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={handleAddTable}>
+              + Table
+            </button>
+            <button
+              type="button"
+              className="px-6 py-4 border border-[#2E73B5] bg-white text-[#2E73B5]"
+              onClick={handleSave}
+            >
+              Save
+            </button>
+            <button type="submit" className="px-6 py-4 bg-[#2E73B5] text-white" onClick={handleSubmit}>
+              Submit
+            </button>
+          </div>
         </div>
         {/* Queue */}
         <div className="flex flex-row overflow-auto items-center gap-[1vw]">
@@ -542,36 +560,21 @@ export default function MapboxMap() {
               {queue.map((club) => (
                 <li 
                   key={club.id} 
-                  className={`p-4 mr-2 border-b min-w-[8vw] h-[6vh] truncate text-center cursor-pointer ${
+                  className={`mr-2 border-b text-center cursor-pointer h-16 flex items-center justify-center px-4 min-w-[8vw] break-words ${
                     club.id === selectedClub?.id 
                       ? 'bg-[#2E73B5] text-white' 
                       : 'bg-categoryBg hover:bg-gray-200'
                   }`}
                   onClick={() => setSelectedClub(club)}
                 >
-                  {club.name}
+                  <span className="leading-tight">
+                    {club.name}
+                  </span>
                 </li>
               ))}
               </ul>
             </div>
           )}
-
-          {/* Submit button (moves left when queue is empty) */}
-          <div className={`queueAndSubmit flex-shrink-0 ${queue.length > 0 ? 'ml-4' : ''}`}>
-            <button className="h-[6vh] px-6 mr-2 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={handleAddTable}>
-              + Table
-            </button>
-            <button
-              type="button"
-              className="h-[6vh] px-6 mr-2 border border-[#2E73B5] bg-white text-[#2E73B5]"
-              onClick={handleSave}
-            >
-              Save
-            </button>
-            <button type="submit" className="h-[6vh] px-6 bg-[#2E73B5] text-white" onClick={handleSubmit}>
-              Submit
-            </button>
-          </div>
         </div>
       </div>
       {status && (
