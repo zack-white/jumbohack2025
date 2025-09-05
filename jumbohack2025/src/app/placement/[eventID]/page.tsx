@@ -561,20 +561,20 @@ export default function MapboxMap() {
             <div className="flex-grow min-w-0">
               <ul className="flex flex-row overflow-x-auto no-scrollbar">
               {queue.map((club) => (
-                <li 
-                  key={club.id} 
-                  className={`mr-2 border-b text-center cursor-pointer h-16 flex items-center justify-center px-4 min-w-[8vw] break-words ${
-                    club.id === selectedClub?.id 
-                      ? 'bg-[#2E73B5] text-white' 
-                      : 'bg-categoryBg hover:bg-gray-200'
-                  }`}
-                  onClick={() => setSelectedClub(club)}
-                >
-                  <span className="leading-tight">
-                    {club.name}
-                  </span>
-                </li>
-              ))}
+  <li 
+    key={club.id} 
+    className={`mr-2 border-b text-center cursor-pointer h-16 flex items-center justify-center px-4 whitespace-nowrap ${
+      club.id === selectedClub?.id 
+        ? 'bg-[#2E73B5] text-white' 
+        : 'bg-categoryBg hover:bg-gray-200'
+    }`}
+    onClick={() => setSelectedClub(club)}
+  >
+    <span className="leading-tight">
+      {club.name}
+    </span>
+  </li>
+))}
               </ul>
             </div>
           )}
