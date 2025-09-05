@@ -516,11 +516,10 @@ export default function MapboxMap() {
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-4">
         <h1 className="text-2xl font-bold flex items-center">
           Unplaced Clubs
-          <span className="ml-2 text-blue-500">(Editing Placement)</span>
         </h1>
 
         {/* Category Dropdown */}
-        <div className="flex flex-row gap-4">
+        <div className="flex flex-row justify-between sm:justify-start gap-4">
           <div className="w-3/5 bg-categoryBg border">
             <select
               value={selectedCategory}
@@ -561,20 +560,20 @@ export default function MapboxMap() {
             <div className="flex-grow min-w-0">
               <ul className="flex flex-row overflow-x-auto no-scrollbar">
               {queue.map((club) => (
-  <li 
-    key={club.id} 
-    className={`mr-2 border-b text-center cursor-pointer h-16 flex items-center justify-center px-4 whitespace-nowrap ${
-      club.id === selectedClub?.id 
-        ? 'bg-[#2E73B5] text-white' 
-        : 'bg-categoryBg hover:bg-gray-200'
-    }`}
-    onClick={() => setSelectedClub(club)}
-  >
-    <span className="leading-tight">
-      {club.name}
-    </span>
-  </li>
-))}
+                <li 
+                  key={club.id} 
+                  className={`mr-2 border-b text-center cursor-pointer h-16 flex items-center justify-center px-4 whitespace-nowrap ${
+                    club.id === selectedClub?.id 
+                      ? 'bg-[#2E73B5] text-white' 
+                      : 'bg-categoryBg hover:bg-gray-200'
+                  }`}
+                  onClick={() => setSelectedClub(club)}
+                >
+                  <span className="leading-tight">
+                    {club.name}
+                  </span>
+                </li>
+              ))}
               </ul>
             </div>
           )}
