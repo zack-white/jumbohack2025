@@ -114,12 +114,16 @@ export default function MapboxMap() {
       );
       setQueue(filteredClubs);
 
+      console.log(movingClub)
+
       // Set selected club to club being moved if one exists; otherwise set to first in list; otherwise null
-      if (movingClub) setSelectedClub(movingClub);
+      if (movingClub) {
+        setSelectedClub(movingClub);
+        setMovingClub(null);
+      }
       else if (filteredClubs.length > 0) setSelectedClub(filteredClubs[0]);
     }
   }, [selectedCategory, unplacedClubs]);
-
 
   /* ------------FUNCTION DECLARATIONS------------ */
 
@@ -283,6 +287,39 @@ export default function MapboxMap() {
     await handlePlaceClub(lng, lat);
   };
 
+  // Assign coordinates to the next club in the queue
+  const handlePlaceClub = async (lng: number, lat: number) => {
+    if (!selectedClub || queue.length === 0) return;
+  
+    // Send update request
+    fetch('/api/updateClub', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'updateCoordinates',
+        id: selectedClub.id,
+        x: lng,
+        y: lat,
+      })
+    }).then((response) => {
+      if (!response.ok) {
+        console.error('Failed to update club coordinates');
+      }
+    }).catch((error) => {
+      console.error('Error updating club:', error);
+    });
+  
+    // Remove the selected club from queue and select the next one
+    setQueue((prevQueue) => {
+      const newQueue = prevQueue.filter((club) => club.id !== selectedClub.id);
+      // Set the new selected club to be the first in the updated queue
+      setSelectedClub(newQueue.length > 0 ? newQueue[0] : null);
+      return newQueue;
+    });
+  };
+
   const createMarkerClickHandler = (marker: mapboxgl.Marker) => {
     return async (event: Event) => {
       event.stopPropagation();
@@ -370,39 +407,6 @@ export default function MapboxMap() {
     });
   };
 
-  // Assign coordinates to the next club in the queue
-  const handlePlaceClub = async (lng: number, lat: number) => {
-    if (!selectedClub || queue.length === 0) return;
-  
-    // Send update request
-    fetch('/api/updateClub', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        action: 'updateCoordinates',
-        id: selectedClub.id,
-        x: lng,
-        y: lat,
-      })
-    }).then((response) => {
-      if (!response.ok) {
-        console.error('Failed to update club coordinates');
-      }
-    }).catch((error) => {
-      console.error('Error updating club:', error);
-    });
-  
-    // Remove the selected club from queue and select the next one
-    setQueue((prevQueue) => {
-      const newQueue = prevQueue.filter((club) => club.id !== selectedClub.id);
-      // Set the new selected club to be the first in the updated queue
-      setSelectedClub(newQueue.length > 0 ? newQueue[0] : null);
-      return newQueue;
-    });
-  };
-
   const handleAddTable = () => {
     router.push(`/addTable/${id}`)
   }
@@ -454,10 +458,7 @@ export default function MapboxMap() {
     if (!clubInfo || !mapRef.current) return;
 
     setMovingClub(clubInfo);
-
-    console.log(clubInfo)
-
-    // Remove coordinates in backend
+  
     try {
       const response = await fetch('/api/updateClub', {
         method: 'POST',
@@ -469,26 +470,25 @@ export default function MapboxMap() {
           id: clubInfo.id,
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to remove club coordinates');
       }
-
-      // Add club being moved back to unplaced clubs queue
-      setUnplacedClubs((prevClubs) => [clubInfo, ...prevClubs])
-
-      // Reset category which adds moving club back to queue
-      setSelectedCategory(clubInfo.category);
-
-      // Close the popup
-      setShowClubInfo(false);
-
+  
+      // Refresh markers first
       await refreshMarkers();
       
-      // Reset club to no longer be moving; needed for determining which club to select when rendering queue 
-      setMovingClub(clubInfo);
-
+      // Refetch unplaced clubs from database
+      await fetchClubs();
+  
+      // Reset category to update queue
+      setSelectedCategory(clubInfo.category);
+  
+      setShowClubInfo(false);
+  
       console.log(`Club ${clubInfo.name} moved back to queue.`);
+
+      //setMovingClub(null);
     } catch (error) {
       console.error('Error moving club:', error);
     }
