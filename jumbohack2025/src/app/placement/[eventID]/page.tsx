@@ -29,7 +29,8 @@ const INITIAL_LAT = 42.4075;
 const INITIAL_ZOOM = 17.33;
 
 export default function MapboxMap() {
-  const id = useParams().eventID;
+  const { eventID } = useParams<{ eventID: string }>();
+  const id = eventID; 
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -69,7 +70,8 @@ export default function MapboxMap() {
   // Track markers on the map; needed for refreshing the map
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  // const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false)
+  ;
   // On page render, create map and fetch all old clubs w/ for given event.
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -405,8 +407,12 @@ export default function MapboxMap() {
     router.push(`/addTable/${id}`)
   }
 
+  const handleSubmit = async () => {
+    await handleSave();
+    handleClose();
+  };
+
   const handleSave = async () => {
-    // setIsLoading(true);
     setStatus('');
 
     try {
@@ -432,11 +438,6 @@ export default function MapboxMap() {
         setStatus('Error sending invitations. Please check the console for details.');
       }
     }
-  };
-
-  const handleSubmit = async () => {
-    await handleSave();
-    handleClose();
   };
 
   const handleClose = () => {
@@ -534,6 +535,7 @@ export default function MapboxMap() {
               ))}
             </select>
           </div>
+
           {/* Submit button (moves left when queue is empty) */}
           <div className={"flex gap-2 queueAndSubmit"}>
             <button className="px-6 py-4 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={handleAddTable}>
@@ -551,6 +553,7 @@ export default function MapboxMap() {
             </button>
           </div>
         </div>
+
         {/* Queue */}
         <div className="flex flex-row overflow-auto items-center gap-[1vw]">
           {/* Queue container (conditionally hidden when empty) */}
