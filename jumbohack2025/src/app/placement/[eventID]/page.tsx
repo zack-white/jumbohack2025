@@ -70,9 +70,7 @@ export default function MapboxMap() {
   // Track markers on the map; needed for refreshing the map
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  // const [isLoading, setIsLoading] = useState(false)
-  ;
-  // On page render, create map and fetch all old clubs w/ for given event.
+  // On page render, create map and fetch all old clubs for given event.
   useEffect(() => {
     if (!mapContainerRef.current) return;
   
@@ -102,7 +100,7 @@ export default function MapboxMap() {
     }
   }, [placementMode]);
 
-  // Update queue when category is selected
+  // Update queue when category is selected or user wants to move a club
   useEffect(() => {
     if (selectedCategory) {
       // Filter clubs by category AND ensure they don't have coordinates
@@ -114,7 +112,7 @@ export default function MapboxMap() {
       );
       setQueue(filteredClubs);
 
-      // Set selected club to club being moved if one exists; otherwise set to first in list; otherwise null
+      // Set selected club to club being moved if one exists; otherwise set to first in list
       if (movingClub) {
         // Put the club being moved at the front of the queue so user doesn't have to scroll in queue to find it
         const otherClubs = filteredClubs.filter(club => club.id !== movingClub.id);
@@ -131,9 +129,7 @@ export default function MapboxMap() {
 
   const initializeMap = async () => {
     const updateMap = async () => {
-      try {
-        console.log("Fetching map location for this event:", id);
-        
+      try {        
         const response = await fetch("/api/getEventLocation", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -152,7 +148,6 @@ export default function MapboxMap() {
         if (data.location) {
           setLong(data.location.x);
           setLat(data.location.y);
-          console.log("UPDATED MAP POSITION")
         }
         if (data.scale) {
           setZoom(data.scale);
@@ -176,7 +171,6 @@ export default function MapboxMap() {
     if (locationData && locationData.location) {
       mapLong = locationData.location.x;
       mapLat = locationData.location.y;
-      console.log("UPDATED MAP POSITION to:", mapLong, mapLat);
       
       // Also update state for other components that might need it
       setLong(mapLong);
@@ -219,7 +213,7 @@ export default function MapboxMap() {
           marker.getElement().addEventListener("click", createMarkerClickHandler(marker));
       });
     });
-  
+
     // Fetch clubs on page load
     setTimeout(() => {
       fetchClubs();
@@ -239,10 +233,10 @@ export default function MapboxMap() {
     return () => map.remove();
   };
 
+  // Fetch all unplaced clubs from db
   async function fetchClubs() {
     try {
       const eventIDFromParams = id;
-      console.log("Fetching clubs for event ID:", eventIDFromParams);
       
       const response = await fetch("/api/getUnplacedClubs", {
           method: 'POST',
@@ -258,7 +252,6 @@ export default function MapboxMap() {
       }
 
       const data = await response.json();
-      console.log("Fetched clubs:", data);
       setUnplacedClubs(data);
       
       // Extract unique categories
@@ -270,6 +263,7 @@ export default function MapboxMap() {
     }
   };
 
+  // Place club when user clicks on map as long as placement mode is on and there are clubs to place
   const handleMapClick = async (e: mapboxgl.MapMouseEvent) => {
     if (!placementMode || queue.length === 0) {
       return;
@@ -283,7 +277,6 @@ export default function MapboxMap() {
     // Track the new marker
     markersRef.current.push(marker);
 
-    // Create an event listener for club on map
     marker.getElement().addEventListener("click", createMarkerClickHandler(marker));
 
     await handlePlaceClub(lng, lat);
@@ -322,6 +315,7 @@ export default function MapboxMap() {
     });
   };
 
+  // When club is clicked, show popup
   const createMarkerClickHandler = (marker: mapboxgl.Marker) => {
     return async (event: Event) => {
       event.stopPropagation();
@@ -360,9 +354,7 @@ export default function MapboxMap() {
 
   // Fetch all existing clubs to add to map
   const getExistingClubs = async () => {
-    try {
-        console.log("Fetching existing clubs for event ID:", id);
-        
+    try {        
         const response = await fetch("/api/getExistingClubs", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -377,7 +369,6 @@ export default function MapboxMap() {
         }
 
         const data = await response.json();
-        console.log("Existing clubs data:", data);
         return data;
     } catch(error) {
         console.error("Error fetching existing clubs:", error);
@@ -385,6 +376,7 @@ export default function MapboxMap() {
     }
   }
 
+  // Refresh markers on map; allows for moving clubs and showing popups w/out re-rendering
   const refreshMarkers = async () => {
     if (!mapRef.current) return;
   
@@ -434,7 +426,6 @@ export default function MapboxMap() {
       }
 
       const data = await response.json();
-      console.log(data);
       setStatus(data.message);
     } catch (error) {
       console.error('Error:', error);
@@ -488,8 +479,6 @@ export default function MapboxMap() {
   
       setShowClubInfo(false);
   
-      console.log(`Club ${clubInfo.name} moved back to queue.`);
-
       //setMovingClub(null);
     } catch (error) {
       console.error('Error moving club:', error);
