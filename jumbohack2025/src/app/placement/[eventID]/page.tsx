@@ -114,10 +114,12 @@ export default function MapboxMap() {
       );
       setQueue(filteredClubs);
 
-      console.log(movingClub)
-
       // Set selected club to club being moved if one exists; otherwise set to first in list; otherwise null
       if (movingClub) {
+        // Put the club being moved at the front of the queue so user doesn't have to scroll in queue to find it
+        const otherClubs = filteredClubs.filter(club => club.id !== movingClub.id);
+        const reorderedClubs = [movingClub, ...otherClubs];
+        setQueue(reorderedClubs);
         setSelectedClub(movingClub);
         setMovingClub(null);
       }
