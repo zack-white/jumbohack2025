@@ -445,6 +445,51 @@ export default function MapboxMap() {
 
   };
 
+  const handleDeleteClub = async () => {
+    if (!clubInfo || !mapRef.current) return;
+    //Pop up a confirmation dialog
+    const confirmDelete = window.confirm(`Are you sure you want to delete ${clubInfo.name}? This action cannot be undone.`);
+    if (!confirmDelete) return;
+
+    // Delete club in backend
+    try {
+      const response = await fetch('/api/updateClub', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'deleteClub',
+          id: clubInfo.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete club');
+      }
+
+      // Remove the club from the local state
+      setClubs((prevClubs) =>
+        prevClubs.filter((club) => club.id !== clubInfo.id)
+      );
+
+      // Also remove from queue if present
+      setQueue((prevQueue) =>
+        prevQueue.filter((club) => club.id !== clubInfo.id)
+      );
+
+      // Close the popup
+      setShowClubInfo(false);
+
+      // Trigger rerender (optional: you could remove and reload markers if you store them)
+      mapRef.current?.fire('load');
+
+      console.log(`Club ${clubInfo.name} deleted.`);
+    } catch (error) {
+      console.error('Error deleting club:', error);
+    }
+  };
+
   return (
     <div className="wrapper">
       <div ref={mapContainerRef} className="mapContainer"/>
@@ -454,6 +499,7 @@ export default function MapboxMap() {
         onClose={() => setShowClubInfo(false)} 
         onEdit={handleEditClub}
         onMove={handleMoveClub}
+        onDelete={handleDeleteClub}
       />}
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-bold mb-4 flex items-center">

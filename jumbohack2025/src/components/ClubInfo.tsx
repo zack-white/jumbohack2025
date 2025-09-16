@@ -17,9 +17,10 @@ interface InfoPopupProps {
   onClose: () => void;
   onEdit: (() => void) | null;
   onMove: (() => void) | null;
+  onDelete: (() => void) | null;
 }
 
-export default function InfoPopup({ club, onClose, onEdit, onMove }: InfoPopupProps) {
+export default function InfoPopup({ club, onClose, onEdit, onMove, onDelete }: InfoPopupProps) {
   // "14:30:00" -> "2:30 PM"
   const formatTime = (timeString?: string) => {
     if (!timeString) return "Not specified";
@@ -56,6 +57,11 @@ export default function InfoPopup({ club, onClose, onEdit, onMove }: InfoPopupPr
             {onEdit && (
               <button className="h-[6vh] px-6 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={onEdit}>
                 Edit
+              </button>
+            )}
+            {onDelete && (
+              <button className="h-[6vh] px-6 border border-red-500 bg-red-100 text-red-500" onClick={onDelete}>
+                Delete
               </button>
             )}
             <button
