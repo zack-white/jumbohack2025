@@ -42,6 +42,19 @@ export async function POST(request: Request) {
         );
         return NextResponse.json({ message: 'Coordinates removed' });
     }
+      case 'deleteClub': {
+        const { id } = body;
+        if (id == null) {
+          return NextResponse.json({ message: 'Missing club ID for deletion' }, { status: 400 });
+        }
+
+        await query(
+          'DELETE FROM clubs WHERE id = $1',
+          [id]
+        );
+
+        return NextResponse.json({ message: 'Club deleted successfully' });
+      }
 
       default:
         return NextResponse.json({ message: 'Invalid action' }, { status: 400 });
