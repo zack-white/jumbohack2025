@@ -66,9 +66,13 @@ export default function EventPage() {
     if (id) fetchEvent();
   }, [id]); 
 
-  const handleEdit = () => {
+  const handlePlacement = () => {
     router.push(`/placement/${id}`);
   };
+
+  const handleEdit = () => {
+    router.push(`/createEvent?id=${id}`);
+  }
 
   const formatTime = (time: string): string => {
     const [hourStr, minuteStr] = time.split(':')
@@ -104,6 +108,12 @@ export default function EventPage() {
               {/* Show Edit Button if the logged-in user is the creator */}
               {userEmail === event.creator && (
                 <div className="flex justify-center">
+                  <button
+                      className="bg-[#2971AC] text-white px-4 py-2 font-inter md:text-base text-xs font-medium"
+                      onClick={handlePlacement}
+                  >
+                      Edit Placement
+                  </button>
                   <button
                       className="bg-[#2971AC] text-white px-4 py-2 font-inter md:text-base text-xs font-medium"
                       onClick={handleEdit}
