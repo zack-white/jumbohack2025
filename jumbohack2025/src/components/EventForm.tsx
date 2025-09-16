@@ -27,20 +27,20 @@ type EventFormProps = {
 };
 
 const defaultFormData = {
-  eventName: "",
+  name: "",
   date: "",
-  startTime: "",
-  endTime: "",
+  start_time: "",
+  end_time: "",
   description: "",
-  organizationName: "",
-  firstName: "",
-  lastName: "",
+  organizationname: "",
+  firstname: "",
+  lastname: "",
   email: "",
-  phoneNumber: "",
+  phonenumber: "",
   address: "",
   city: "",
   state: "",
-  zipCode: "",
+  zipcode: "",
   timedTables: false,
   emailingEnabled: true,
   eventImage: null as File | null,
@@ -74,13 +74,13 @@ export default function EventForm({
   const [emailingEnabled, setEmailingEnabled] = useState(true);
   const [selectedState, setSelectedState] = useState("");
   const [spreadsheetColumns, setSpreadsheetColumns] = useState<string[]>([]);
-  const [startTimeOfDay, setStartTimeOfDay] = useState("AM");
-  const [endTimeOfDay, setEndTimeOfDay] = useState("PM");
+  const [start_timeOfDay, setstart_timeOfDay] = useState("AM");
+  const [end_timeOfDay, setend_timeOfDay] = useState("PM");
   const times = ["AM", "PM"];
 
-//   useEffect(() => {
-//     setFormData((prev) => ({ ...prev, ...initialValues }));
-//   }, [initialValues]);
+    useEffect(() => {
+    setFormData({ ...defaultFormData, ...initialValues });
+    }, [initialValues]);
 
   const handleChange = (field: keyof typeof formData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -101,16 +101,16 @@ export default function EventForm({
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.eventName) newErrors.eventName = "Required";
+    if (!formData.name) newErrors.name = "Required";
     if (!formData.date) newErrors.date = "Required";
-    if (!formData.startTime) newErrors.startTime = "Required";
-    if (!formData.endTime) newErrors.endTime = "Required";
+    if (!formData.start_time) newErrors.start_time = "Required";
+    if (!formData.end_time) newErrors.end_time = "Required";
     if (!formData.description) newErrors.description = "Required";
-    if (!formData.organizationName) newErrors.organizationName = "Required";
-    if (!formData.firstName) newErrors.firstName = "Required";
-    if (!formData.lastName) newErrors.lastName = "Required";
+    if (!formData.organizationname) newErrors.organizationname = "Required";
+    if (!formData.firstname) newErrors.firstname = "Required";
+    if (!formData.lastname) newErrors.lastname = "Required";
     if (!formData.email) newErrors.email = "Required";
-    if (!formData.phoneNumber) newErrors.phoneNumber = "Required";
+    if (!formData.phonenumber) newErrors.phonenumber = "Required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -215,11 +215,11 @@ export default function EventForm({
       <div>
         <label className="text-sm">Event Name*</label>
         <Input
-          name="eventName"
-          value={formData.eventName}
-          onChange={(e) => handleChange("eventName", e.target.value)}
+          name="name"
+          value={formData.name}
+          onChange={(e) => handleChange("name", e.target.value)}
         />
-        {errors.eventName && <p className="text-red-500 text-sm">{errors.eventName}</p>}
+        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
       </div>
 
         {/* DATE / TIME / DURATION with adjusted spacing */}
@@ -252,7 +252,7 @@ export default function EventForm({
                 <div className="space-y-1  mt-3">
                   <label className="text-sm text-primary flex items-center">
                     Start Time*
-                    {errors.startTime && (
+                    {errors.start_time && (
                       <span className="ml-2 text-xs text-red-500">
                         (Required)
                       </span>
@@ -263,10 +263,10 @@ export default function EventForm({
                       name="time"
                       type="text"
                       placeholder="HH:MM"
-                      value={formData.startTime}
-                      onChange={(e) => handleInputChange("startTime", e.target.value)}
-                      className={`${getInputClasses("startTime")} basis-2/3`}
-                      aria-invalid={errors.startTime ? "true" : "false"}
+                      value={formData.start_time}
+                      onChange={(e) => handleInputChange("start_time", e.target.value)}
+                      className={`${getInputClasses("start_time")} basis-2/3`}
+                      aria-invalid={errors.start_time ? "true" : "false"}
                     />
                     <div className="basis-1/3">
                       <DropdownMenu>
@@ -274,17 +274,17 @@ export default function EventForm({
                         <div className="relative">
                           <Button
                             variant="dropdown"
-                            className={`${getInputClasses("startTime")} flex items-center`}
+                            className={`${getInputClasses("start_time")} flex items-center`}
                           >
-                            {startTimeOfDay === "" ? <div className="text-[#747474]">AM</div> : startTimeOfDay}
+                            {start_timeOfDay === "" ? <div className="text-[#747474]">AM</div> : start_timeOfDay}
                           </Button>
                         </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="max-h-60 overflow-y-auto">
                           <DropdownMenuLabel>Select a Time</DropdownMenuLabel>
                           <DropdownMenuRadioGroup
-                            value={startTimeOfDay}
-                            onValueChange={setStartTimeOfDay}
+                            value={start_timeOfDay}
+                            onValueChange={setstart_timeOfDay}
                           >
                               {times.map((abbr) => (
                               <DropdownMenuRadioItem key={abbr} value={abbr}>
@@ -296,8 +296,8 @@ export default function EventForm({
                       </DropdownMenu>
                     </div>
                   </div>
-                  {errors.startTime && (
-                    <p className="text-sm text-red-500">{errors.startTime}</p>
+                  {errors.start_time && (
+                    <p className="text-sm text-red-500">{errors.start_time}</p>
                   )}
                 </div>
 
@@ -305,7 +305,7 @@ export default function EventForm({
                 <div className="space-y-1 mt-3 mb-3">
                   <label className="text-sm text-primary flex items-center">
                     End Time*
-                    {errors.endTime && (
+                    {errors.end_time && (
                       <span className="ml-2 text-xs text-red-500">
                         (Required)
                       </span>
@@ -316,10 +316,10 @@ export default function EventForm({
                       name="time"
                       type="text"
                       placeholder="HH:MM"
-                      value={formData.endTime}
-                      onChange={(e) => handleInputChange("endTime", e.target.value)}
-                      className={`${getInputClasses("endTime")} basis-2/3`}
-                      aria-invalid={errors.endTime ? "true" : "false"}
+                      value={formData.end_time}
+                      onChange={(e) => handleInputChange("end_time", e.target.value)}
+                      className={`${getInputClasses("end_time")} basis-2/3`}
+                      aria-invalid={errors.end_time ? "true" : "false"}
                     />
                     <div className="basis-1/3">
                       <DropdownMenu>
@@ -327,17 +327,17 @@ export default function EventForm({
                         <div className="relative">
                           <Button
                             variant="dropdown"
-                            className={`${getInputClasses("endTime")} flex items-center`}
+                            className={`${getInputClasses("end_time")} flex items-center`}
                           >
-                            {endTimeOfDay === "" ? <div className="text-[#747474]">AM</div> : endTimeOfDay}
+                            {end_timeOfDay === "" ? <div className="text-[#747474]">AM</div> : end_timeOfDay}
                           </Button>
                         </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="max-h-60 overflow-y-auto">
                           <DropdownMenuLabel>Select a Time</DropdownMenuLabel>
                           <DropdownMenuRadioGroup
-                            value={endTimeOfDay}
-                            onValueChange={setEndTimeOfDay}
+                            value={end_timeOfDay}
+                            onValueChange={setend_timeOfDay}
                           >
                             {times.map((abbr) => (
                               <DropdownMenuRadioItem key={abbr} value={abbr}>
@@ -349,8 +349,8 @@ export default function EventForm({
                       </DropdownMenu>
                     </div>
                   </div>
-                  {errors.endTime && (
-                    <p className="text-sm text-red-500">{errors.endTime}</p>
+                  {errors.end_time && (
+                    <p className="text-sm text-red-500">{errors.end_time}</p>
                   )}
                 </div>
               </div>
@@ -390,22 +390,22 @@ export default function EventForm({
               <div className="space-y-1 mt-3">
                 <label className="text-sm text-primary flex items-center">
                   Organization Name*
-                  {errors.organizationName && (
+                  {errors.organizationname && (
                     <span className="ml-2 text-xs text-red-500">
                       (Required)
                     </span>
                   )}
                 </label>
                 <Input
-                  name="organizationName"
+                  name="organizationname"
                   placeholder="e.g. JumboCode"
-                  value={formData.organizationName}
-                  onChange={(e) => handleInputChange("organizationName", e.target.value)}
-                  className={getInputClasses("organizationName")}
-                  aria-invalid={errors.organizationName ? "true" : "false"}
+                  value={formData.organizationname}
+                  onChange={(e) => handleInputChange("organizationname", e.target.value)}
+                  className={getInputClasses("organizationname")}
+                  aria-invalid={errors.organizationname ? "true" : "false"}
                 />
-                {errors.organizationName && (
-                  <p className="text-sm text-red-500">{errors.organizationName}</p>
+                {errors.organizationname && (
+                  <p className="text-sm text-red-500">{errors.organizationname}</p>
                 )}
               </div>
 
@@ -414,45 +414,45 @@ export default function EventForm({
                 <div className="space-y-1 mt-3"> 
                   <label className="text-sm text-primary flex items-center">
                     Representative First Name*
-                    {errors.firstName && (
+                    {errors.firstname && (
                       <span className="ml-2 text-xs text-red-500">
                         (Required)
                       </span>
                     )}
                   </label>
                   <Input
-                    name="firstName"
+                    name="firstname"
                     type="text"
                     placeholder=""
-                    value={formData.firstName}
-                    onChange={(e) => handleInputChange("firstName", e.target.value)}
-                    className={getInputClasses("firstName")}
-                    aria-invalid={errors.firstName ? "true" : "false"}
+                    value={formData.firstname}
+                    onChange={(e) => handleInputChange("firstname", e.target.value)}
+                    className={getInputClasses("firstname")}
+                    aria-invalid={errors.firstname ? "true" : "false"}
                   />
-                  {errors.firstName && (
-                    <p className="text-sm text-red-500">{errors.firstName}</p>
+                  {errors.firstname && (
+                    <p className="text-sm text-red-500">{errors.firstname}</p>
                   )}
                 </div>
                 <div className="space-y-1 mt-3"> 
                   <label className="text-sm text-primary flex items-center">
                     Representative Last Name*
-                    {errors.lastName && (
+                    {errors.lastname && (
                       <span className="ml-2 text-xs text-red-500">
                         (Required)
                       </span>
                     )}
                   </label>
                   <Input
-                    name="lastName"
+                    name="lastname"
                     type="text"
                     placeholder=""
-                    value={formData.lastName}
-                    onChange={(e) => handleInputChange("lastName", e.target.value)}
-                    className={getInputClasses("lastName")}
-                    aria-invalid={errors.lastName ? "true" : "false"}
+                    value={formData.lastname}
+                    onChange={(e) => handleInputChange("lastname", e.target.value)}
+                    className={getInputClasses("lastname")}
+                    aria-invalid={errors.lastname ? "true" : "false"}
                   />
-                  {errors.lastName && (
-                    <p className="text-sm text-red-500">{errors.lastName}</p>
+                  {errors.lastname && (
+                    <p className="text-sm text-red-500">{errors.lastname}</p>
                   )}
                 </div>
               </div>
@@ -486,23 +486,23 @@ export default function EventForm({
                 <div className="space-y-1 mt-3 mb-3"> 
                   <label className="text-sm text-primary flex items-center">
                     Phone Number*
-                    {errors.phoneNumber && (
+                    {errors.phonenumber && (
                       <span className="ml-2 text-xs text-red-500">
                         (Required)
                       </span>
                     )}
                   </label>
                   <Input
-                    name="phoneNumber"
+                    name="phonenumber"
                     type="text"
                     placeholder="(XXX)-XXX-XXXX"
-                    value={formData.phoneNumber}
-                    onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-                    className={getInputClasses("phoneNumber")}
-                    aria-invalid={errors.phoneNumber ? "true" : "false"}
+                    value={formData.phonenumber}
+                    onChange={(e) => handleInputChange("phonenumber", e.target.value)}
+                    className={getInputClasses("phonenumber")}
+                    aria-invalid={errors.phonenumber ? "true" : "false"}
                   />
-                  {errors.phoneNumber && (
-                    <p className="text-sm text-red-500">{errors.phoneNumber}</p>
+                  {errors.phonenumber && (
+                    <p className="text-sm text-red-500">{errors.phonenumber}</p>
                   )}
                 </div>
               </div>
@@ -582,16 +582,16 @@ export default function EventForm({
                     ZIP Code
                   </label>
                   <Input
-                    name="zipCode"
+                    name="zipcode"
                     type="text"
                     placeholder=""
-                    value={formData.zipCode}
-                    onChange={(e) => handleInputChange("zipCode", e.target.value)}
-                    className={getInputClasses("zipCode")}
-                    aria-invalid={errors.zipCode ? "true" : "false"}
+                    value={formData.zipcode}
+                    onChange={(e) => handleInputChange("zipcode", e.target.value)}
+                    className={getInputClasses("zipcode")}
+                    aria-invalid={errors.zipcode ? "true" : "false"}
                   />
-                  {errors.zipCode && (
-                    <p className="text-sm text-red-500">{errors.zipCode}</p>
+                  {errors.zipcode && (
+                    <p className="text-sm text-red-500">{errors.zipcode}</p>
                   )}
                 </div>
               </div>

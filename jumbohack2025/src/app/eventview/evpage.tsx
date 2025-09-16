@@ -71,7 +71,7 @@ export default function EventPage() {
   };
 
   const handleEdit = () => {
-    router.push(`/createEvent?id=${id}`);
+    router.push(`/events/edit/${id}`);
   }
 
   const formatTime = (time: string): string => {

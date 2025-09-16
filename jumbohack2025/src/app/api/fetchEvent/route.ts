@@ -3,6 +3,7 @@ import { query } from '../../../lib/query';
 
 export async function POST(request: Request) {
   try {
+    console.log("Received request to fetch event");
     const body = await request.json();
     const id = Number(body.id);
     console.log(id);
