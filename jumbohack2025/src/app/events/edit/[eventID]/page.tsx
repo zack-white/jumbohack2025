@@ -28,10 +28,10 @@ export default function EditEventPage() {
   }, [id]);
 
   async function handleUpdate(values: any) {
-    const res = await fetch(`/api/event/${id}`, {
-      method: "PATCH",
+    const res = await fetch(`/api/updateEvent`, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
+      body: JSON.stringify({ id: Number(id), data: values }),
     });
 
     if (!res.ok) {
