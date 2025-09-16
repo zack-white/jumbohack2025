@@ -1239,7 +1239,12 @@ export default function CreateEventPage() {
                         </span>
                       )}
                     </label>
-                    <Tooltip emailingEnabled={emailingEnabled} />
+                    <Tooltip 
+                      text={emailingEnabled 
+                        ? "Upload a spreadsheet with the following columns:<br/><strong>Name</strong>, <strong>Category</strong>, <strong>Contact Email</strong><br/>Organizations will be emailed to confirm attendance and provide descriptions."
+                        : "Upload a spreadsheet with the following columns:<br/><strong>Name</strong>, <strong>Category</strong>, <strong>Contact Email (optional)</strong>, <strong>Description</strong><br/>No emails will be sent - descriptions must be provided in the spreadsheet."
+                      }
+                    />
                   </div>
                   <div className="flex gap-2 relative">
                     <Input
