@@ -78,9 +78,9 @@ export default function EventForm({
   const [end_timeOfDay, setend_timeOfDay] = useState("PM");
   const times = ["AM", "PM"];
 
-    useEffect(() => {
-    setFormData({ ...defaultFormData, ...initialValues });
-    }, [initialValues]);
+    // useEffect(() => {
+    // setFormData({ ...defaultFormData, ...initialValues });
+    // }, [initialValues]);
 
   const handleChange = (field: keyof typeof formData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
