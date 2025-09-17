@@ -119,7 +119,6 @@ export default function EventPage() {
             <div className="mt-4 pl-4 flex flex-col gap-2">
               <div className="flex items-center gap-3">
                 <h1 className="text-xl md:text-2xl font-bold font-serif">Contact Information</h1>
-                <Tooltip text="What is the best way for others to contact you or your organization? You may provide an organizational email or phone number, or your personal contact information if you prefer." />
               </div>
               <ContactInfoCard
                 isEventOrganizer={true}
