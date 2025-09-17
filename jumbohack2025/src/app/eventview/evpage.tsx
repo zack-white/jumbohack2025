@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import ClubsSearch from "../../components/ClubsSearch";
 import ShowMapButton from '../../components/showMapButton';
 import ContactInfoCard from '@/components/ContactInfoCard';
+import Tooltip from '@/components/tooltip';
 import { useSearchParams, useRouter } from "next/navigation";
 import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
@@ -116,7 +117,10 @@ export default function EventPage() {
 
             <p className="px-4 text-gray-500">{event.description}</p>
             <div className="mt-4 pl-4 flex flex-col gap-2">
-              <h1 className="text-xl md:text-2xl font-bold font-serif">Contact Information</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl md:text-2xl font-bold font-serif">Contact Information</h1>
+                <Tooltip text="What is the best way for others to contact you or your organization? You may provide an organizational email or phone number, or your personal contact information if you prefer." />
+              </div>
               <ContactInfoCard
                 isEventOrganizer={true}
                 organizer={event.organizationname} 
