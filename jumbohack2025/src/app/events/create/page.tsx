@@ -921,7 +921,10 @@ export default function CreateEventPage() {
 
               {/* Table and Location Title */}
               <div className="pt-4 mb-3 flex items-center justify-between">
-                <h2 className="text-lg font-bold font-serif text-primary">Contact Information</h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-bold font-serif text-primary">Contact Information</h2>
+                  <Tooltip text="All contact information inputted will be displayed publicly." />
+                </div>
               </div>
               
               {/* ORGANIZATION NAME */}
