@@ -1139,7 +1139,15 @@ export default function CreateEventPage() {
               
               {/* TABLE AND LOCATION INFORMATION SECTION */}
               <div className="mb-3 flex flex-col gap-4">
-                <h2 className="font-bold font-serif">Table and Location Information</h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="font-bold font-serif">Table and Location Information</h2>
+                  <Tooltip 
+                    text={timedTables 
+                      ? "Upload a spreadsheet with the following columns:<br/><br/>1. Organization Name<br/>2. Category<br/>3. Contact Email<br/>4. Start Time (XX:YY[AM/PM] format)<br/>5. End Time (XX:YY[AM/PM] format)<br/><br/>Each new row should represent a new table."
+                      : "Upload a spreadsheet with the following columns:<br/><br/>1. Organization Name<br/>2. Category<br/>3. Contact Email<br/><br/>Each new row should represent a new table."
+                    }
+                  />
+                </div>
                 
                 {/* Mobile-first toggle section */}
                 <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-6 sm:justify-end">
@@ -1233,22 +1241,14 @@ export default function CreateEventPage() {
               <div className="grid grid-cols-1 gap-6" style={{marginBottom: "2rem"}}>
                 {/* SPREADSHEET */}
                 <div className="space-y-1 mt-3">
-                  <div className="flex items-center gap-3">
-                    <label className="text-sm text-primary flex items-center">
-                      Select Spreadsheet*
-                      {errors.spreadsheet && (
-                        <span className="ml-2 text-xs text-red-500">
-                          (Required)
-                        </span>
-                      )}
-                    </label>
-                    <Tooltip 
-                      text={emailingEnabled 
-                        ? "Upload a spreadsheet with the following columns:<br/><strong>Name</strong>, <strong>Category</strong>, <strong>Contact Email</strong><br/>Organizations will be emailed to confirm attendance and provide descriptions. Each new row should represent a new table."
-                        : "Upload a spreadsheet with the following columns:<br/><strong>Name</strong>, <strong>Category</strong>, <strong>Contact Email (optional)</strong>, <strong>Description</strong><br/>No emails will be sent - descriptions must be provided in the spreadsheet. Each new row should represent a new table."
-                      }
-                    />
-                  </div>
+                  <label className="text-sm text-primary flex items-center">
+                    Select Spreadsheet*
+                    {errors.spreadsheet && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )}
+                  </label>
                   <div className="flex gap-2 relative">
                     <Input
                       name="spreadsheet"
