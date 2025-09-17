@@ -1155,7 +1155,7 @@ export default function CreateEventPage() {
                         <div className="opacity-0 invisible group-hover:visible group-hover:opacity-100 transition-opacity duration-300 
                                 absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white text-xs rounded py-2 px-3 pointer-events-none z-10 w-72 sm:w-80">
                           <p className="text-center">
-                            When enabled, organizations will be emailed to confirm attendance and provide their own descriptions. 
+                            When enabled, organizations will be emailed to confirm attendance and provide their own descriptions. <br></br>
                             When disabled, contact information becomes optional and descriptions must be included in the spreadsheet.
                           </p>
                         </div>
@@ -1244,8 +1244,8 @@ export default function CreateEventPage() {
                     </label>
                     <Tooltip 
                       text={emailingEnabled 
-                        ? "Upload a spreadsheet with the following columns:<br/><strong>Name</strong>, <strong>Category</strong>, <strong>Contact Email</strong><br/>Organizations will be emailed to confirm attendance and provide descriptions."
-                        : "Upload a spreadsheet with the following columns:<br/><strong>Name</strong>, <strong>Category</strong>, <strong>Contact Email (optional)</strong>, <strong>Description</strong><br/>No emails will be sent - descriptions must be provided in the spreadsheet."
+                        ? "Upload a spreadsheet with the following columns:<br/><strong>Name</strong>, <strong>Category</strong>, <strong>Contact Email</strong><br/>Organizations will be emailed to confirm attendance and provide descriptions. Each new row should represent a new table."
+                        : "Upload a spreadsheet with the following columns:<br/><strong>Name</strong>, <strong>Category</strong>, <strong>Contact Email (optional)</strong>, <strong>Description</strong><br/>No emails will be sent - descriptions must be provided in the spreadsheet. Each new row should represent a new table."
                       }
                     />
                   </div>
