@@ -13,16 +13,6 @@ export default function TutorialPage() {
             </h1>
           </div>
 
-          {/* Placeholder for header image */}
-          <div className="relative mb-8 flex justify-center">
-            <div className="w-full h-32 md:h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-              <p className="text-gray-500 text-center">
-                [Tutorial Header Image]<br />
-                <span className="text-sm">Image placeholder - tutorial overview</span>
-              </p>
-            </div>
-          </div>
-
           {/* Two Modes Section */}
           <section className="mb-12">
             <h2 className="text-xl md:text-2xl font-serif font-bold mb-6 text-gray-900">Two Modes</h2>
@@ -202,17 +192,21 @@ export default function TutorialPage() {
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div className="border border-gray-200 p-6 rounded-lg bg-white">
                 <ul className="space-y-3 text-gray-700">
-                  <li>• If you have new information from a table not in the spreadsheet, you can edit tables if you are logged in on the event you created</li>
-                  <li>• You can also add new tables in the same manner</li>
+                    <li>• Return to your event page</li>
+                    <li>• To add new information to existing tables from the spreadsheet, click on a table pinpoint on the map and edit the details</li>
+                    <li>• To adjust the positioning of a table, click the pin and then "Move". Then, click the new location on the map and then confirm with "Save" at the bottom.</li>
+                    <li>• To add more tables to your event, click the "+ Table" button</li>
                 </ul>
               </div>
               
               {/* Image placeholder */}
-              <div className="h-32 md:h-40 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500 text-center text-sm">
-                  [Table Editing Features Image]
-                </p>
-              </div>
+              <div className="h-full min-h-[200px] rounded-lg flex items-center justify-center overflow-hidden bg-white border border-gray-200">
+                    <img
+                        src="/images/edittable.gif"
+                        alt="JumboMap Managing Events"
+                        className="object-contain h-full w-full"
+                    />
+                  </div>
             </div>
           </section>
 
@@ -222,11 +216,13 @@ export default function TutorialPage() {
             
             <div className="grid md:grid-cols-2 gap-8 items-start">
               {/* Image placeholder */}
-              <div className="h-48 md:h-56 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500 text-center text-sm">
-                  [Spreadsheet Example Image]
-                </p>
-              </div>
+              <div className="h-full min-h-[200px] rounded-lg flex items-center justify-center overflow-hidden bg-white border border-gray-200">
+                    <img
+                        src="/images/spreadsheet.png"
+                        alt="JumboMap Managing Events"
+                        className="object-contain h-full w-full"
+                    />
+                  </div>
               
               <div className="space-y-6">
                 <div className="border border-gray-200 p-6 rounded-lg bg-white">
@@ -264,28 +260,23 @@ export default function TutorialPage() {
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div className="border border-gray-200 p-6 rounded-lg bg-white">
                 <ol className="list-decimal list-inside space-y-3 text-gray-700">
-                  <li>Find the right event on the landing page</li>
-                  <li>On event page can view all clubs attending and search</li>
+                  <li>Find the event on the landing page</li>
+                  <li>On event page, view all clubs attending and search</li>
                   <li>Can go to map view to see all clubs on the map</li>
                   <li>Can search and see their descriptions if their pins are clicked on</li>
                 </ol>
               </div>
               
               {/* Image placeholder */}
-              <div className="h-40 md:h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500 text-center text-sm">
-                  [Student User Journey Image]
-                </p>
-              </div>
+              <div className="h-full min-h-[200px] rounded-lg flex items-center justify-center overflow-hidden bg-white border border-gray-200">
+                    <img
+                        src="/images/workflow.png"
+                        alt="JumboMap Managing Events"
+                        className="object-contain h-full w-full"
+                    />
+                  </div>
             </div>
           </section>
-
-          {/* Footer Note */}
-          <div className="mt-12 p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
-            <p className="text-gray-600 italic">
-              Images will be added throughout these instructions to help illustrate each step.
-            </p>
-          </div>
         </div>
       </div>
     </main>
