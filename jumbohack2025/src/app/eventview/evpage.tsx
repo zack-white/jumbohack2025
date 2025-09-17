@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import ClubsSearch from "../../components/ClubsSearch";
 import ShowMapButton from '../../components/showMapButton';
 import ContactInfoCard from '@/components/ContactInfoCard';
+import Tooltip from '@/components/tooltip';
 import { useSearchParams, useRouter } from "next/navigation";
 import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
@@ -116,7 +117,9 @@ export default function EventPage() {
 
             <p className="px-4 text-gray-500">{event.description}</p>
             <div className="mt-4 pl-4 flex flex-col gap-2">
-              <h1 className="text-xl md:text-2xl font-bold font-serif">Contact Information</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl md:text-2xl font-bold font-serif">Contact Information</h1>
+              </div>
               <ContactInfoCard
                 isEventOrganizer={true}
                 organizer={event.organizationname} 
@@ -170,8 +173,7 @@ export default function EventPage() {
             </div>
           </div>
           <div className='flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6 px-4'>
-            <p className='text-white text-xs'>© 2025 Led by Holden Kittelberger and created by Elisa Yu, Hannah Jiang, Shayne Sidman,
-                  William Goldman, Zachary White</p>
+            <p className='text-white text-xs'>© 2025 Led by Holden Kittelberger and created by Dan Glorioso, Elisa Yu, Hannah Jiang, Shayne Sidman, William Goldman, Zachary White</p>
             <div className='flex flex-row gap-6'>  
               <a className='flex justify-center items-center text-center px-6 py-2 text-white text-sm border border-white hover:cursor-pointer'>
                 Report a Bug

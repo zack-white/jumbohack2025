@@ -4,6 +4,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Tooltip from "@/components/tooltip";
 import * as React from "react";
 
 type BaseClubFields = {
@@ -120,10 +121,11 @@ export default function ClubForm<T extends BaseClubFields>({
               )}
 
               <div>
-                <div className="mt-8 items-center gap-2 mb-2">
+                <div className="mt-8 flex items-center gap-3 mb-2">
                   <CardTitle className="text-xl font-semibold text-titleFont">
                     Contact Information
                   </CardTitle>
+                  <Tooltip text="What is the best way for others to contact you or your organization? You may provide an organizational email or phone number, or your personal contact information if you prefer." />
                 </div>
 
                 <label className="mt-4 text-sm text-primary flex items-center">

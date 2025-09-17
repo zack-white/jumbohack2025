@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import MapboxMap from "@/app/map/map";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -727,8 +728,18 @@ export default function CreateEventPage() {
     <div className="bg-[#F7F9FB] md:bg-white m-[3%] overflow-hidden md:flex md:items-center md:justify-center">
       <div className="bg-[#F7F9FB] max-w-4xl w-full md:w-[80%] lg:w-[60%] mx-auto p-8">
         <div>
-          <div className="mb-3">
+          <div className="mb-3 flex items-center justify-between">
             <h1 className="text-2xl font-bold font-serif text-primary">Create Event</h1>
+            <Link 
+              href="/tutorial" 
+              target="_blank"
+              className="text-sm text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              New to JumboMap? Learn how to use it
+            </Link>
           </div>
           <hr style={{ width: "100%", borderTop: "1px solid #ccc", marginBottom: "1rem"}} />
           <div>
@@ -921,7 +932,10 @@ export default function CreateEventPage() {
 
               {/* Table and Location Title */}
               <div className="pt-4 mb-3 flex items-center justify-between">
-                <h2 className="text-lg font-bold font-serif text-primary">Contact Information</h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-bold font-serif text-primary">Contact Information</h2>
+                  <Tooltip text="All contact information inputted will be displayed publicly." />
+                </div>
               </div>
               
               {/* ORGANIZATION NAME */}
@@ -1136,7 +1150,15 @@ export default function CreateEventPage() {
               
               {/* TABLE AND LOCATION INFORMATION SECTION */}
               <div className="mb-3 flex flex-col gap-4">
-                <h2 className="font-bold font-serif">Table and Location Information</h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="font-bold font-serif">Table and Location Information</h2>
+                  <Tooltip 
+                    text={timedTables 
+                      ? "Upload a spreadsheet with the following columns:<br/><br/>1. Organization Name<br/>2. Category<br/>3. Contact Email<br/>4. Start Time (XX:YY[AM/PM] format)<br/>5. End Time (XX:YY[AM/PM] format)<br/><br/>Each new row should represent a new table."
+                      : "Upload a spreadsheet with the following columns:<br/><br/>1. Organization Name<br/>2. Category<br/>3. Contact Email<br/><br/>Each new row should represent a new table."
+                    }
+                  />
+                </div>
                 
                 {/* Mobile-first toggle section */}
                 <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-6 sm:justify-end">
@@ -1152,7 +1174,7 @@ export default function CreateEventPage() {
                         <div className="opacity-0 invisible group-hover:visible group-hover:opacity-100 transition-opacity duration-300 
                                 absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white text-xs rounded py-2 px-3 pointer-events-none z-10 w-72 sm:w-80">
                           <p className="text-center">
-                            When enabled, organizations will be emailed to confirm attendance and provide their own descriptions. 
+                            When enabled, organizations will be emailed to confirm attendance and provide their own descriptions. <br></br>
                             When disabled, contact information becomes optional and descriptions must be included in the spreadsheet.
                           </p>
                         </div>
@@ -1230,17 +1252,14 @@ export default function CreateEventPage() {
               <div className="grid grid-cols-1 gap-6" style={{marginBottom: "2rem"}}>
                 {/* SPREADSHEET */}
                 <div className="space-y-1 mt-3">
-                  <div className="flex items-center gap-3">
-                    <label className="text-sm text-primary flex items-center">
-                      Select Spreadsheet*
-                      {errors.spreadsheet && (
-                        <span className="ml-2 text-xs text-red-500">
-                          (Required)
-                        </span>
-                      )}
-                    </label>
-                    <Tooltip emailingEnabled={emailingEnabled} />
-                  </div>
+                  <label className="text-sm text-primary flex items-center">
+                    Select Spreadsheet*
+                    {errors.spreadsheet && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Required)
+                      </span>
+                    )}
+                  </label>
                   <div className="flex gap-2 relative">
                     <Input
                       name="spreadsheet"

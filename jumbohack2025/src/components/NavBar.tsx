@@ -58,13 +58,11 @@ const NavBar = () => {
             </Button>
 
             {isSignedIn && protectedNavItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="text-white hover:text-gray-200 md:text-lg"
-              >
-                {item.label}
-              </Link>
+              <Button key={item.label} variant="ghost" className="border-2 border-white bg-[#2971AC] text-white hover:bg-white hover:text-[#2971AC] transition-all duration-200">
+                <Link href={item.href}>
+                  {item.label}
+                </Link>
+              </Button>
             ))}
 
             {isSignedIn ? (
@@ -112,14 +110,13 @@ const NavBar = () => {
         </Link>
 
           {isSignedIn && protectedNavItems.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="block px-3 py-2 text-white hover:text-gray-200"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {item.label}
-            </Link>
+            <div key={item.label} className="px-3 py-2">
+              <Button variant="ghost" className="border-2 border-white bg-[#2971AC] text-white hover:bg-white hover:text-[#2971AC] transition-all duration-200 w-full">
+                <Link href={item.href} onClick={() => setIsMobileMenuOpen(false)}>
+                  {item.label}
+                </Link>
+              </Button>
+            </div>
           ))}
 
           {isSignedIn ? (

@@ -16,7 +16,7 @@ export default function ShowMapButton({ eventID }: { eventID: number }) {
         {/* Grayed-out Map Image */}
         <Image
           src="/mapButton.png" // Image from the public folder
-          alt="Expand Map"
+          alt="Click toExpand Map"
           height={200}
           width={600}
           className="w-full max-h-[200px] opacity-80 brightness-90 contrast-90 hover:brightness-100 hover:contrast-100 transition"
@@ -24,7 +24,7 @@ export default function ShowMapButton({ eventID }: { eventID: number }) {
 
         {/* Overlay Text */}
         <div className="max-h-[200px] absolute inset-0 flex items-center justify-center text-white text-lg font-bold bg-black/30">
-          Expand Map
+          Click to view full map
         </div>
       </button>
     </div>
