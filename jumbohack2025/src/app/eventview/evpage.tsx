@@ -170,8 +170,7 @@ export default function EventPage() {
             </div>
           </div>
           <div className='flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6 px-4'>
-            <p className='text-white text-xs'>© 2025 Led by Holden Kittelberger and created by Elisa Yu, Hannah Jiang, Shayne Sidman,
-                  William Goldman, Zachary White</p>
+            <p className='text-white text-xs'>© 2025 Led by Holden Kittelberger and created by Dan Glorioso, Elisa Yu, Hannah Jiang, Shayne Sidman, William Goldman, Zachary White</p>
             <div className='flex flex-row gap-6'>  
               <a className='flex justify-center items-center text-center px-6 py-2 text-white text-sm border border-white hover:cursor-pointer'>
                 Report a Bug
