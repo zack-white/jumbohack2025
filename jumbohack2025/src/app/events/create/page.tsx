@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import MapboxMap from "@/app/map/map";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -727,8 +728,18 @@ export default function CreateEventPage() {
     <div className="bg-[#F7F9FB] md:bg-white m-[3%] overflow-hidden md:flex md:items-center md:justify-center">
       <div className="bg-[#F7F9FB] max-w-4xl w-full md:w-[80%] lg:w-[60%] mx-auto p-8">
         <div>
-          <div className="mb-3">
+          <div className="mb-3 flex items-center justify-between">
             <h1 className="text-2xl font-bold font-serif text-primary">Create Event</h1>
+            <Link 
+              href="/tutorial" 
+              target="_blank"
+              className="text-sm text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              New to JumboMap? Learn how to use it
+            </Link>
           </div>
           <hr style={{ width: "100%", borderTop: "1px solid #ccc", marginBottom: "1rem"}} />
           <div>
