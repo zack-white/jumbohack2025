@@ -112,18 +112,46 @@ export default function TutorialPage() {
                 
                 <div className="grid md:grid-cols-2 gap-6 items-center">
                   {/* Image placeholder */}
-                  <div className="h-32 md:h-36 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                    <p className="text-gray-500 text-center text-sm">
-                      [Table Placement Map Image]
-                    </p>
+                  <div className="h-full min-h-[200px] rounded-lg flex items-center justify-center overflow-hidden bg-white border border-gray-200">
+                    <img
+                        src="/images/placing.gif"
+                        alt="JumboMap Create Event"
+                        className="object-contain h-full w-full"
+                    />
                   </div>
                   
                   <ol className="list-decimal list-inside space-y-2 text-gray-700">
-                    <li>Start placing tables on the map</li>
-                    <li>Select a category to see a section of clubs to place</li>
-                    <li>Once you are done hit submit</li>
+                    <li>Select a category to see a section of tables to place</li>
+                    <li>Click on a location on the map to start placing tables from that category in order</li>
+                    <li>Click "Save" to store your pin-placing progress</li>
+                    <li>Click on a previously placed table and click "Move" to modify its positioning</li>
+                    <li>Once all of the tables are placed, click "Submit" to finalize the layout</li>
                   </ol>
+                  Note: You can always come back to edit the table placements later.
                 </div>
+              </div>
+
+              <div className="border border-gray-200 p-6 rounded-lg bg-white">
+                <h3 className="text-lg font-semibold mb-4 text-gray-900">Adding More Tables</h3>
+                
+                <div className="grid md:grid-cols-2 gap-6 items-center">
+                  <ol className="list-decimal list-inside space-y-2 text-gray-700">
+                    <li>Before leaving the table placement screen, if you want to add more tables to your event, click the "+ Table" button</li>
+                    <li>Within the pop-up window, fill out the listed fields</li>
+                    <li>Click "Add Table" when finished, and confirm your additions are correct</li>
+                    <li>Now, from the table placement screen, your newly-added table will be in the list of unplaced tables for your event</li>
+                  </ol>
+                  
+                  {/* Image placeholder */}
+                  <div className="h-full min-h-[200px] rounded-lg flex items-center justify-center overflow-hidden bg-white border border-gray-200">
+                    <img
+                        src="/images/addtables.gif"
+                        alt="JumboMap Add Table"
+                        className="object-contain h-full w-full"
+                    />
+                  </div>
+                </div>
+                
               </div>
 
               <div className="border border-gray-200 p-6 rounded-lg bg-white">
@@ -138,9 +166,7 @@ export default function TutorialPage() {
                   
                   {/* Image placeholder */}
                   <div className="h-32 md:h-36 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                    <p className="text-gray-500 text-center text-sm">
-                      [Email Confirmation Flow Image]
-                    </p>
+                    
                   </div>
                 </div>
               </div>
@@ -150,15 +176,20 @@ export default function TutorialPage() {
                 
                 <div className="grid md:grid-cols-2 gap-6 items-center">
                   {/* Image placeholder */}
-                  <div className="h-32 md:h-36 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                    <p className="text-gray-500 text-center text-sm">
-                      [Event Management Dashboard Image]
-                    </p>
+                  <div className="h-full min-h-[200px] rounded-lg flex items-center justify-center overflow-hidden bg-white border border-gray-200">
+                    <img
+                        src="/images/managing.gif"
+                        alt="JumboMap Managing Events"
+                        className="object-contain h-full w-full"
+                    />
                   </div>
                   
-                  <p className="text-gray-700">
-                    On landing page, you can select the created event to go back and edit it.
-                  </p>
+                  <ul className="space-y-2 text-gray-700">
+                    <li>• From the landing page while logged in, you can click on your event to view details</li>
+                    <li>• If your event is not visible in the top 3, click "See All Events" in the top right</li>
+                    <li>• From the event view page, click "Edit Event" to modify your event details</li>
+                    <li>• From here, you will be able to move and continue placing tables on the map</li>
+                  </ul>
                 </div>
               </div>
             </div>
