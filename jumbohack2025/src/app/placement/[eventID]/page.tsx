@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useRouter } from 'next/navigation';
 import mapboxgl from "mapbox-gl";
 import InfoPopup from "@/components/ClubInfo";
+import { Switch } from "@/components/ui/switch"; 
 import "./placement.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -21,15 +22,26 @@ interface Club {
   y?: number;
 }
 
-mapboxgl.accessToken =
-  "pk.eyJ1Ijoic2FsbW9uLXN1c2hpIiwiYSI6ImNtN2dqYWdrZzA4ZnIyam9qNWx1NnAybjcifQ._YD8GYWPtpZ09AwYHzR2Og";
+interface EmailSummary {
+  total: number;
+  successful: number;
+  failed: number;
+}
+
+interface EmailResults {
+  message?: string;
+  summary?: EmailSummary;
+}
+
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_KEY;
 
 const INITIAL_LONG = -71.120;
 const INITIAL_LAT = 42.4075;
 const INITIAL_ZOOM = 17.33;
 
 export default function MapboxMap() {
-  const id = useParams().eventID;
+  const { eventID } = useParams<{ eventID: string }>();
+  const id = eventID; 
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -49,10 +61,15 @@ export default function MapboxMap() {
   const [zoom, setZoom] = useState(paramZoom);
 
   // Keep track of clubs to add to map
-  const [clubs, setClubs] = useState<Club[]>([]);
+  const [unplacedClubs, setUnplacedClubs] = useState<Club[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [queue, setQueue] = useState<Club[]>([]);
+  const [selectedClub, setSelectedClub] = useState<Club | null>(null);
+
+  // Placement mode and moving mode on map
+  const [placementMode, setPlacementMode] = useState(true);
+  const [movingClub, setMovingClub] = useState<Club | null>(null);
 
   // Track club to show popup for
   const [clubInfo, setClubInfo] = useState<Club>();
@@ -61,267 +78,349 @@ export default function MapboxMap() {
   // Enhanced state for email sending
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [emailResults, setEmailResults] = useState<any>(null);
+  const [emailResults, setEmailResults] = useState<EmailResults | null>(null);
 
   // On page render, create map and fetch all old clubs w/ for given event.
+
+  // Track markers on the map; needed for refreshing the map
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
+
+  // On page render, create map and fetch all old clubs for given event.
   useEffect(() => {
     if (!mapContainerRef.current) return;
-  
-    const initializeMap = async () => {
-      const updateMap = async () => {
-        try {
-          console.log("Fetching map location for this event:", id);
-          
-          const response = await fetch("/api/getEventLocation", {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                eventID: id
-              })
-          });
-  
-          if (!response.ok) {
-              console.error("Error fetching map location:", response.status);
-              return;
-          }
-  
-          const data = await response.json();
-  
-          if (data.location) {
-            setLong(data.location.x);
-            setLat(data.location.y);
-            console.log("UPDATED MAP POSITION")
-          }
-          if (data.scale) {
-            setZoom(data.scale);
-          }
-  
-          return data;
-        } catch(error) {
-          console.error("Error fetching map location:", error);
-          return [];
-        }
-      };
-  
-      // Get updated coordinates first
-      const locationData = await updateMap();
-      
-      // Use the fetched coordinates directly instead of using state
-      let mapLong = long;
-      let mapLat = lat;
-      let mapZoom = zoom;
-      
-      if (locationData && locationData.location) {
-        mapLong = locationData.location.x;
-        mapLat = locationData.location.y;
-        console.log("UPDATED MAP POSITION to:", mapLong, mapLat);
-        
-        // Also update state for other components that might need it
-        setLong(mapLong);
-        setLat(mapLat);
-      }
-      
-      if (locationData && locationData.scale) {
-        mapZoom = locationData.scale;
-        setZoom(mapZoom);
-      }
-
-      // Create map with directly fetched coordinates
-      const map = new mapboxgl.Map({
-        container: mapContainerRef.current!,
-        style: "mapbox://styles/mapbox/dark-v11",
-        center: [mapLong, mapLat], // Use direct variables, not state
-        zoom: mapZoom, // Use direct variable, not state
-      });
-      mapRef.current = map;
-  
-      // Function to fetch all existing clubs to add to map
-      const getExistingClubs = async () => {
-        try {
-            console.log("Fetching existing clubs for event ID:", id);
-            
-            const response = await fetch("/api/getExistingClubs", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  eventID: id
-                })
-            });
-    
-            if (!response.ok) {
-                console.error("Error fetching existing clubs:", response.status);
-                return [];
-            }
-    
-            const data = await response.json();
-            console.log("Existing clubs data:", data);
-            return data;
-        } catch(error) {
-            console.error("Error fetching existing clubs:", error);
-            return [];
-        }
-      }
-  
-      // EXECUTED ON LOAD
-  
-      // Fetch a club by clicking on their table (specified by coords)
-      const getClubByCoords = async (lng: number, lat: number) => {
-          try {
-              const response = await fetch("/api/getClubByCoords", {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                      action: 'findByCoords',
-                      x: lng,
-                      y: lat
-                  })
-              });
-  
-              if (!response.ok) {
-                  console.log("Error fetching existing clubs.");
-              }
-  
-              return await response.json();;
-          } catch(error) {
-              console.error("Error" + error);
-          }
-      }
-  
-      map.on("load", async () => {
-        const existingClubs = await getExistingClubs();
-        existingClubs.forEach((club:Club) => {
-            if (!club.coordinates) return; 
-  
-            const marker = new mapboxgl.Marker()
-                .setLngLat([club.coordinates.x, club.coordinates.y])
-                .addTo(map);
-  
-            marker.getElement().addEventListener("click", async (event) => {
-                event.stopPropagation();
-  
-                const { lng, lat } = marker.getLngLat();
-                const fetchedClub = await getClubByCoords(lng, lat);
-  
-                if (fetchedClub) {
-                    setClubInfo({
-                        id: fetchedClub.id,
-                        name: fetchedClub.name,
-                        description: fetchedClub.description,
-                        category: fetchedClub.category,
-                    });
-                    setShowClubInfo(true);
-                }
-            });
-        });
-      });
-    
-  
-      async function fetchClubs() {
-        try {
-          const eventIDFromParams = id;
-          console.log("Fetching clubs for event ID:", eventIDFromParams);
-          
-          const response = await fetch("/api/getClubs", {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                eventID: eventIDFromParams
-              })
-          });
-  
-          if (!response.ok) {
-              console.error("Error fetching clubs:", response.status);
-              return;
-          }
-  
-          const data = await response.json();
-          console.log("Fetched clubs:", data);
-          setClubs(data);
-          
-          // Extract unique categories
-          const uniqueCategories: string[] = Array.from(new Set<string>(data.map((club: Club) => club.category))) as string[];
-          setCategories(uniqueCategories);
-  
-        } catch(error) {
-          console.error("Error fetching clubs:", error);
-        }
-      };
-    
-      // Fetch clubs on page load
-      setTimeout(() => {
-        fetchClubs();
-      }, 500);
-  
-      mapRef.current.on("move", () => {
-        // Get the current center coordinates and zoom level from the map
-        const mapCenter = map.getCenter();
-        const mapZoom = map.getZoom();
-  
-        setLong(mapCenter.lng);
-        setLat(mapCenter.lat);
-        setZoom(mapZoom);
-      });
-  
-      // Assign coordinates to the next club in the queue
-      const handlePlaceClub = async (lng: number, lat: number) => {
-        setQueue((prevQueue) => {
-          if (prevQueue.length === 0) return prevQueue; // No clubs left to place; means markers with no associated club could be place but not saved
-      
-          const nextClub = prevQueue[0];
-      
-          // Send update request
-          fetch('/api/updateClub', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              action: 'updateCoordinates',
-              id: nextClub.id,
-              x: lng,
-              y: lat,
-            })
-          }).then((response) => {
-            if (response.ok) {
-              // Update the club in the main clubs array
-              setClubs((prevClubs) =>
-                prevClubs.map((club) =>
-                  club.id === nextClub.id ? { ...nextClub, x: lng, y: lat } : club
-                )
-              );
-            } else {
-              console.error('Failed to update club coordinates');
-            }
-          }).catch((error) => {
-            console.error('Error updating club:', error);
-          });
-      
-          // Remove the first club from the queue and return the updated state
-          return prevQueue.slice(1);
-        });
-      };
-      
-      // Listener for map click to add a marker
-      map.on("click", async (e) => {
-        const { lng, lat } = e.lngLat; // Get the clicked coordinates
-        new mapboxgl.Marker() 
-          .setLngLat([lng, lat])
-          .addTo(map);
-  
-        // Pop front element off the queue for given category
-        await handlePlaceClub(lng, lat);
-      });
-  
-      // Cleanup on unmount
-      return () => map.remove();
-    };
   
     initializeMap();
   }, []);
 
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    mapRef.current.on("click", handleMapClick);
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.off("click", handleMapClick);
+      }
+    };
+  }, [queue, placementMode, selectedClub]);
+
+  // Updating cursor between view and placement mode
+  useEffect(() => {
+    if (!mapRef.current) return;
+    
+    if (placementMode) {
+      mapRef.current.getCanvas().style.cursor = 'crosshair';
+    } else {
+      mapRef.current.getCanvas().style.cursor = '';
+    }
+  }, [placementMode]);
+
+  // Update queue when category is selected or user wants to move a club
+  useEffect(() => {
+    if (selectedCategory) {
+      // Filter clubs by category AND ensure they don't have coordinates
+      const filteredClubs = unplacedClubs.filter(
+        (club) => 
+          club.category === selectedCategory && 
+          (club.x === undefined || club.x === null) && 
+          (club.y === undefined || club.y === null)
+      );
+      setQueue(filteredClubs);
+
+      // Set selected club to club being moved if one exists; otherwise set to first in list
+      if (movingClub) {
+        // Put the club being moved at the front of the queue so user doesn't have to scroll in queue to find it
+        const otherClubs = filteredClubs.filter(club => club.id !== movingClub.id);
+        const reorderedClubs = [movingClub, ...otherClubs];
+        setQueue(reorderedClubs);
+        setSelectedClub(movingClub);
+        setMovingClub(null);
+      }
+      else if (filteredClubs.length > 0) setSelectedClub(filteredClubs[0]);
+    }
+  }, [selectedCategory, unplacedClubs]);
+
+  /* ------------FUNCTION DECLARATIONS------------ */
+
+  const initializeMap = async () => {
+    const updateMap = async () => {
+      try {        
+        const response = await fetch("/api/getEventLocation", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              eventID: id
+            })
+        });
+
+        if (!response.ok) {
+            console.error("Error fetching map location:", response.status);
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.location) {
+          setLong(data.location.x);
+          setLat(data.location.y);
+        }
+        if (data.scale) {
+          setZoom(data.scale);
+        }
+
+        return data;
+      } catch(error) {
+        console.error("Error fetching map location:", error);
+        return [];
+      }
+    };
+
+    // Get updated coordinates first
+    const locationData = await updateMap();
+    
+    // Use the fetched coordinates directly instead of using state
+    let mapLong = long;
+    let mapLat = lat;
+    let mapZoom = zoom;
+    
+    if (locationData && locationData.location) {
+      mapLong = locationData.location.x;
+      mapLat = locationData.location.y;
+      
+      // Also update state for other components that might need it
+      setLong(mapLong);
+      setLat(mapLat);
+    }
+    
+    if (locationData && locationData.scale) {
+      mapZoom = locationData.scale;
+      setZoom(mapZoom);
+    }
+
+    // Create map with directly fetched coordinates
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current!,
+      style: "mapbox://styles/mapbox/dark-v11",
+      center: [mapLong, mapLat],
+      zoom: mapZoom,
+    });
+    mapRef.current = map;
+
+    // Make cursor a crosshair once map is mounted
+    if (placementMode) {
+      mapRef.current.getCanvas().style.cursor = 'crosshair';
+    } else {
+      mapRef.current.getCanvas().style.cursor = '';
+    }
+
+    map.on("load", async () => {
+      const existingClubs = await getExistingClubs();
+      existingClubs.forEach((club: Club) => {
+          if (!club.coordinates) return; 
+
+          const marker = new mapboxgl.Marker()
+              .setLngLat([club.coordinates.x, club.coordinates.y])
+              .addTo(map);
+          
+          // Track the marker
+          markersRef.current.push(marker);
+
+          marker.getElement().addEventListener("click", createMarkerClickHandler(marker));
+      });
+    });
+
+    // Fetch clubs on page load
+    setTimeout(() => {
+      fetchClubs();
+    }, 500);
+
+    mapRef.current.on("move", () => {
+      // Get the current center coordinates and zoom level from the map
+      const mapCenter = map.getCenter();
+      const mapZoom = map.getZoom();
+
+      setLong(mapCenter.lng);
+      setLat(mapCenter.lat);
+      setZoom(mapZoom);
+    });
+
+    // Cleanup on unmount
+    return () => map.remove();
+  };
+
+  // Fetch all unplaced clubs from db
+  async function fetchClubs() {
+    try {
+      const eventIDFromParams = id;
+      
+      const response = await fetch("/api/getUnplacedClubs", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            eventID: eventIDFromParams
+          })
+      });
+
+      if (!response.ok) {
+          console.error("Error fetching clubs:", response.status);
+          return;
+      }
+
+      const data = await response.json();
+      setUnplacedClubs(data);
+      
+      // Extract unique categories
+      const uniqueCategories: string[] = Array.from(new Set<string>(data.map((club: Club) => club.category))) as string[];
+      setCategories(uniqueCategories);
+
+    } catch(error) {
+      console.error("Error fetching clubs:", error);
+    }
+  };
+
+  // Place club when user clicks on map as long as placement mode is on and there are clubs to place
+  const handleMapClick = async (e: mapboxgl.MapMouseEvent) => {
+    if (!placementMode || queue.length === 0) {
+      return;
+    }
+    
+    const { lng, lat } = e.lngLat;
+    const marker = new mapboxgl.Marker() 
+      .setLngLat([lng, lat])
+      .addTo(mapRef.current!);
+    
+    // Track the new marker
+    markersRef.current.push(marker);
+
+    marker.getElement().addEventListener("click", createMarkerClickHandler(marker));
+
+    await handlePlaceClub(lng, lat);
+  };
+
+  // Assign coordinates to the next club in the queue
+  const handlePlaceClub = async (lng: number, lat: number) => {
+    if (!selectedClub || queue.length === 0) return;
+  
+    // Send update request
+    fetch('/api/updateClub', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'updateCoordinates',
+        id: selectedClub.id,
+        x: lng,
+        y: lat,
+      })
+    }).then((response) => {
+      if (!response.ok) {
+        console.error('Failed to update club coordinates');
+      }
+    }).catch((error) => {
+      console.error('Error updating club:', error);
+    });
+  
+    // Remove the selected club from queue and select the next one
+    setQueue((prevQueue) => {
+      const newQueue = prevQueue.filter((club) => club.id !== selectedClub.id);
+      // Set the new selected club to be the first in the updated queue
+      setSelectedClub(newQueue.length > 0 ? newQueue[0] : null);
+      return newQueue;
+    });
+  };
+
+  // When club is clicked, show popup
+  const createMarkerClickHandler = (marker: mapboxgl.Marker) => {
+    return async (event: Event) => {
+      event.stopPropagation();
+  
+      const { lng, lat } = marker.getLngLat();
+      
+      try {
+        const response = await fetch("/api/getClubByCoords", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'findByCoords',
+            x: lng,
+            y: lat
+          })
+        });
+  
+        if (response.ok) {
+          const fetchedClub = await response.json();
+          
+          if (fetchedClub) {
+            setClubInfo({
+              id: fetchedClub.id,
+              name: fetchedClub.name,
+              description: fetchedClub.description,
+              category: fetchedClub.category,
+            });
+            setShowClubInfo(true);
+          }
+        }
+      } catch(error) {
+        console.error("Error fetching club:", error);
+      }
+    };
+  };
+
+  // Fetch all existing clubs to add to map
+  const getExistingClubs = async () => {
+    try {        
+        const response = await fetch("/api/getExistingClubs", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              eventID: id
+            })
+        });
+
+        if (!response.ok) {
+            console.error("Error fetching existing clubs:", response.status);
+            return [];
+        }
+
+        const data = await response.json();
+        return data;
+    } catch(error) {
+        console.error("Error fetching existing clubs:", error);
+        return [];
+    }
+  }
+
+  // Refresh markers on map; allows for moving clubs and showing popups w/out re-rendering
+  const refreshMarkers = async () => {
+    if (!mapRef.current) return;
+  
+    // Remove all existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+  
+    // Reload existing clubs and recreate markers
+    const existingClubs = await getExistingClubs();
+    existingClubs.forEach((club: Club) => {
+      if (!club.coordinates) return;
+  
+      const marker = new mapboxgl.Marker()
+        .setLngLat([club.coordinates.x, club.coordinates.y])
+        .addTo(mapRef.current!);
+  
+      markersRef.current.push(marker);
+  
+    });
+  };
+
   const handleAddTable = () => {
     router.push(`/addTable/${id}`)
   }
+
+  const handleSubmit = async () => {
+    await handleSave();
+    handleClose();
+  };
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -365,33 +464,9 @@ export default function MapboxMap() {
     }
   };
 
-  const handleSubmit = async () => {
-    await handleSave();
-    // Only navigate if there were no errors
-    if (!status.includes('Error')) {
-      setTimeout(() => {
-        handleClose();
-      }, 2000); // Give user time to see the success message
-    }
-  };
-
   const handleClose = () => {
     router.push(`/eventview?id=${id}`);
   };
-
-  // Update queue when category is selected
-  useEffect(() => {
-    if (selectedCategory) {
-      // Filter clubs by category AND ensure they don't have coordinates
-      const filteredClubs = clubs.filter(
-        (club) => 
-          club.category === selectedCategory && 
-          (club.x === undefined || club.x === null) && 
-          (club.y === undefined || club.y === null)
-      );
-      setQueue(filteredClubs);
-    }
-  }, [selectedCategory, clubs]);
 
   // Edit club information
   const handleEditClub = async () => {
@@ -400,10 +475,10 @@ export default function MapboxMap() {
 
   // Move club marker
   const handleMoveClub = async () => {
-    
     if (!clubInfo || !mapRef.current) return;
 
-    // Remove coordinates in backend
+    setMovingClub(clubInfo);
+  
     try {
       const response = await fetch('/api/updateClub', {
         method: 'POST',
@@ -415,66 +490,85 @@ export default function MapboxMap() {
           id: clubInfo.id,
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to remove club coordinates');
       }
-
-      // Update the club in the local state
-      setClubs((prevClubs) =>
-        prevClubs.map((club) =>
-          club.id === clubInfo.id
-            ? { ...club, x: undefined, y: undefined, coordinates: undefined }
-            : club
-        )
-      );
-
-      // Add to front of queue
-      setQueue((prevQueue) => [clubInfo, ...prevQueue]);
-
-      // Close the popup
+  
+      // Refresh markers first
+      await refreshMarkers();
+      
+      // Refetch unplaced clubs from database
+      await fetchClubs();
+  
+      // Reset category to update queue
+      setSelectedCategory(clubInfo.category);
+  
       setShowClubInfo(false);
-
-      // Trigger rerender (optional: you could remove and reload markers if you store them)
-      mapRef.current?.fire('load');
-
-      console.log(`Club ${clubInfo.name} moved back to queue.`);
+  
+      //setMovingClub(null);
     } catch (error) {
       console.error('Error moving club:', error);
     }
-
   };
 
   return (
     <div className="wrapper">
-      <div ref={mapContainerRef} className="mapContainer"/>
+      <div ref={mapContainerRef} className="mapContainer relative">
+        <div className="absolute bottom-2 left-2 bg-white px-3 py-2 z-10 flex gap-2">
+          <Switch 
+            checked={placementMode}
+            onCheckedChange={setPlacementMode}
+          />
+          <p>{placementMode ? "Placement Mode" : "View Mode"}</p>
+        </div>
+      </div>
       {showClubInfo && clubInfo !== undefined && 
-      <InfoPopup 
-        club={clubInfo} 
-        onClose={() => setShowClubInfo(false)} 
-        onEdit={handleEditClub}
-        onMove={handleMoveClub}
-      />}
-      <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold mb-4 flex items-center">
+        <InfoPopup 
+          club={clubInfo} 
+          onClose={() => setShowClubInfo(false)} 
+          onEdit={handleEditClub}
+          onMove={handleMoveClub}
+        />
+      }
+      <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-4">
+        <h1 className="text-2xl font-bold flex items-center">
           Unplaced Clubs
-          <span className="ml-2 text-blue-500">(Editing Placement)</span>
         </h1>
 
         {/* Category Dropdown */}
-        <div className="mb-4 w-3/5 bg-categoryBg">
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full p-3 border rounded bg-categoryBg"
-          >
-            <option>Select a category</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-row justify-between sm:justify-start gap-4">
+          <div className="w-3/5 bg-categoryBg border">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full h-full px-6 py-4 bg-categoryBg"
+            >
+              <option>Select a category</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Submit button (moves left when queue is empty) */}
+          <div className={"flex gap-2 queueAndSubmit"}>
+            <button className="px-6 py-4 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={handleAddTable}>
+              + Table
+            </button>
+            <button
+              type="button"
+              className="px-6 py-4 border border-[#2E73B5] bg-white text-[#2E73B5]"
+              onClick={handleSave}
+            >
+              Save
+            </button>
+            <button type="submit" className="px-6 py-4 bg-[#2E73B5] text-white" onClick={handleSubmit}>
+              Submit
+            </button>
+          </div>
         </div>
         
         {/* Queue */}
@@ -483,11 +577,21 @@ export default function MapboxMap() {
           {queue.length > 0 && (
             <div className="flex-grow min-w-0">
               <ul className="flex flex-row overflow-x-auto no-scrollbar">
-                {queue.map((club) => (
-                  <li key={club.id} className="p-4 mr-2 border-b bg-categoryBg min-w-[8vw] h-[6vh] truncate text-center">
+              {queue.map((club) => (
+                <li 
+                  key={club.id} 
+                  className={`mr-2 border-b text-center cursor-pointer h-16 flex items-center justify-center px-4 whitespace-nowrap ${
+                    club.id === selectedClub?.id 
+                      ? 'bg-[#2E73B5] text-white' 
+                      : 'bg-categoryBg hover:bg-gray-200'
+                  }`}
+                  onClick={() => setSelectedClub(club)}
+                >
+                  <span className="leading-tight">
                     {club.name}
-                  </li>
-                ))}
+                  </span>
+                </li>
+              ))}
               </ul>
             </div>
           )}

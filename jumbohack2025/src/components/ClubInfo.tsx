@@ -45,16 +45,16 @@ export default function InfoPopup({ club, onClose, onEdit, onMove }: InfoPopupPr
         className="bg-white w-full max-w-xl p-4 pb-8 rounded-t-lg shadow-lg relative"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between gap-2 mb-4">
           <h1 className="text-3xl font-bold">{club.name}</h1>
           <div className="flex space-x-4">
             {onMove && (
-              <button className="h-[6vh] px-6 bg-[#2E73B5] text-white" onClick={onMove}>
+              <button className="px-6 py-4 bg-[#2E73B5] text-white" onClick={onMove}>
                 Move
               </button>
             )}
             {onEdit && (
-              <button className="h-[6vh] px-6 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={onEdit}>
+              <button className="px-6 py-4 border border-[#2E73B5] bg-[#F7F9FB] text-[#2E73B5]" onClick={onEdit}>
                 Edit
               </button>
             )}
