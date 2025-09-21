@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import mapboxgl from "mapbox-gl";
 import InfoPopup from "@/components/ClubInfo";
 import "./mapview.css";
@@ -51,7 +51,7 @@ const PROXIMITY_THRESHOLD = 100; // Pixel distance threshold for label proximity
 
 export default function MapboxMap() {
   const { eventID } = useParams<{ eventID: string }>();
-  const router = useRouter();
+  // const router = useRouter();
   const [eventName, setEventName] = useState("None");
   const id = Number(eventID);
 

@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
     // Define different types based on emailing enabled
     type ClubRowWithEmail = [string, string, string, string?]; // name, category, contact, description (optional when emailing enabled)
-    type ClubRowWithoutEmail = [string, string, string?, string?]; // name, category, contact (optional), description (required when emailing disabled)
+    // type ClubRowWithoutEmail = [string, string, string?, string?]; // name, category, contact (optional), description (required when emailing disabled)
 
     // Process the data into the desired format
     const clubs = jsonData.slice(1).map((row, index) => {

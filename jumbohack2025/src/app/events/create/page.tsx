@@ -14,7 +14,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
-import { Switch } from "@/components/ui/switch";
+// import { Switch } from "@/components/ui/switch";
 import { ChevronDown } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
@@ -254,6 +254,7 @@ export default function CreateEventPage() {
       
       return { error: null, columns };
     } catch (error) {
+      console.log("Error reading Excel file:", error);
       return { 
         error: "Unable to read spreadsheet file. Please ensure it's a valid .xlsx or .xls file.", 
         columns: [] 

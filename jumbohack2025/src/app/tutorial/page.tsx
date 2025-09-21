@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+// import Image from 'next/image';
 
 export default function TutorialPage() {
   return (
@@ -54,7 +54,7 @@ export default function TutorialPage() {
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div className="border border-gray-200 p-6 rounded-lg bg-white">
                 <p className="text-gray-700">
-                  Click the "Sign in" button at the top right corner to log in or create an account. Currently, anyone can create an account and start making events that will show up on our landing page. Single sign-on with Google or with an email address/username.
+                  Click the &quot;Sign in&quot; button at the top right corner to log in or create an account. Currently, anyone can create an account and start making events that will show up on our landing page. Single sign-on with Google or with an email address/username.
                 </p>
               </div>
               
@@ -80,7 +80,7 @@ export default function TutorialPage() {
                 <div className="grid md:grid-cols-2 gap-6 items-center">
                   <ol className="list-decimal list-inside space-y-2 text-gray-700">
                     <li>Sign in</li>
-                    <li>Click on "Create an Event"</li>
+                    <li>Click on &quot;Create an Event&quot;</li>
                     <li>Fill out all required information</li>
                     <li>Can upload your own spreadsheet (example format provided below)</li>
                     <li>Choose a location anywhere in the world!</li>
@@ -113,9 +113,9 @@ export default function TutorialPage() {
                   <ol className="list-decimal list-inside space-y-2 text-gray-700">
                     <li>Select a category to see a section of tables to place</li>
                     <li>Click on a location on the map to start placing tables from that category in order</li>
-                    <li>Click "Save" to store your pin-placing progress</li>
-                    <li>Click on a previously placed table and click "Move" to modify its positioning</li>
-                    <li>Once all of the tables are placed, click "Submit" to finalize the layout</li>
+                    <li>Click &quot;Save&quot; to store your pin-placing progress</li>
+                    <li>Click on a previously placed table and click &quot;Move&quot; to modify its positioning</li>
+                    <li>Once all of the tables are placed, click &quot;Submit&quot; to finalize the layout</li>
                   </ol>
                   Note: You can always come back to edit the table placements later.
                 </div>
@@ -126,9 +126,9 @@ export default function TutorialPage() {
                 
                 <div className="grid md:grid-cols-2 gap-6 items-center">
                   <ol className="list-decimal list-inside space-y-2 text-gray-700">
-                    <li>Before leaving the table placement screen, if you want to add more tables to your event, click the "+ Table" button</li>
+                    <li>Before leaving the table placement screen, if you want to add more tables to your event, click the &quot;+ Table&quot; button</li>
                     <li>Within the pop-up window, fill out the listed fields</li>
-                    <li>Click "Add Table" when finished, and confirm your additions are correct</li>
+                    <li>Click &quot;Add Table&quot; when finished, and confirm your additions are correct</li>
                     <li>Now, from the table placement screen, your newly-added table will be in the list of unplaced tables for your event</li>
                   </ol>
                   
@@ -176,8 +176,8 @@ export default function TutorialPage() {
                   
                   <ul className="space-y-2 text-gray-700">
                     <li>• From the landing page while logged in, you can click on your event to view details</li>
-                    <li>• If your event is not visible in the top 3, click "See All Events" in the top right</li>
-                    <li>• From the event view page, click "Edit Event" to modify your event details</li>
+                    <li>• If your event is not visible in the top 3, click &quot;See All Events&quot; in the top right</li>
+                    <li>• From the event view page, click &quot;Edit Event&quot; to modify your event details</li>
                     <li>• From here, you will be able to move and continue placing tables on the map</li>
                   </ul>
                 </div>
@@ -194,8 +194,8 @@ export default function TutorialPage() {
                 <ul className="space-y-3 text-gray-700">
                     <li>• Return to your event page</li>
                     <li>• To add new information to existing tables from the spreadsheet, click on a table pinpoint on the map and edit the details</li>
-                    <li>• To adjust the positioning of a table, click the pin and then "Move". Then, click the new location on the map and then confirm with "Save" at the bottom.</li>
-                    <li>• To add more tables to your event, click the "+ Table" button</li>
+                    <li>• To adjust the positioning of a table, click the pin and then &quot;Move&quot;. Then, click the new location on the map and then confirm with &quot;Save&quot; at the bottom.</li>
+                    <li>• To add more tables to your event, click the &quot;+ Table&quot; button</li>
                 </ul>
               </div>
               
@@ -238,7 +238,7 @@ export default function TutorialPage() {
                 </div>
 
                 <div className="border border-gray-200 p-6 rounded-lg bg-white">
-                  <h3 className="text-lg font-semibold mb-4 text-gray-900">Table Timings Format (for when tables aren't available for the entire event)</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900">Table Timings Format (for when tables aren&apos;t available for the entire event)</h3>
                   <div className="bg-gray-50 p-4 rounded border">
                     <ul className="space-y-2 text-gray-700">
                       <li>1. <strong>Table Name</strong></li>

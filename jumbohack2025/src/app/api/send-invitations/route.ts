@@ -88,8 +88,13 @@ export async function POST(request: Request) {
         return { email, clubName, status: 'sent' };
       } catch (emailError) {
         console.error(`Failed to send email for club ${club.name}:`, emailError);
-        return { email: club.contact, clubName: club.name, status: 'failed', error: emailError.message };
-      }
+        let errorMessage = 'Unknown error';
+        if (emailError instanceof Error) {
+          errorMessage = emailError.message;
+        }
+        return { email: club.contact, clubName: club.name, status: 'failed', error: errorMessage };
+}
+
     }));
 
     // Log results
@@ -112,13 +117,22 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Error in send-invitations:', error);
+    let errorMessage = 'Unknown error';
+    let errorStack = undefined;
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorStack = error.stack;
+    }
+
     return NextResponse.json(
       { 
         message: 'Error sending invitations', 
-        error: error.message,
-        details: error.stack 
+        error: errorMessage,
+        details: errorStack
       },
       { status: 500 }
     );
   }
+
 }

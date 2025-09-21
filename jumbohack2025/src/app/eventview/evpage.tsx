@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import ClubsSearch from "../../components/ClubsSearch";
 import ShowMapButton from '../../components/showMapButton';
 import ContactInfoCard from '@/components/ContactInfoCard';
-import Tooltip from '@/components/tooltip';
+// import Tooltip from '@/components/tooltip';
 import { useSearchParams, useRouter } from "next/navigation";
 import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';

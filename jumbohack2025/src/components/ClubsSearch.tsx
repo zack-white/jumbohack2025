@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import InfoPopup from "./ClubInfo";
 import { AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
 interface Club {
   id: number;
@@ -15,7 +15,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [search, setSearch] = useState('');
-  const router = useRouter();
+  // const router = useRouter();
 
   useEffect(() => {
     async function fetchClubs() {
@@ -50,9 +50,9 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
   }
 
   // Edit club information
-  const handleEditClub = (clubId: number) => {
-    router.push(`/editTable/${clubId}`);
-  };
+  // const handleEditClub = (clubId: number) => {
+  //   router.push(`/editTable/${clubId}`);
+  // };
 
   return (
     <div className="max-w-md mx-auto bg-white min-h-screen pt-4 pb-12 md:pb-4">
