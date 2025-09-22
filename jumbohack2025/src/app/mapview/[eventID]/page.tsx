@@ -491,7 +491,7 @@ export default function MapboxMap() {
                 className="
                   p-4 mb-2 md:mr-2
                   bg-categoryBg
-                  w-full md:min-w-[40vw]
+                  w-full min-w-[20vw] lg:min-w-[10vw]
                   truncate text-center
                 "
               >
