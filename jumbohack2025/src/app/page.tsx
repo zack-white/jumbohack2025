@@ -146,8 +146,7 @@ export default function Home() {
               
               <div className="flex flex-col md:flex-row justify-between items-center mt-6 gap-4 md:gap-0">
                 <p className="text-xs md:text-sm text-gray-500 font-inter">
-                  © 2025 Led by Holden Kittelberger and created by Dan Glorioso, Elisa Yu, Hannah Jiang, Shayne Sidman,
-                  William Goldman, Zachary White
+                  © 2025 Created by Dan Glorioso, William Goldman, Hannah Jiang, Holden Kittelberger, Shayne Sidman, Elisa Yu, Zachary White
                 </p>
                 <button 
                   onClick={scrollToTop}
