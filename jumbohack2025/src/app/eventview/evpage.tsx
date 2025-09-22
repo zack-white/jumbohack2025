@@ -92,7 +92,7 @@ export default function EventPage() {
   return (
     <>
       <div className="bg-white md:overflow-hidden max-w-7xl mx-auto py-6 px-6 flex flex-col items-center justify-center">
-        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 max-h-[120vh] justify-between w-full">
+        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 sm:max-h-[60vh] max-h-[100vh] justify-between w-full">
           <div className="md:flex-1 md:min-w-0">
             <h1 className="px-4 text-2xl md:text-3xl font-bold font-serif">{event.name}</h1>
             <p className="px-4 text-gray-500">
@@ -137,7 +137,7 @@ export default function EventPage() {
           </div>
         </div>
       </div>
-      <div className="bg-[#2971AC] w-[100vw] h-50">
+      <div className="bg-[#2971AC] w-[100vw] mt-10">
         <div className="flex flex-col max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 gap-4">
           <Image
             src={theme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'}
