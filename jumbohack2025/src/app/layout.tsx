@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Serif, Inter } from "next/font/google";
 import "./globals.css";
-
+import { Analytics } from '@vercel/analytics/react';
 import NavBar from '../components/NavBar';
 import { ClerkProvider } from '@clerk/nextjs';
 
@@ -31,12 +31,14 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body
-          className={`${inter.variable} ${ibmPlexSerif.variable} antialiased`}
-        >
-          <NavBar />
-          {children}
-        </body>
+        <Analytics />
+          <body
+            className={`${inter.variable} ${ibmPlexSerif.variable} antialiased`}
+          >
+            <NavBar />
+            {children}
+          </body>
+        <Analytics />
       </html>
     </ClerkProvider>
   );
