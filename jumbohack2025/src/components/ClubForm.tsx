@@ -39,7 +39,7 @@ export default function ClubForm<T extends BaseClubFields>({
   onCancel,
   mode = "add",
 }: ClubFormProps<T>) {
-  console.log("Club Data Form (category):", clubData.category);
+  // console.log("Club Data Form (category):", clubData.category);
 
   return (
     <div className="bg-[#F7F9FB] md:bg-white m-[3%] overflow-hidden md:flex md:items-center md:justify-center">

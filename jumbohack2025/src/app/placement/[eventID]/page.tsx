@@ -428,7 +428,7 @@ export default function MapboxMap() {
     setEmailResults(null);
 
     try {
-      console.log('Sending invitations for event:', id);
+      // console.log('Sending invitations for event:', id);
       
       const response = await fetch('/api/send-invitations', {
         method: 'POST',
@@ -437,7 +437,7 @@ export default function MapboxMap() {
       });
 
       const data = await response.json();
-      console.log('Response data:', data);
+      // console.log('Response data:', data);
 
       if (!response.ok) {
         throw new Error(data.message || `HTTP error! status: ${response.status}`);

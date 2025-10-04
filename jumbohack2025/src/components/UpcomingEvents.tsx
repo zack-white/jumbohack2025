@@ -15,13 +15,13 @@ interface Event {
 
 const fetchEvents = async (): Promise<Event[]> => {
   try {
-    console.log("Fetching events...");
+    // console.log("Fetching events...");
     const response = await fetch("/api/getEventsByDate");
     if (!response.ok) {
       throw new Error(`Failed to fetch events: ${response.status}`);
     }
     const data = await response.json();
-    console.log("Fetched events:", data);
+    // console.log("Fetched events:", data);
     
     // Validate the data structure
     if (Array.isArray(data)) {

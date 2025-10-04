@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function ShowMapButton({ eventID }: { eventID: number }) {
   const router = useRouter();
-  console.log("Navigating to map with event ID:", eventID);
+  // console.log("Navigating to map with event ID:", eventID);
 
   return (
     <div className="flex items-center justify-center py-4 pl-4">

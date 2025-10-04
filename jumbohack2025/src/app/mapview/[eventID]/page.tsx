@@ -216,13 +216,13 @@ export default function MapboxMap() {
           mapLat = data.location.y;
           setLong(mapLong);
           setLat(mapLat);
-          console.log("Map coordinates:", mapLong, mapLat);
+          // console.log("Map coordinates:", mapLong, mapLat);
         }
 
         if (data.scale) {
           mapZoom = data.scale;
           setZoom(mapZoom);
-          console.log("Map zoom level:", mapZoom);
+          // console.log("Map zoom level:", mapZoom);
         }
 
         // Create map

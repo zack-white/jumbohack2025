@@ -32,7 +32,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
 
         const data: Club[] = await response.json();
         setClubs(data);
-        console.log(data);
+        // console.log(data);
       } catch (error) {
         console.error("Error fetching clubs:", error);
       }

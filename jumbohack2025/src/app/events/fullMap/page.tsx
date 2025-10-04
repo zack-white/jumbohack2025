@@ -15,7 +15,7 @@ export default function FullScreen() {
   useEffect(() => {
     async function fetchEventInfo() {
       const eventId = window.prompt("Enter an eventID: ");
-      console.log('Entered ID:', eventId);
+      // console.log('Entered ID:', eventId);
 
       try {
         const response = await fetch(`/api/getEventInfo?eventId=${eventId}`, {
@@ -42,7 +42,7 @@ export default function FullScreen() {
 
   // Handle location selection
   const handleLocationSelect = (coordinates: { x: number; y: number }, zoom: number) => {
-    console.log('Selected Location:', coordinates, 'Zoom:', zoom);
+    // console.log('Selected Location:', coordinates, 'Zoom:', zoom);
     setMapData({ long: coordinates.x, lat: coordinates.y, scale: zoom });
   };
 

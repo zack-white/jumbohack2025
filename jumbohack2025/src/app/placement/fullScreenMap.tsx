@@ -22,7 +22,7 @@ export default function FullScreenMap({ long, lat, scale }: FullScreenMapProps) 
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    console.log('Initializing FullScreenMap with:', { long, lat, scale });
+    // console.log('Initializing FullScreenMap with:', { long, lat, scale });
 
     // Destroy existing map before creating a new one
     if (mapRef.current) {

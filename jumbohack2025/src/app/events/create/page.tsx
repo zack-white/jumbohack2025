@@ -586,7 +586,7 @@ export default function CreateEventPage() {
     try {
       // FIRST: Process and validate the Excel file before creating the event
       if (formData.spreadsheet) {
-        console.log("Processing Excel file before creating event...");
+        // console.log("Processing Excel file before creating event...");
         
         const excelFormData = new FormData();
         excelFormData.append("file", formData.spreadsheet);
@@ -618,7 +618,7 @@ export default function CreateEventPage() {
           return; // Stop here - don't create event
         }
 
-        console.log("Excel file validated successfully");
+        // console.log("Excel file validated successfully");
       }
 
       // SECOND: Create the event only after Excel validation passes
@@ -657,7 +657,7 @@ export default function CreateEventPage() {
       const eventResult = await eventResponse.json();
       const eventId = eventResult.eventId + 1;
 
-      console.log("Event created successfully with ID:", eventId);
+      // console.log("Event created successfully with ID:", eventId);
 
       // THIRD: Now process Excel file for real (insert data)
       if (formData.spreadsheet) {
@@ -682,7 +682,7 @@ export default function CreateEventPage() {
           return;
         }
 
-        console.log("Excel file processed and data inserted successfully");
+        // console.log("Excel file processed and data inserted successfully");
       }
 
       // SUCCESS: Everything worked

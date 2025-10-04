@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    console.log(`Processing registration for token: ${token}`);
+    // console.log(`Processing registration for token: ${token}`);
     
     // Get the club information using the token
     const result = await query(
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     );
     
     const club = result.rows[0];
-    console.log('Found club:', club ? { id: club.id, name: club.name, contact: club.contact } : 'None');
+    // console.log('Found club:', club ? { id: club.id, name: club.name, contact: club.contact } : 'None');
 
     if (!club) {
       return NextResponse.json({ message: 'Invalid or expired token' }, { status: 400 });
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     );
     
     const eventName = eventResult.rows[0]?.name || 'the event';
-    console.log('Event name:', eventName);
+    // console.log('Event name:', eventName);
 
     // Update the database with the bio
     await query(
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       [bio, club.id]
     );
 
-    console.log(`Updated club description for ${club.name}`);
+    // console.log(`Updated club description for ${club.name}`);
 
     // Send email to admin if configured
     if (process.env.ADMIN_EMAIL) {
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
             </div>
           `
         });
-        console.log('Admin notification sent');
+        // console.log('Admin notification sent');
       } catch (emailError) {
         console.error('Failed to send admin notification:', emailError);
       }
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
           </div>
         `
       });
-      console.log('User confirmation sent');
+      // console.log('User confirmation sent');
     } catch (emailError) {
       console.error('Failed to send user confirmation:', emailError);
     }

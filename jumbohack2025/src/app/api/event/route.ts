@@ -4,7 +4,7 @@ import { query } from '../../../lib/query';
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    console.log('Received event data:', data);
+    // console.log('Received event data:', data);
     
     const pointString = `(${data.location.x}, ${data.location.y})`;
 
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       ]
     );
 
-    console.log('Event created successfully with ID:', result.rows[0].id);
+    // console.log('Event created successfully with ID:', result.rows[0].id);
 
     return NextResponse.json({ 
       success: true, 

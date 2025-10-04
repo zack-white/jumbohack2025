@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    console.log(`Processing invitation response: token=${token}, response=${response}`);
+    // console.log(`Processing invitation response: token=${token}, response=${response}`);
     
     // Find the user by the token we stored in description
     const result = await query(
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     );
     
     const user = result.rows[0];
-    console.log('Found user:', user ? { id: user.id, name: user.name, contact: user.contact } : 'None');
+    // console.log('Found user:', user ? { id: user.id, name: user.name, contact: user.contact } : 'None');
 
     if (!user) {
       return new Response(
@@ -74,11 +74,11 @@ export async function GET(request: Request) {
     );
     
     const eventName = eventResult.rows[0]?.name || 'the event';
-    console.log('Event name:', eventName);
+    // console.log('Event name:', eventName);
 
     // Handle declined response
     if (response === 'no') {
-      console.log(`User declined invitation: ${user.contact}`);
+      // console.log(`User declined invitation: ${user.contact}`);
       
       // Update description to indicate decline
       await query(
@@ -169,7 +169,7 @@ export async function GET(request: Request) {
       );
     } else {
       // Handle accepted response (response === 'yes')
-      console.log(`User accepted invitation: ${user.contact}`);
+      // console.log(`User accepted invitation: ${user.contact}`);
       
       // Update confirmed status
       await query(
@@ -184,7 +184,7 @@ export async function GET(request: Request) {
       
       // Redirect to registration form for 'yes' responses
       const redirectUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/registration?token=${token}`;
-      console.log(`Redirecting to: ${redirectUrl}`);
+      // console.log(`Redirecting to: ${redirectUrl}`);
       
       return NextResponse.redirect(redirectUrl);
     }

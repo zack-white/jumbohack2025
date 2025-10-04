@@ -14,7 +14,7 @@ interface SendInvitationsProps {
 
 export default function SendInvitations({ club }: SendInvitationsProps) { 
   const eventId = club.id;
-  console.log("eventId:", eventId);
+  // console.log("eventId:", eventId);
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 

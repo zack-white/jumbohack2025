@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const validateOnly = formData.get('validateOnly') === 'true'; // New flag
     const providedEventId = formData.get('eventId'); // Event ID for actual insertion
 
-    console.log('Processing Excel with emailingEnabled:', emailingEnabled, 'validateOnly:', validateOnly);
+    // console.log('Processing Excel with emailingEnabled:', emailingEnabled, 'validateOnly:', validateOnly);
 
     if (!file) {
       return NextResponse.json({ message: 'No file uploaded' }, { status: 400 });
@@ -126,7 +126,7 @@ export async function POST(request: Request) {
       }
     });
 
-    console.log('Processed clubs:', clubs.length);
+    // console.log('Processed clubs:', clubs.length);
 
     // If validateOnly is true, just return success without inserting data
     if (validateOnly) {

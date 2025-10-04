@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const eventId = body.eventID;
-    console.log(eventId)
+    // console.log(eventId)
     const result = await query(
       'SELECT id, name, category, coordinates FROM clubs WHERE event_id = $1',
       [eventId]

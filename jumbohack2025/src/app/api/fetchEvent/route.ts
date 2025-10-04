@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const id = Number(body.id);
-    console.log(id);
+    // console.log(id);
 
     if (!id || isNaN(id)) {
       return NextResponse.json({ error: 'Invalid event ID' }, { status: 400 });
