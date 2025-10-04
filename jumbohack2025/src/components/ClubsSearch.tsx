@@ -55,12 +55,12 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
   // };
 
   return (
-    <div className="max-w-md mx-auto bg-white min-h-screen pt-4 pb-12 md:pb-4">
+    <div className="flex flex-col h-full bg-white">
       {/* Fixed Header */}
-        <div className="max-w-md bg-white sticky top-4 z-1 pl-4 pb-4">
-            <h2 className="mb-2 text-xl md:text-2xl font-bold font-serif">Who’s Attending?</h2>
+        <div className="flex-shrink-0 bg-white pt-4 pl-4 pb-4">
+            <h2 className="mb-2 text-xl md:text-2xl font-bold font-serif">Who's Attending?</h2>
             {/* Search Bar */}
-            <div className="relative mt-2">
+            <div className="relative mt-2 pr-4">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
@@ -82,9 +82,9 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
         </div>
 
     {/* Components */}
-        <div className="h-80 md:h-auto max-h-[65vh] overflow-y-auto pl-4 pb-4 mb-4">
+        <div className="flex-1 min-h-0 pl-4 pr-4 pb-4">
             {/* Clubs List */}
-            <div>
+            <div className="h-full max-h-80 md:max-h-full overflow-y-auto">
                 {filteredClubs.map((club) => (
                     <div
                         key={club.id}
