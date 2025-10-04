@@ -508,7 +508,7 @@ export default function MapboxMap() {
         <div className="mt-[1%] min-w-[25%] absolute z-10">
           <input
             type="text"
-            placeholder="Search attending clubs..."
+            placeholder="Search attending orgs..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="shadow pl-4 pr-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-[#F7F9FB] mt-2"

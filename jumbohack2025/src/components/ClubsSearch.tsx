@@ -73,7 +73,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
                 </svg>
                 <input
                     type="text"
-                    placeholder="Search attending clubs..."
+                    placeholder="Search attending orgs..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="bg-[#F7F9FB] pl-10 pr-4 py-3 border shadow focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
