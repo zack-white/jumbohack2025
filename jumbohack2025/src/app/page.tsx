@@ -84,21 +84,23 @@ export default function Home() {
                     Emergency: <span className="font-bold">Tufts University Police Department</span>
                   </h3>
 
-                  <div className="mt-2 flex flex-col md:flex-row gap-6">
+                  <div className="mt-2 flex flex-col gap-6">
+                    {/* Address */}
                     <div className="text-base md:text-lg text-gray-700 ml-1">
                       <p>419 Boston Ave</p>
                       <p>Medford, MA 02155</p>
                     </div>
 
-                    <div className="ml-auto w-full md:w-auto">
-                      <p className="flex items-center justify-between md:justify-end gap-1 text-base md:text-lg">
+                    {/* Contact Info */}
+                    <div className="w-full">
+                      <p className="flex items-center justify-between gap-1 text-base md:text-lg">
                         <span className="font-semibold">Emergency:</span> 
                         <a href="tel:617-627-3780" className="text-blue-600 flex items-center">
                           617-627-3780
                           <Info size={16} className="ml-1 text-gray-900" />
                         </a>
                       </p>
-                      <p className="flex items-center justify-between md:justify-end gap-1 text-base md:text-lg">
+                      <p className="flex items-center justify-between gap-1 text-base md:text-lg">
                         <span className="font-semibold">Non-Emergency:</span> 
                         <a href="tel:617-627-3030" className="text-blue-600 flex items-center">
                           617-627-3030
@@ -112,11 +114,10 @@ export default function Home() {
                 {/* Emergency Section 2 */}
                 <div className="bg-gray-50 p-4 rounded-lg flex-1">
                   <h3 className="text-base md:text-xl">
-                    Emergency: <span className="font-bold">Health Services</span>
+                    Emergency: <span className="font-bold">Tufts University Health Services</span>
                   </h3>
 
-                  {/* Wrap address and contacts in a flex container */}
-                  <div className="mt-2 flex flex-col md:flex-row gap-6">
+                  <div className="mt-2 flex flex-col gap-6">
                     {/* Address */}
                     <div className="text-base md:text-lg text-gray-700 ml-1">
                       <p>124 Professors Row</p>
@@ -124,15 +125,15 @@ export default function Home() {
                     </div>
 
                     {/* Contact Info */}
-                    <div className="ml-auto w-full md:w-auto">
-                      <p className="flex items-center justify-between md:justify-end gap-1 text-base md:text-lg">
+                    <div className="w-full">
+                      <p className="flex items-center justify-between gap-1 text-base md:text-lg">
                         <span className="font-semibold">Phone:</span> 
                         <a href="tel:617-627-3350" className="text-blue-600 flex items-center">
                           617-627-3350
                           <Phone size={16} className="ml-1 text-gray-900" />
                         </a>
                       </p>
-                      <p className="flex items-center justify-between md:justify-end gap-1 text-base md:text-lg">
+                      <p className="flex items-center justify-between gap-1 text-base md:text-lg">
                         <span className="font-semibold">Fax:</span> 
                         <a href="tel:617-627-3592" className="text-blue-600 flex items-center">
                           617-627-3592
@@ -148,12 +149,11 @@ export default function Home() {
                 <p className="text-xs md:text-sm text-gray-500 font-inter">
                   © 2025 Created by Dan Glorioso, William Goldman, Hannah Jiang, Holden Kittelberger, Shayne Sidman, Elisa Yu, Zachary White
                 </p>
-                <button 
+                <button
                   onClick={scrollToTop}
-                  className="bg-[#2E73B5] text-white px-4 h-10 text-sm flex items-center"
+                  className="bg-[#2E73B5] text-white px-6 h-12 text-sm flex items-center hover:cursor-pointer hover:bg-gray-400 transition-colors"
                 >
-                  Back to top
-                  <ArrowUpToLineIcon size={16} className="ml-1" />
+                  Back to top <ArrowUpToLineIcon size={16} className="ml-1" />
                 </button>
               </div>
             </footer>

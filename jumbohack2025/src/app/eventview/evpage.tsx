@@ -87,7 +87,13 @@ export default function EventPage() {
   const month = eventDate.toLocaleDateString("en-US", { month: "long" });
   const day = eventDate.getDate();
 
-  console.log(event)
+  const scrollToTop = () => {
+    console.log("scrolling to top");
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  };
 
   return (
     <>
@@ -175,14 +181,21 @@ export default function EventPage() {
           <div className='flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6 px-4'>
             <p className='text-white text-xs'>© 2025 Created by Dan Glorioso, William Goldman, Hannah Jiang, Holden Kittelberger, Shayne Sidman, Elisa Yu, Zachary White</p>
             <div className='flex flex-row gap-6'>  
-              <a className='flex justify-center items-center text-center px-6 py-2 text-white text-sm border border-white hover:cursor-pointer'>
+              <a 
+                className='flex justify-center items-center text-center px-6 py-2 text-white text-sm border border-white hover:cursor-pointer hover:bg-white hover:text-[#2971AC] transition-colors'
+                href="/report-bug">
                 Report a Bug
               </a>
               <div 
-                className='flex flex-row gap-1 items-center px-6 py-2 bg-white text-sm text-[#2971AC] hover:cursor-pointer'
+                className='flex flex-row gap-1 items-center px-6 py-2 bg-white text-sm text-[#2971AC] hover:cursor-pointer hover:bg-gray-400 transition-colors'
+                onClick={scrollToTop}
               >
                 <p className='text-center'>Back to Top</p>
-                <Image src={"/back-to-top.svg"} alt={"Back to top"} width={16} height={16} />
+                <Image 
+                  src={"/back-to-top.svg"} 
+                  alt={"Back to top"} 
+                  width={16} 
+                  height={16} />
               </div>
             </div>
           </div>
