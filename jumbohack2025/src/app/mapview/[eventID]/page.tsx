@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo, lazy, Suspense } from "react";
 import { useParams } from "next/navigation";
 import mapboxgl from "mapbox-gl";
-import InfoPopup from "@/components/ClubInfo";
 import "./mapview.css";
 import "mapbox-gl/dist/mapbox-gl.css";
+
+// Lazy load the InfoPopup component
+const InfoPopup = lazy(() => import("@/components/ClubInfo"));
 
 interface Club {
   id: number;
@@ -45,7 +47,7 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_KEY;
 const INITIAL_LONG = -71.12;
 const INITIAL_LAT = 42.4075;
 const INITIAL_ZOOM = 17.33;
-const LABEL_ZOOM_THRESHOLD = 16; // Only show labels at this zoom level or higher
+const LABEL_ZOOM_THRESHOLD = 15.5; // Only show labels at this zoom level or higher (increased range)
 const PROXIMITY_THRESHOLD = 100; // Pixel distance threshold for label proximity
 
 export default function MapboxMap() {
@@ -71,9 +73,21 @@ export default function MapboxMap() {
   const [showClubInfo, setShowClubInfo] = useState(false);
   const [search, setSearch] = useState("");
   const [showLabels, setShowLabels] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [mapReady, setMapReady] = useState(false);
+  const [dataReady, setDataReady] = useState(false);
 
-  // Helper to get club by coordinates
-  const getClubByCoords = async (lng: number, lat: number) => {
+  // Helper to get club by coordinates with caching
+  const clubCacheRef = useRef<Map<string, any>>(new Map());
+  
+  const getClubByCoords = useCallback(async (lng: number, lat: number) => {
+    const key = `${lng.toFixed(6)},${lat.toFixed(6)}`;
+    
+    // Return cached result if available
+    if (clubCacheRef.current.has(key)) {
+      return clubCacheRef.current.get(key);
+    }
+
     try {
       const response = await fetch("/api/getClubByCoords", {
         method: "POST",
@@ -87,42 +101,74 @@ export default function MapboxMap() {
 
       if (!response.ok) {
         console.error("Error fetching club by coordinates.");
+        return null;
       }
 
-      return await response.json();
+      const result = await response.json();
+      
+      // Cache the result
+      clubCacheRef.current.set(key, result);
+      
+      return result;
     } catch (error) {
       console.error("Error fetching club:", error);
+      return null;
     }
-  };
+  }, []);
 
-  // Fetch event name based on ID
+  // Fetch all initial data in a single optimized API call
   useEffect(() => {
-    const fetchEventName = async () => {
+    const fetchInitialData = async () => {
+      if (!id) return;
+
+      setIsLoading(true);
+
       try {
-        const response = await fetch("/api/fetchEvent", {
+        const response = await fetch("/api/getEventData", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id }),
+          body: JSON.stringify({ eventId: id }),
         });
 
         if (!response.ok) {
-          throw new Error(`Error fetching event name (status: ${response.status})`);
+          throw new Error(`Error fetching event data: ${response.status}`);
         }
 
         const data = await response.json();
-        setEventName(data[0].name);
+
+        // Set event name
+        setEventName(data.event.name || "None");
+
+        // Set map coordinates
+        if (data.location) {
+          setLong(data.location.x);
+          setLat(data.location.y);
+        }
+        if (data.scale) {
+          setZoom(data.scale);
+        }
+
+        // Set clubs data
+        const clubsData = data.clubs || [];
+        setClubs(clubsData);
+        setQueue(clubsData);
+        
+        const uniqueCategories = [...new Set((clubsData as Club[]).map(club => club.category))];
+        setCategories(uniqueCategories);
+        setDataReady(true);
+
       } catch (error) {
-        console.error("Error fetching event name:", error);
+        console.error("Error fetching initial data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    if (id) {
-      fetchEventName();
-    }
+    fetchInitialData();
   }, [id]);
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") {
-      console.debug("map center/zoom", { long, lat, zoom });
+      // console.debug("map center/zoom", { long, lat, zoom });
     }
   }, [long, lat, zoom]);
   // Toggle labels visibility function
@@ -137,21 +183,30 @@ export default function MapboxMap() {
     const map = mapRef.current;
     const currentZoom = map.getZoom();
 
-    // Clear existing label popups
-    markersRef.current.forEach(({ label }) => {
-      if (label) label.remove();
+    // Clear existing label popups and reset label references
+    markersRef.current.forEach((markerInfo) => {
+      if (markerInfo.label) {
+        markerInfo.label.remove();
+        markerInfo.label = undefined;
+      }
     });
 
     if (!showLabels || currentZoom < LABEL_ZOOM_THRESHOLD) return;
 
+    // Only consider visible markers (not filtered out)
+    const visibleMarkers = markersRef.current.filter(({ marker }) => {
+      const element = marker.getElement();
+      return element.style.display !== 'none';
+    });
+
     // Decide which labels to show based on on-screen proximity
     const shouldShowLabel = new Map<mapboxgl.Marker, boolean>();
-    markersRef.current.forEach(({ marker }) => shouldShowLabel.set(marker, true));
+    visibleMarkers.forEach(({ marker }) => shouldShowLabel.set(marker, true));
 
-    for (let i = 0; i < markersRef.current.length; i++) {
-      for (let j = i + 1; j < markersRef.current.length; j++) {
-        const markerA = markersRef.current[i].marker;
-        const markerB = markersRef.current[j].marker;
+    for (let i = 0; i < visibleMarkers.length; i++) {
+      for (let j = i + 1; j < visibleMarkers.length; j++) {
+        const markerA = visibleMarkers[i].marker;
+        const markerB = visibleMarkers[j].marker;
 
         const posA = map.project(markerA.getLngLat());
         const posB = map.project(markerB.getLngLat());
@@ -164,8 +219,8 @@ export default function MapboxMap() {
       }
     }
 
-    // Add popups for those we chose to show
-    markersRef.current.forEach((markerInfo) => {
+    // Add popups only for visible markers that we chose to show
+    visibleMarkers.forEach((markerInfo) => {
       const { marker, clubName, lng, lat } = markerInfo;
       if (shouldShowLabel.get(marker)) {
         const popup = new mapboxgl.Popup({
@@ -183,181 +238,119 @@ export default function MapboxMap() {
     });
   }, [showLabels]);
 
-  // Initialize the map
+  // Store updateLabelVisibility in ref to avoid dependency issues
+  const updateLabelVisibilityRef = useRef(updateLabelVisibility);
+  updateLabelVisibilityRef.current = updateLabelVisibility;
+
+  // Initialize the map only once when component mounts
   useEffect(() => {
-    if (!mapContainerRef.current) return;
+    if (!mapContainerRef.current || mapRef.current) return;
 
-    const initializeMap = async () => {
-      try {
-        // Fetch map location for this event
-        const response = await fetch("/api/getEventLocation", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            eventID: id,
-          }),
-        });
+    // Create map with current coordinates (fallback to defaults if not set)
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current!,
+      style: "mapbox://styles/mapbox/dark-v11",
+      center: [long || INITIAL_LONG, lat || INITIAL_LAT],
+      zoom: zoom || INITIAL_ZOOM,
+    });
+    mapRef.current = map;
 
-        if (!response.ok) {
-          console.error("Error fetching map location:", response.status);
-          return;
-        }
+    // Map event handlers - set up once
+    map.on("move", () => {
+      const mapCenter = map.getCenter();
+      setLong(mapCenter.lng);
+      setLat(mapCenter.lat);
+      setZoom(map.getZoom());
+    });
 
-        const data = await response.json();
-
-        // Use local defaults so this effect doesn't depend on state
-        let mapLong = INITIAL_LONG;
-        let mapLat = INITIAL_LAT;
-        let mapZoom = INITIAL_ZOOM;
-
-        if (data.location) {
-          mapLong = data.location.x;
-          mapLat = data.location.y;
-          setLong(mapLong);
-          setLat(mapLat);
-          // console.log("Map coordinates:", mapLong, mapLat);
-        }
-
-        if (data.scale) {
-          mapZoom = data.scale;
-          setZoom(mapZoom);
-          // console.log("Map zoom level:", mapZoom);
-        }
-
-        // Create map
-        const map = new mapboxgl.Map({
-          container: mapContainerRef.current!,
-          style: "mapbox://styles/mapbox/dark-v11",
-          center: [mapLong, mapLat],
-          zoom: mapZoom,
-        });
-        mapRef.current = map;
-
-        // Get existing clubs
-        const getExistingClubs = async () => {
-        try {
-          const res = await fetch("/api/getExistingClubs", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ eventID: id }), // ensure `id` is defined
-          });
-
-          if (!res.ok) {
-            const text = await res.text();
-            throw new Error(`GET_EXISTING_CLUBS failed: ${res.status} ${res.statusText} – ${text}`);
-          }
-
-          return await res.json();
-        } catch (err) {
-          console.error(err);
-          return [];
-        }
-      };
-
-
-        // When map loads, setup markers
-        map.on("load", async () => {
-          const existingClubs: Club[] = await getExistingClubs();
-          setClubs(existingClubs);
-          setQueue(existingClubs);
-
-          const uniqueCategories = [...new Set(existingClubs.map((club) => club.category))];
-          setCategories(uniqueCategories);
-
-          // Clear existing markers
-          markersRef.current.forEach(({ marker, label }) => {
-            marker.remove();
-            if (label) label.remove();
-          });
-          markersRef.current = [];
-
-          // Add markers for each club
-          existingClubs.forEach((club) => {
-            if (!club.coordinates) return;
-
-            const lng = club.coordinates.x;
-            const lat = club.coordinates.y;
-
-            const marker = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(map);
-
-            marker.getElement().addEventListener("click", async (event) => {
-              event.stopPropagation();
-              const { lng, lat } = marker.getLngLat();
-              const clubData = await getClubByCoords(lng, lat);
-              if (clubData) {
-                setClubInfo({
-                  id: clubData.id,
-                  name: clubData.name,
-                  description: clubData.description,
-                  start_time: clubData.start_time || "",
-                  end_time: clubData.end_time || "",
-                });
-                setShowClubInfo(true);
-              }
-            });
-
-            markersRef.current.push({
-              marker,
-              clubName: club.name,
-              lng,
-              lat,
-            });
-          });
-
-          // Apply initial label visibility
-          updateLabelVisibility();
-        });
-
-        // Map event handlers
-        map.on("move", () => {
-          const mapCenter = map.getCenter();
-          setLong(mapCenter.lng);
-          setLat(mapCenter.lat);
-          setZoom(map.getZoom());
-        });
-
-        map.on("moveend", updateLabelVisibility);
-        map.on("zoomend", updateLabelVisibility);
-
-        return () => {
-          map.remove();
-        };
-      } catch (error) {
-        console.error("Error initializing map:", error);
-      }
+    // Debounce label updates to improve performance
+    let labelUpdateTimeout: NodeJS.Timeout;
+    const debouncedLabelUpdate = () => {
+      clearTimeout(labelUpdateTimeout);
+      labelUpdateTimeout = setTimeout(() => updateLabelVisibilityRef.current(), 100);
     };
 
-    initializeMap();
-  }, [id, updateLabelVisibility]);
+    map.on("moveend", debouncedLabelUpdate);
+    map.on("zoomend", debouncedLabelUpdate);
 
-  // Compute filtered clubs based on search input and category
-  const filteredClubs =
-    selectedCategory === ""
-      ? clubs.filter((club) =>
-          club.name.toLowerCase().includes(search.toLowerCase())
-        )
-      : clubs.filter(
-          (club) =>
-            club.category === selectedCategory &&
-            club.name.toLowerCase().includes(search.toLowerCase())
-        );
+    // When map loads, setup markers
+    map.on("load", () => {
+      setMapReady(true);
+    });
 
+    return () => {
+      if (labelUpdateTimeout) clearTimeout(labelUpdateTimeout);
+      mapRef.current = null;
+      map.remove();
+    };
+  }, []); // No dependencies - only create once
+
+  // Update map center when we get new coordinates from API (only if map hasn't been moved by user)
+  const [hasUserMovedMap, setHasUserMovedMap] = useState(false);
+  
   useEffect(() => {
-    if (!mapRef.current || !mapRef.current.loaded()) return;
+    if (!mapRef.current || hasUserMovedMap) return;
+    
+    // Only update if we have specific coordinates from the API (not defaults)
+    if (long !== INITIAL_LONG || lat !== INITIAL_LAT) {
+      mapRef.current.setCenter([long, lat]);
+      if (zoom !== INITIAL_ZOOM) {
+        mapRef.current.setZoom(zoom);
+      }
+    }
+  }, [long, lat, zoom, hasUserMovedMap]);
+
+  // Track when user moves the map
+  useEffect(() => {
+    if (!mapRef.current) return;
+    
+    const handleUserMove = () => {
+      setHasUserMovedMap(true);
+    };
+    
+    mapRef.current.on("dragstart", handleUserMove);
+    mapRef.current.on("zoomstart", handleUserMove);
+    
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.off("dragstart", handleUserMove);
+        mapRef.current.off("zoomstart", handleUserMove);
+      }
+    };
+  }, []);
+
+  // Track previous clubs to avoid unnecessary marker recreation
+  const prevClubsRef = useRef<Club[]>([]);
+  
+  // Effect to add markers when both map and data are ready
+  useEffect(() => {
+    if (!mapRef.current || !mapReady || !dataReady || !clubs.length) return;
+
+    // Check if clubs actually changed
+    if (prevClubsRef.current.length === clubs.length && 
+        prevClubsRef.current.every((prevClub, index) => 
+          prevClub.id === clubs[index]?.id && 
+          prevClub.coordinates?.x === clubs[index]?.coordinates?.x &&
+          prevClub.coordinates?.y === clubs[index]?.coordinates?.y
+        )) {
+      return; // No changes, skip marker recreation
+    }
 
     const map = mapRef.current;
-
+    
+    // Clear existing markers
     markersRef.current.forEach(({ marker, label }) => {
       marker.remove();
       if (label) label.remove();
     });
     markersRef.current = [];
 
-    // Add markers for each filtered club
-    filteredClubs.forEach((club) => {
-      const lng = club.coordinates ? club.coordinates.x : club.x;
-      const lat = club.coordinates ? club.coordinates.y : club.y;
-      if (lng == null || lat == null) return; // Skip if no coordinates
+    // Add markers for each club
+    clubs.forEach((club) => {
+      if (!club.coordinates) return;
+
+      const lng = club.coordinates.x;
+      const lat = club.coordinates.y;
 
       const marker = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(map);
 
@@ -385,13 +378,103 @@ export default function MapboxMap() {
       });
     });
 
-    // Refresh label visibility based on current state
-    updateLabelVisibility();
-  }, [filteredClubs, updateLabelVisibility]);
+    // Update the previous clubs reference
+    prevClubsRef.current = [...clubs];
+
+    // Apply initial label visibility
+    updateLabelVisibilityRef.current();
+  }, [clubs, mapReady, dataReady]);
+
+  // Memoize filtered clubs to prevent unnecessary re-calculations
+  const filteredClubs = useMemo(() => {
+    const searchLower = search.toLowerCase();
+    return selectedCategory === ""
+      ? clubs.filter((club) =>
+          club.name.toLowerCase().includes(searchLower)
+        )
+      : clubs.filter(
+          (club) =>
+            club.category === selectedCategory &&
+            club.name.toLowerCase().includes(searchLower)
+        );
+  }, [clubs, selectedCategory, search]);
+
+  // Optimize marker updates - only show/hide markers instead of recreating them
+  useEffect(() => {
+    if (!mapRef.current || !mapRef.current.loaded()) return;
+
+    const filteredClubIds = new Set(filteredClubs.map(club => club.id));
+
+    // Show/hide existing markers instead of recreating them
+    markersRef.current.forEach((markerInfo) => {
+      const { marker, clubName } = markerInfo;
+      const clubInFiltered = filteredClubs.some(club => club.name === clubName);
+      const element = marker.getElement();
+      
+      if (clubInFiltered) {
+        element.style.display = 'block';
+      } else {
+        element.style.display = 'none';
+        // Also hide the label if marker is hidden and clear reference
+        if (markerInfo.label) {
+          markerInfo.label.remove();
+          markerInfo.label = undefined;
+        }
+      }
+    });
+
+    // Add new markers for clubs that don't have markers yet
+    const existingClubNames = new Set(markersRef.current.map(m => m.clubName));
+    
+    filteredClubs.forEach((club) => {
+      if (existingClubNames.has(club.name)) return; // Skip if marker already exists
+      
+      const lng = club.coordinates ? club.coordinates.x : club.x;
+      const lat = club.coordinates ? club.coordinates.y : club.y;
+      if (lng == null || lat == null) return;
+
+      const marker = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current!);
+
+      marker.getElement().addEventListener("click", async (event) => {
+        event.stopPropagation();
+        const { lng, lat } = marker.getLngLat();
+        const clubData = await getClubByCoords(lng, lat);
+        if (clubData) {
+          setClubInfo({
+            id: clubData.id,
+            name: clubData.name,
+            description: clubData.description,
+            start_time: clubData.start_time || "",
+            end_time: clubData.end_time || "",
+          });
+          setShowClubInfo(true);
+        }
+      });
+
+      markersRef.current.push({
+        marker,
+        clubName: club.name,
+        lng,
+        lat,
+      });
+    });
+
+    // Refresh label visibility based on current state (debounced)
+    const timeoutRef = setTimeout(() => {
+      updateLabelVisibilityRef.current();
+    }, 50); // Slightly longer delay for better performance
+    
+    return () => clearTimeout(timeoutRef);
+  }, [filteredClubs]);
 
   useEffect(() => {
-    updateLabelVisibility();
-  }, [showLabels, updateLabelVisibility]);
+    // Small delay to ensure state changes are applied
+    const timeoutRef = setTimeout(() => {
+      updateLabelVisibilityRef.current();
+    }, 10);
+    
+    return () => clearTimeout(timeoutRef);
+  }, [showLabels]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -412,6 +495,15 @@ export default function MapboxMap() {
 
   return (
     <div className="wrapper">
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-50">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-gray-600">Loading event data...</p>
+          </div>
+        </div>
+      )}
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mt-[1%] min-w-[25%] absolute z-10">
           <input
@@ -420,18 +512,28 @@ export default function MapboxMap() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="shadow pl-4 pr-4 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-[#F7F9FB] mt-2"
+            disabled={isLoading}
           />
         </div>
       </div>
-      <div ref={mapContainerRef} className="mapContainer" />
+      
+      <div ref={mapContainerRef} className="mapContainer">
+        {!mapReady && !isLoading && (
+          <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+            <div className="text-gray-600">Initializing map...</div>
+          </div>
+        )}
+      </div>
 
       {showClubInfo && clubInfo && (
-        <InfoPopup
-          club={clubInfo}
-          onClose={() => setShowClubInfo(false)}
-          onEdit={null}
-          onMove={null}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <InfoPopup
+            club={clubInfo}
+            onClose={() => setShowClubInfo(false)}
+            onEdit={null}
+            onMove={null}
+          />
+        </Suspense>
       )}
 
       <div className="p-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -445,13 +547,16 @@ export default function MapboxMap() {
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full p-3 border shadow text-[#23394A] font-inter bg-[#F7F9FB] focus:ring-2 focus:ring-blue-50"
+              disabled={isLoading}
             >
               <option value="">Select a category</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
+              {useMemo(() => 
+                categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                )), [categories]
+              )}
             </select>
           </div>
 
@@ -484,19 +589,21 @@ export default function MapboxMap() {
               max-h-100 md:max-h-none
             "
           >
-            {queue.map((club) => (
-              <li
-                key={club.id}
-                className="
-                  p-4 mb-2 md:mr-2
-                  bg-categoryBg
-                  w-full min-w-[20vw] lg:min-w-[10vw]
-                  truncate text-center
-                "
-              >
-                {club.name}
-              </li>
-            ))}
+            {useMemo(() => 
+              queue.map((club) => (
+                <li
+                  key={club.id}
+                  className="
+                    p-4 mb-2 md:mr-2
+                    bg-categoryBg
+                    w-full min-w-[20vw] lg:min-w-[10vw]
+                    truncate text-center
+                  "
+                >
+                  {club.name}
+                </li>
+              )), [queue]
+            )}
           </ul>
         </div>
       </div>
