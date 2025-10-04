@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    console.log('Fetching clubs for event_id:', event_id);
+    // console.log('Fetching clubs for event_id:', event_id);
     
     // First, get the event name
     const eventResult = await query(
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     );
     
     const eventName = eventResult.rows[0]?.name || 'the event';
-    console.log('Event name:', eventName);
+    // console.log('Event name:', eventName);
     
     // Get clubs with the provided event_id that have coordinates but no confirmation
     const result = await query(
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     );
 
     const clubs = result.rows;
-    console.log('Found clubs:', clubs);
+    // console.log('Found clubs:', clubs);
 
     if (clubs.length === 0) {
       return NextResponse.json(
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log('Sending invitations to clubs:', clubs.map(club => ({ name: club.name, contact: club.contact })));
+    // console.log('Sending invitations to clubs:', clubs.map(club => ({ name: club.name, contact: club.contact })));
 
     // Process each club individually (not grouping by email)
     const results = await Promise.all(clubs.map(async (club) => {
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
         const { contact: email, name: clubName } = club;
         const token = Buffer.from(Date.now().toString() + email + clubName + Math.random().toString()).toString('hex');
 
-        console.log(`Processing club: ${clubName}, email: ${email}`);
+        // console.log(`Processing club: ${clubName}, email: ${email}`);
 
         // Store the token temporarily in description for secure email response handling
         // Include club name in the search to handle multiple clubs with same email
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         const yesLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invitation-response?token=${token}&response=yes`;
         const noLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/invitation-response?token=${token}&response=no`;
 
-        console.log(`Sending email to ${email} for club ${clubName}`);
+        // console.log(`Sending email to ${email} for club ${clubName}`);
 
         await sendEmail({
           to: email,
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
           `
         });
 
-        console.log(`Email sent successfully to ${email} for club ${clubName}`);
+        // console.log(`Email sent successfully to ${email} for club ${clubName}`);
         return { email, clubName, status: 'sent' };
       } catch (emailError) {
         console.error(`Failed to send email for club ${club.name}:`, emailError);
@@ -101,9 +101,9 @@ export async function POST(request: Request) {
     const successful = results.filter(r => r.status === 'sent');
     const failed = results.filter(r => r.status === 'failed');
     
-    console.log(`Successfully sent ${successful.length} emails`);
+    // console.log(`Successfully sent ${successful.length} emails`);
     if (failed.length > 0) {
-      console.log(`Failed to send ${failed.length} emails:`, failed);
+      // console.log(`Failed to send ${failed.length} emails:`, failed);
     }
 
     return NextResponse.json({ 
