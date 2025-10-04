@@ -40,8 +40,7 @@ interface MarkerWithLabel {
 
 // https://docs.mapbox.com/mapbox-gl-js/example/popup/
 
-mapboxgl.accessToken =
-  "pk.eyJ1Ijoic2FsbW9uLXN1c2hpIiwiYSI6ImNtN2dqYWdrZzA4ZnIyam9qNWx1NnAybjcifQ._YD8GYWPtpZ09AwYHzR2Og";
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_KEY;
 
 const INITIAL_LONG = -71.12;
 const INITIAL_LAT = 42.4075;
