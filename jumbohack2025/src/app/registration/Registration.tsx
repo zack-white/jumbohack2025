@@ -63,7 +63,7 @@ export default function RegistrationForm() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Textarea
-                  placeholder="Enter your club description (max 250 characters)"
+                  placeholder="Enter your organization description (max 250 characters)"
                   value={description}
                   onChange={(e) => setDescription(e.target.value.slice(0, 250))}
                   className="min-h-[100px]"

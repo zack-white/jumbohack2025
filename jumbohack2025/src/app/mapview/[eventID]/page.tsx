@@ -78,7 +78,7 @@ export default function MapboxMap() {
   const [dataReady, setDataReady] = useState(false);
 
   // Helper to get club by coordinates with caching
-  const clubCacheRef = useRef<Map<string, any>>(new Map());
+  const clubCacheRef = useRef<Map<string, ClubInfo>>(new Map());
   
   const getClubByCoords = useCallback(async (lng: number, lat: number) => {
     const key = `${lng.toFixed(6)},${lat.toFixed(6)}`;
@@ -246,12 +246,12 @@ export default function MapboxMap() {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    // Create map with current coordinates (fallback to defaults if not set)
+    // Create map with initial coordinates (use constants to avoid dependencies)
     const map = new mapboxgl.Map({
       container: mapContainerRef.current!,
       style: "mapbox://styles/mapbox/dark-v11",
-      center: [long || INITIAL_LONG, lat || INITIAL_LAT],
-      zoom: zoom || INITIAL_ZOOM,
+      center: [INITIAL_LONG, INITIAL_LAT],
+      zoom: INITIAL_ZOOM,
     });
     mapRef.current = map;
 
@@ -383,7 +383,7 @@ export default function MapboxMap() {
 
     // Apply initial label visibility
     updateLabelVisibilityRef.current();
-  }, [clubs, mapReady, dataReady]);
+  }, [clubs, mapReady, dataReady, getClubByCoords]);
 
   // Memoize filtered clubs to prevent unnecessary re-calculations
   const filteredClubs = useMemo(() => {
@@ -402,8 +402,6 @@ export default function MapboxMap() {
   // Optimize marker updates - only show/hide markers instead of recreating them
   useEffect(() => {
     if (!mapRef.current || !mapRef.current.loaded()) return;
-
-    const filteredClubIds = new Set(filteredClubs.map(club => club.id));
 
     // Show/hide existing markers instead of recreating them
     markersRef.current.forEach((markerInfo) => {
@@ -465,7 +463,7 @@ export default function MapboxMap() {
     }, 50); // Slightly longer delay for better performance
     
     return () => clearTimeout(timeoutRef);
-  }, [filteredClubs]);
+  }, [filteredClubs, getClubByCoords]);
 
   useEffect(() => {
     // Small delay to ensure state changes are applied

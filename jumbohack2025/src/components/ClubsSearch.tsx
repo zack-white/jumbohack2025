@@ -58,7 +58,7 @@ export default function ClubsSearch({ eventId }: { eventId: number }) {
     <div className="flex flex-col h-full bg-white">
       {/* Fixed Header */}
         <div className="flex-shrink-0 bg-white pt-4 pl-4 pb-4">
-            <h2 className="mb-2 text-xl md:text-2xl font-bold font-serif">Who's Attending?</h2>
+            <h2 className="mb-2 text-xl md:text-2xl font-bold font-serif">Who&apos;s Attending?</h2>
             {/* Search Bar */}
             <div className="relative mt-2 pr-4">
                 <svg
