@@ -32,7 +32,7 @@ export default function FullScreenMap({ long, lat, scale }: FullScreenMapProps) 
     // Initialize the map
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/dark-v11",
+      style: "mapbox://styles/mapbox/standard",
       center: [lat, long], // Longitude and Latitude
       zoom: scale,
     });

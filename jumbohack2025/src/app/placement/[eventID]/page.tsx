@@ -200,7 +200,7 @@ export default function MapboxMap() {
     // Create map with directly fetched coordinates
     const map = new mapboxgl.Map({
       container: mapContainerRef.current!,
-      style: "mapbox://styles/mapbox/dark-v11",
+      style: "mapbox://styles/mapbox/standard",
       center: [mapLong, mapLat],
       zoom: mapZoom,
     });
