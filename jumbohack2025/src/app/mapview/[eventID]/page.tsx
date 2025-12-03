@@ -249,7 +249,7 @@ export default function MapboxMap() {
     // Create map with initial coordinates (use constants to avoid dependencies)
     const map = new mapboxgl.Map({
       container: mapContainerRef.current!,
-      style: "mapbox://styles/mapbox/dark-v11",
+      style: "mapbox://styles/mapbox/standard",
       center: [INITIAL_LONG, INITIAL_LAT],
       zoom: INITIAL_ZOOM,
     });

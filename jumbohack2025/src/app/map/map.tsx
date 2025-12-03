@@ -26,7 +26,7 @@ export default function FullScreenMap({ long, lat, scale, onLocationSelect }: Fu
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/dark-v11",
+      style: "mapbox://styles/mapbox/standard",
       center: [long, lat], // Use provided long, lat
       zoom: scale, // Use provided scale
     });
